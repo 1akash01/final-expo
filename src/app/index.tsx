@@ -6,6 +6,7 @@ import { BottomNav as DealerBottomNav } from '@/features/dealer/BottomNav';
 import { CallElectricianScreen as DealerCallElectricianScreen } from '@/features/dealer/CallElectricianScreen';
 import { ElectriciansScreen as DealerElectriciansScreen } from '@/features/dealer/ElectriciansScreen';
 import { HomeScreen as DealerHomeScreen } from '@/features/dealer/HomeScreen';
+import { ProfileScreen as DealerProfileScreen } from '@/features/dealer/ProfileScreen';
 import { ProductScreen as DealerProductScreen } from '@/features/dealer/ProductScreen';
 import { BottomNav as ElectricianBottomNav } from '@/features/electrician/BottomNav';
 import { HomeScreen as ElectricianHomeScreen } from '@/features/electrician/HomeScreen';
@@ -71,10 +72,14 @@ export default function Index() {
           return <DealerCallElectricianScreen />;
         case 'notification':
           return <ElectricianNotificationScreen onNavigate={handleNavigate} />;
+        case 'scan':
+          return <ElectricianScanScreen onNavigate={handleNavigate} />;
+        case 'rewards':
+          return <ElectricianRewardsScreen />;
         case 'wallet':
           return <ElectricianWalletScreen onNavigate={handleNavigate} />;
         case 'profile':
-          return <ElectricianProfileScreen onNavigate={handleNavigate} onSignOut={handleSignOut} />;
+          return <DealerProfileScreen onNavigate={handleNavigate} onSignOut={handleSignOut} />;
         default:
           return (
             <DealerHomeScreen

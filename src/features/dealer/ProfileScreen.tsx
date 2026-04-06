@@ -9,5 +9,5 @@ export function ProfileScreen({
   onNavigate: (screen: Screen) => void;
   onSignOut: () => void;
 }) {
-  return <SharedProfileScreen currentRole="electrician" onNavigate={onNavigate} onSignOut={onSignOut} />;
+  return <SharedProfileScreen currentRole="dealer" onNavigate={onNavigate} onSignOut={onSignOut} />;
 }
