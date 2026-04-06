@@ -64,11 +64,16 @@ const roleImages = {
   dealer: require('../../../assets/dealer-role.png'),
 } as const;
 
+const isValidEmail = (value: string) => {
+  const trimmed = value.trim();
+  return !trimmed || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+};
+
 const dealerSignupMeta: Partial<Record<SignupStep, { stepLabel: string; title: string; description: string; buttonLabel: string }>> = {
   name: {
     stepLabel: 'Step 1 of 5',
-    title: 'Business Details',
-    description: 'Name, email and address ek saath fill kijiye. Address field tap karte hi current location fetch ho jayegi.',
+    title: 'Business Profile',
+    description: 'Owner or business name, email and address ko clean business format me fill kijiye.',
     buttonLabel: 'Continue to Location',
   },
   location: {
@@ -80,19 +85,19 @@ const dealerSignupMeta: Partial<Record<SignupStep, { stepLabel: string; title: s
   identity: {
     stepLabel: 'Step 3 of 5',
     title: 'Business Identity',
-    description: 'GST aur PAN details ke saath holder information ka first part yahin complete ho jayega.',
-    buttonLabel: 'Continue to Verification',
+    description: 'GST ya PAN me se koi ek number aur uska matching holder name add kijiye.',
+    buttonLabel: 'Continue to Mobile Verification',
   },
   holders: {
     stepLabel: 'Step 4 of 5',
-    title: 'Verification Details',
-    description: 'PAN holder name, dealer mobile aur terms acceptance ko ek hi form section me complete kijiye.',
+    title: 'Mobile Verification',
+    description: 'Dealer mobile number verify karne ke baad hi password setup open hoga.',
     buttonLabel: 'Continue to Security',
   },
   password: {
     stepLabel: 'Step 5 of 5',
-    title: 'Secure Account',
-    description: 'OTP verify karke password set kariye. Iske baad dealer account direct create ho jayega.',
+    title: 'Password & Consent',
+    description: 'Password create kijiye, confirm kijiye, aur sabse last me consent accept kijiye.',
     buttonLabel: 'Create Account',
   },
 };
@@ -210,7 +215,16 @@ function Field({
           onPressIn={onPressIn}
         />
         {actionLabel || actionContent ? (
-          <Pressable onPress={onActionPress} disabled={actionDisabled} style={[s.fieldAction, actionDisabled ? s.fieldActionDisabled : null]}>
+          <Pressable
+            onPress={onActionPress}
+            disabled={actionDisabled}
+            style={[
+              s.fieldAction,
+              actionLabel === 'Current Address' ? s.fieldActionWide : null,
+              actionContent ? s.fieldActionIcon : null,
+              actionDisabled ? s.fieldActionDisabled : null,
+            ]}
+          >
             {actionContent ?? <Text style={[s.fieldActionText, actionDisabled ? s.fieldActionTextDisabled : null]}>{actionLabel}</Text>}
           </Pressable>
         ) : null}
@@ -336,6 +350,8 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
   const [signupPanHolderName, setSignupPanHolderName] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
   const [signupOtp, setSignupOtp] = useState('');
+  const [signupOtpSent, setSignupOtpSent] = useState(false);
+  const [signupOtpVerified, setSignupOtpVerified] = useState(false);
   const [signupPass, setSignupPass] = useState('');
   const [signupConfirmPass, setSignupConfirmPass] = useState('');
   const [signupStep, setSignupStep] = useState<SignupStep>('name');
@@ -381,6 +397,8 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
     setSignupPanHolderName('');
     setSignupPhone('');
     setSignupOtp('');
+    setSignupOtpSent(false);
+    setSignupOtpVerified(false);
     setSignupPass('');
     setSignupConfirmPass('');
     setSignupStep('name');
@@ -393,6 +411,19 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
 
   const handlePhone = (setter: (value: string) => void) => (value: string) => setter(value.replace(/\D/g, '').slice(0, 10));
   const handleOtp = (setter: (value: string) => void) => (value: string) => setter(value.replace(/\D/g, '').slice(0, 4));
+  const handleSignupEmail = (value: string) => {
+    setSignupEmail(value);
+    setError('signupEmail', isValidEmail(value) ? undefined : 'Please enter a valid email address like name@example.com.');
+  };
+  const handleSignupPhone = (value: string) => {
+    const nextPhone = value.replace(/\D/g, '').slice(0, 10);
+    setSignupPhone(nextPhone);
+    setSignupOtp('');
+    setSignupOtpSent(false);
+    setSignupOtpVerified(false);
+    setError('signupPhone');
+    setError('signupOtp');
+  };
 
   const canContinue = useMemo(() => {
     if (mode === 'login') {
@@ -404,10 +435,10 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
       return loginPhone.length === 10 && loginOtp.length === 4 && loginPass.length >= 6;
     }
     if (role === 'dealer') {
-      return signupName.trim().length >= 3 && signupAddress.trim().length >= 5 && signupState.trim().length >= 2 && signupCity.trim().length >= 2 && signupPincode.trim().length >= 4 && signupGstNumber.trim().length >= 4 && signupPanNumber.trim().length >= 4 && signupGstHolderName.trim().length >= 3 && signupPanHolderName.trim().length >= 3 && termsAccepted && signupPhone.length === 10 && signupOtp.length === 4 && signupPass.length >= 6 && signupConfirmPass === signupPass;
+      return signupName.trim().length >= 3 && isValidEmail(signupEmail) && signupAddress.trim().length >= 5 && signupState.trim().length >= 2 && signupCity.trim().length >= 2 && signupPincode.trim().length >= 4 && signupGstNumber.trim().length >= 4 && signupGstHolderName.trim().length >= 3 && signupPhone.length === 10 && signupOtpVerified && signupPass.length >= 6 && signupConfirmPass === signupPass && termsAccepted;
     }
     return signupName.trim().length >= 3 && dealerVerified && signupPhone.length === 10 && signupOtp.length === 4 && signupPass.length >= 6 && signupConfirmPass === signupPass;
-  }, [dealerVerified, electricianLoginMethod, loginOtp, loginOtpVerified, loginPass, loginPhone, loginStep, mode, role, signupAddress, signupCity, signupConfirmPass, signupGstHolderName, signupGstNumber, signupName, signupOtp, signupPanHolderName, signupPanNumber, signupPass, signupPincode, signupPhone, signupState, termsAccepted]);
+  }, [dealerVerified, electricianLoginMethod, loginOtp, loginOtpVerified, loginPass, loginPhone, loginStep, mode, role, signupAddress, signupCity, signupConfirmPass, signupEmail, signupGstHolderName, signupGstNumber, signupName, signupOtp, signupOtpVerified, signupPass, signupPincode, signupPhone, signupState, termsAccepted]);
   const dealerSignupContent = role === 'dealer' ? dealerSignupMeta[signupStep] ?? dealerSignupMeta.name : null;
 
   const submitAuth = () => {
@@ -429,11 +460,11 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
     }
     if (mode === 'signup' && role === 'dealer') {
       if (signupPhone.length !== 10) return setError('signupPhone', 'Please enter a valid 10-digit mobile number.');
+      if (!signupOtpVerified) return setError('signupOtp', 'Please verify the OTP before creating your account.');
       if (!termsAccepted) return setError('termsAccepted', 'Please accept the Terms & Conditions and Privacy Policy.');
-      if (signupOtp.length !== 4) return setError('signupOtp', 'Enter the 4-digit OTP to finish account creation.');
       setError('signupPhone');
-      setError('termsAccepted');
       setError('signupOtp');
+      setError('termsAccepted');
     }
     if (mode === 'signup' && signupPass.length < 6) return setError('signupPass', 'Password must be at least 6 characters long.');
     if (mode === 'signup' && signupConfirmPass !== signupPass) return setError('signupConfirmPass', 'Passwords do not match. Please re-enter the same password.');
@@ -542,12 +573,31 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
     setVerifiedDealerName(matchedDealer?.dealerName ?? 'SRV Premium Dealer');
   };
 
+  const sendSignupOtp = () => {
+    Keyboard.dismiss();
+    if (signupPhone.length !== 10) return setError('signupPhone', 'Please enter a valid 10-digit mobile number.');
+    setError('signupPhone');
+    setError('signupOtp');
+    setSignupOtp('');
+    setSignupOtpSent(true);
+    setSignupOtpVerified(false);
+  };
+
+  const verifySignupOtp = () => {
+    Keyboard.dismiss();
+    if (!signupOtpSent) return setError('signupOtp', 'Please verify your mobile number first.');
+    if (signupOtp.length !== 4) return setError('signupOtp', 'Enter the 4-digit OTP to verify your number.');
+    setError('signupOtp');
+    setSignupOtpVerified(true);
+    setSignupStep('password');
+  };
+
   const continueSignup = () => {
     Keyboard.dismiss();
     if (role === 'dealer') {
       if (signupStep === 'name') {
         if (signupName.trim().length < 3) return setError('signupName', 'Please fill the full name field.');
-        if (signupEmail.trim() && !/\S+@\S+\.\S+/.test(signupEmail.trim())) return setError('signupEmail', 'Please enter a valid email address or leave it empty.');
+        if (!isValidEmail(signupEmail)) return setError('signupEmail', 'Please enter a valid email address like name@example.com.');
         if (signupAddress.trim().length < 5) return setError('signupAddress', 'Please fill the address field.');
         setError('signupName');
         setError('signupEmail');
@@ -568,23 +618,23 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
       }
 
       if (signupStep === 'identity') {
-        if (signupGstNumber.trim().length < 4) return setError('signupGstNumber', 'Please enter GST number.');
-        if (signupPanNumber.trim().length < 4) return setError('signupPanNumber', 'Please enter PAN number.');
-        if (signupGstHolderName.trim().length < 3) return setError('signupGstHolderName', 'Please enter GST holder name.');
+        if (signupGstNumber.trim().length < 4) return setError('signupGstNumber', 'Please enter GST or PAN number.');
+        if (signupGstHolderName.trim().length < 3) return setError('signupGstHolderName', 'Please enter GST or PAN holder name.');
         setError('signupGstNumber');
-        setError('signupPanNumber');
         setError('signupGstHolderName');
         setSignupStep('holders');
         return;
       }
 
       if (signupStep === 'holders') {
-        if (signupPanHolderName.trim().length < 3) return setError('signupPanHolderName', 'Please enter PAN holder name.');
-        if (signupPhone.length !== 10) return setError('signupPhone', 'Please enter a valid 10-digit mobile number.');
-        if (!termsAccepted) return setError('termsAccepted', 'Please accept the Terms & Conditions and Privacy Policy.');
-        setError('signupPanHolderName');
-        setError('signupPhone');
-        setError('termsAccepted');
+        if (!signupOtpSent) {
+          sendSignupOtp();
+          return;
+        }
+        if (!signupOtpVerified) {
+          verifySignupOtp();
+          return;
+        }
         setSignupStep('password');
       }
       return;
@@ -756,10 +806,10 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
                         {signupStep === 'name' ? (
                           <>
                             <Field label="Full Name" value={signupName} onChangeText={setSignupName} placeholder="Enter owner or business name" error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label="Email" value={signupEmail} onChangeText={setSignupEmail} placeholder="Enter email address (optional)" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label="Address" value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? 'Fetching current address...' : 'Tap here to use current location'} error={errors.signupAddress} onFocus={scrollToForm} onPressIn={() => { if (!locationLoading) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? 'Fetching' : 'Fetch'} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
+                            <Field label="Email Address" value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
+                            <Field label="Business Address" value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? 'Fetching current address...' : 'Enter complete business address'} error={errors.signupAddress} onFocus={scrollToForm} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? 'Locating' : 'Current Address'} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
                             {locationMessage ? <Info text={locationMessage} kind="success" /> : null}
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupName.trim().length < 3 || (!!signupEmail.trim() && !/\S+@\S+\.\S+/.test(signupEmail.trim())) || signupAddress.trim().length < 5} secondary />
+                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
                           </>
                         ) : null}
 
@@ -774,35 +824,35 @@ export function OnboardingScreen({ onGetStarted }: { onGetStarted: (role: UserRo
 
                         {signupStep === 'identity' ? (
                           <>
-                            <Field label="GST Number" value={signupGstNumber} onChangeText={setSignupGstNumber} placeholder="Enter GST number" error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPanNumberRef.current?.focus()} />
-                            <Field label="PAN Number" value={signupPanNumber} onChangeText={setSignupPanNumber} placeholder="Enter PAN number" error={errors.signupPanNumber} onFocus={scrollToForm} inputRef={signupPanNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
-                            <Field label="GST Holder Name" value={signupGstHolderName} onChangeText={setSignupGstHolderName} placeholder="Enter GST holder name" error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupGstNumber.trim().length < 4 || signupPanNumber.trim().length < 4 || signupGstHolderName.trim().length < 3} secondary />
+                            <Field label="GST / PAN Number" value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase()); setError('signupGstNumber'); }} placeholder="Enter GST or PAN number" error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
+                            <Field label="GST / PAN Holder Name" value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value); setError('signupGstHolderName'); }} placeholder="Enter holder name" error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
+                            <Info text="Enter Gst No or Pan No." kind="success" />
+                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupGstNumber.trim().length < 4 || signupGstHolderName.trim().length < 3} secondary />
                           </>
                         ) : null}
 
                         {signupStep === 'holders' ? (
                           <>
-                            <Field label="PAN Holder Name" value={signupPanHolderName} onChangeText={setSignupPanHolderName} placeholder="Enter PAN holder name" error={errors.signupPanHolderName} onFocus={scrollToForm} inputRef={signupPanHolderRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label="Mobile Number" value={signupPhone} onChangeText={handlePhone(setSignupPhone)} placeholder="Enter mobile number" keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
-                            <Pressable style={s.checkboxCard} onPress={() => { setTermsAccepted((current) => !current); setError('termsAccepted'); }}>
-                              <View style={[s.checkbox, termsAccepted ? s.checkboxOn : null]}>{termsAccepted ? <Text style={s.check}>v</Text> : null}</View>
-                              <View style={s.checkboxCardTextWrap}>
-                                <Text style={s.checkboxCardTitle}>Terms Acceptance</Text>
-                                <Text style={s.checkboxText}>I agree to our Terms & Conditions and Privacy Policy</Text>
-                              </View>
-                            </Pressable>
-                            {errors.termsAccepted ? <Info text={errors.termsAccepted} kind="error" /> : null}
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupPanHolderName.trim().length < 3 || signupPhone.length !== 10 || !termsAccepted} secondary />
+                            <Field label="Mobile Number" value={signupPhone} onChangeText={handleSignupPhone} placeholder="Enter mobile number" keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? 'Resend' : 'Verify') : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} />
+                            {signupOtpSent && !signupOtpVerified ? <Info text={`OTP sent to +91 ${signupPhone}.`} kind="success" /> : null}
+                            {signupOtpSent && !signupOtpVerified ? <Field label="OTP" value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} onSubmitEditing={verifySignupOtp} actionLabel={signupOtp.length > 0 ? 'Verify' : undefined} onActionPress={verifySignupOtp} actionDisabled={signupOtp.length !== 4} /> : null}
                           </>
                         ) : null}
 
                         {signupStep === 'password' ? (
                           <>
-                            <Field label="OTP" value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPassRef.current?.focus()} />
+                            {signupOtpVerified ? <Info text="Phone verification successful." kind="success" /> : null}
                             <Field label="Password" value={signupPass} onChangeText={setSignupPass} placeholder="Create password" secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
                             <Field label="Confirm Password" value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder="Re-enter password" secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
-                            <Button label={loading ? 'Creating Account...' : dealerSignupContent?.buttonLabel ?? 'Create Account'} onPress={submitAuth} disabled={!canContinue || loading} />
+                            <Pressable style={s.checkboxCard} onPress={() => { setTermsAccepted((current) => !current); setError('termsAccepted'); }}>
+                              <View style={[s.checkbox, termsAccepted ? s.checkboxOn : null]}>{termsAccepted ? <Text style={s.check}>v</Text> : null}</View>
+                              <View style={s.checkboxCardTextWrap}>
+                                <Text style={s.checkboxCardTitle}>Final Consent</Text>
+                                <Text style={s.checkboxText}>I agree to our Terms & Conditions and Privacy Policy</Text>
+                              </View>
+                            </Pressable>
+                            {errors.termsAccepted ? <Info text={errors.termsAccepted} kind="error" /> : null}
+                            {termsAccepted ? <Button label={loading ? 'Creating Account...' : dealerSignupContent?.buttonLabel ?? 'Create Account'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                           </>
                         ) : null}
                       </>
@@ -902,7 +952,9 @@ const s = StyleSheet.create({
   prefixWrap: { height: '100%', justifyContent: 'center', paddingHorizontal: 12, borderRightWidth: 1, borderRightColor: '#DFE7F1' },
   prefix: { color: C.text, fontSize: 14, fontWeight: '700' },
   input: { flex: 1, height: '100%', paddingHorizontal: 14, color: C.text, fontSize: 15, fontWeight: '600' },
-  fieldAction: { alignSelf: 'center', marginRight: 8, paddingHorizontal: 12, minWidth: 70, height: 36, borderRadius: 12, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
+  fieldAction: { alignSelf: 'center', marginRight: 8, paddingHorizontal: 10, minWidth: 74, height: 36, borderRadius: 12, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
+  fieldActionWide: { minWidth: 112 },
+  fieldActionIcon: { minWidth: 42, width: 42, paddingHorizontal: 0 },
   fieldActionDisabled: { backgroundColor: '#E3E9F2' },
   fieldActionText: { color: C.accentA, fontSize: 12, fontWeight: '800' },
   fieldActionTextDisabled: { color: '#97A6BE' },
