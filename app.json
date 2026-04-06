@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "SRV Electricals",
+    "slug": "srv-electricals",
+    "scheme": "srv-electricals",
+    "version": "1.0.0",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow SRV Electricals to access your location so we can fill your current address during dealer signup."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F0E8"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5F0E8"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
