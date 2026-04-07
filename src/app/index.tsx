@@ -26,6 +26,14 @@ export default function Index() {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [currentRole, setCurrentRole] = useState<UserRole>('electrician');
   const [selectedProductCategory, setSelectedProductCategory] = useState('fanbox');
+  const [passwordConfiguredByRole, setPasswordConfiguredByRole] = useState<Record<UserRole, boolean>>({
+    dealer: false,
+    electrician: false,
+  });
+  const [passwordValueByRole, setPasswordValueByRole] = useState<Record<UserRole, string>>({
+    dealer: '',
+    electrician: '',
+  });
 
   const isDealer = currentRole === 'dealer';
 
@@ -79,7 +87,20 @@ export default function Index() {
         case 'wallet':
           return <ElectricianWalletScreen onNavigate={handleNavigate} />;
         case 'profile':
-          return <DealerProfileScreen onNavigate={handleNavigate} onSignOut={handleSignOut} />;
+          return (
+            <DealerProfileScreen
+              onNavigate={handleNavigate}
+              onSignOut={handleSignOut}
+              hasPasswordConfigured={passwordConfiguredByRole.dealer}
+              storedPassword={passwordValueByRole.dealer}
+              onPasswordConfiguredChange={(configured) =>
+                setPasswordConfiguredByRole((current) => ({ ...current, dealer: configured }))
+              }
+              onPasswordChange={(password) =>
+                setPasswordValueByRole((current) => ({ ...current, dealer: password }))
+              }
+            />
+          );
         default:
           return (
             <DealerHomeScreen
@@ -112,7 +133,20 @@ export default function Index() {
       case 'rewards':
         return <ElectricianRewardsScreen />;
       case 'profile':
-        return <ElectricianProfileScreen onNavigate={handleNavigate} onSignOut={handleSignOut} />;
+        return (
+          <ElectricianProfileScreen
+            onNavigate={handleNavigate}
+            onSignOut={handleSignOut}
+            hasPasswordConfigured={passwordConfiguredByRole.electrician}
+            storedPassword={passwordValueByRole.electrician}
+            onPasswordConfiguredChange={(configured) =>
+              setPasswordConfiguredByRole((current) => ({ ...current, electrician: configured }))
+            }
+            onPasswordChange={(password) =>
+              setPasswordValueByRole((current) => ({ ...current, electrician: password }))
+            }
+          />
+        );
       case 'wallet':
         return <ElectricianWalletScreen onNavigate={handleNavigate} />;
       default:
@@ -123,14 +157,31 @@ export default function Index() {
           />
         );
     }
-  }, [currentScreen, isDealer, selectedProductCategory]);
+  }, [
+    currentScreen,
+    isDealer,
+    passwordConfiguredByRole.dealer,
+    passwordConfiguredByRole.electrician,
+    passwordValueByRole.dealer,
+    passwordValueByRole.electrician,
+    selectedProductCategory,
+  ]);
 
   if (showOnboarding) {
     return (
       <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <ExpoStatusBar style="dark" />
         <OnboardingScreen
-          onGetStarted={(role) => {
+          onGetStarted={(role, options) => {
+            if (typeof options?.passwordConfigured === 'boolean') {
+              setPasswordConfiguredByRole((current) => ({ ...current, [role]: options.passwordConfigured as boolean }));
+              if (!options.passwordConfigured) {
+                setPasswordValueByRole((current) => ({ ...current, [role]: '' }));
+              }
+            }
+            if (typeof options?.passwordValue === 'string') {
+              setPasswordValueByRole((current) => ({ ...current, [role]: options.passwordValue as string }));
+            }
             setCurrentRole(role);
             setCurrentScreen('home');
             setShowOnboarding(false);
