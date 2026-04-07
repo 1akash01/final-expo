@@ -14,8 +14,11 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
   const [selectedBank, setSelectedBank] = useState('');
   const [showBankOptions, setShowBankOptions] = useState(false);
   const [verifiedUpiName, setVerifiedUpiName] = useState('');
+  const [upiError, setUpiError] = useState('');
   const [fieldPositions, setFieldPositions] = useState<Record<string, number>>({});
   const [scrollRef, setScrollRef] = useState<ScrollView | null>(null);
+
+  const isValidUpi = (value: string) => /^[A-Za-z0-9._-]{2,}@[A-Za-z0-9.-]{2,}$/.test(value.trim());
 
   const scrollToField = (fieldKey: string) => {
     const y = fieldPositions[fieldKey];
@@ -25,13 +28,19 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
   };
 
   const verifyUpi = () => {
-    if (!upi.trim()) {
-      return Alert.alert('Required field', 'Please enter your UPI ID.');
+    const trimmedUpi = upi.trim();
+    if (!trimmedUpi) {
+      setVerifiedUpiName('');
+      setUpiError('Please enter a valid UPI ID in the format name@bank.');
+      return;
     }
-    if (!upi.includes('@')) {
-      return Alert.alert('Invalid UPI ID', 'UPI ID must include @.');
+    if (!isValidUpi(trimmedUpi)) {
+      setVerifiedUpiName('');
+      setUpiError('Please enter a valid UPI ID in the format name@bank.');
+      return;
     }
-    const namePart = upi.split('@')[0].replace(/[^A-Za-z ]/g, ' ').trim();
+    setUpiError('');
+    const namePart = trimmedUpi.split('@')[0].replace(/[^A-Za-z ]/g, ' ').trim();
     const fetchedName = namePart
       .split(' ')
       .filter(Boolean)
@@ -122,7 +131,13 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
             <>
               <View onLayout={({ nativeEvent }) => saveFieldPosition('upi', nativeEvent.layout.y)}>
                 <Text style={[styles.label, { color: theme.textMuted }]}>UPI ID *</Text>
-                <View style={[styles.inputWrap, { backgroundColor: theme.soft, borderColor: theme.border }]}>
+                <View
+                  style={[
+                    styles.inputWrap,
+                    { backgroundColor: theme.soft, borderColor: theme.border },
+                    upiError ? styles.inputWrapError : null,
+                  ]}
+                >
                   <AppIcon name="bank" size={18} color={C.gold} />
                   <TextInput
                     style={[styles.input, { color: theme.textPrimary }]}
@@ -130,13 +145,18 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
                     placeholderTextColor={theme.textMuted}
                     value={upi}
                     onChangeText={(value) => {
-                      setUpi(value);
+                      const nextValue = value.replace(/\s/g, '');
+                      setUpi(nextValue);
                       setVerifiedUpiName('');
+                      if (upiError) {
+                        setUpiError(nextValue && !isValidUpi(nextValue) ? 'Please enter a valid UPI ID in the format name@bank.' : '');
+                      }
                     }}
                     autoCapitalize="none"
                     onFocus={() => scrollToField('upi')}
                   />
                 </View>
+                {upiError ? <Text style={styles.errorText}>{upiError}</Text> : null}
               </View>
               <PrimaryBtn label="Verify" onPress={verifyUpi} />
               {verifiedUpiName ? (
@@ -256,7 +276,9 @@ const styles = StyleSheet.create({
   tabTextActive: { color: C.primary },
   label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   inputWrap: { flexDirection: 'row', alignItems: 'center', height: 54, borderRadius: 16, borderWidth: 1.5, paddingHorizontal: 14, gap: 8 },
+  inputWrapError: { borderColor: '#B42318', backgroundColor: '#FFF4F2' },
   input: { flex: 1, fontSize: 15, fontWeight: '600' },
+  errorText: { marginTop: 7, fontSize: 12, fontWeight: '700', color: '#B42318', lineHeight: 18 },
   bankOptionsWrap: { marginTop: 8, borderRadius: 16, overflow: 'hidden', borderWidth: 1 },
   bankOption: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1 },
   bankOptionText: { fontSize: 14, fontWeight: '600' },

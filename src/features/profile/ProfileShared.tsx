@@ -54,6 +54,7 @@ export type SubPage =
   | 'Need Help'
   | 'Offers & Promotions'
   | 'Notifications'
+  | 'Password'
   | 'App Settings'
   | 'Scan History'
   | 'Contact Support';
@@ -62,7 +63,7 @@ export type IconName =
   | 'edit' | 'eye' | 'eyeOff' | 'star' | 'scan' | 'gift' | 'signOut' | 'transfer'
   | 'order' | 'bank' | 'refer' | 'help' | 'offer' | 'notification' | 'settings'
   | 'history' | 'support' | 'camera' | 'gallery' | 'phone' | 'mail' | 'building'
-  | 'link' | 'message' | 'whatsapp' | 'moon' | 'warning' | 'arrowLeft' | 'check'
+  | 'link' | 'message' | 'whatsapp' | 'moon' | 'warning' | 'arrowLeft' | 'check' | 'lock'
   | 'chevronRight' | 'chevronDown' | 'chevronUp' | 'location' | 'search';
 
 export type AppLanguage = 'English' | 'Hindi' | 'Punjabi';
@@ -184,6 +185,7 @@ export function AppIcon({ name, size = 18, color = '#0F1120', strokeWidth = 1.8 
     case 'warning': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M12 4l8 14H4l8-14z" stroke={color} strokeWidth={strokeWidth} strokeLinejoin="round" /><Path d="M12 9v4M12 16h.01" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" /></Svg>;
     case 'arrowLeft': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M15 6l-6 6 6 6M9 12h10" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
     case 'check': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M5 12.5l4.2 4.2L19 7" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
+    case 'lock': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Rect x="5" y="11" width="14" height="10" rx="2.5" stroke={color} strokeWidth={strokeWidth} /><Path d="M8 11V8.5A4 4 0 0112 4.5a4 4 0 014 4V11" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" /><Circle cx="12" cy="16" r="1.3" fill={color} /></Svg>;
     case 'chevronRight': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M9 6l6 6-6 6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
     case 'chevronDown': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M6 9l6 6 6-6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
     case 'chevronUp': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M6 15l6-6 6 6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
