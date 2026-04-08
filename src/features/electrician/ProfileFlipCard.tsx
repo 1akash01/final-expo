@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 const logoImage = require('../../../assets/banners/srv-logo.jpeg');
 
@@ -112,6 +113,7 @@ function DetailPill({
 }
 
 export default function ProfileFlipCard({ profile, role = 'electrician', photoUri }: Props) {
+  const { darkMode } = usePreferenceContext();
   const [flipped, setFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -321,9 +323,9 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
       <View style={styles.container}>
         <Pressable onPress={onToggle} style={styles.pressArea}>
           <Animated.View pointerEvents="none" style={[styles.face, { opacity: frontOpacity, transform: [{ rotateY: frontRotate }] }]}>
-            <LinearGradient colors={['#587AC7', '#4768B7', '#38549B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
-              <View style={styles.textureOne} />
-              <View style={styles.textureTwo} />
+            <LinearGradient colors={darkMode ? ['#0F172A', '#16233B', '#1E3A5F'] : ['#587AC7', '#4768B7', '#38549B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
+              <View style={[styles.textureOne, darkMode ? styles.textureOneDark : null]} />
+              <View style={[styles.textureTwo, darkMode ? styles.textureTwoDark : null]} />
 
               <View style={styles.frontTopRow}>
                 <View style={styles.identityWrap}>
@@ -331,11 +333,11 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
                     {photoUri ? <Image source={{ uri: photoUri }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.roleText}>{role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner'}</Text>
+                    <Text style={[styles.roleText, darkMode ? styles.roleTextDark : null]}>{role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner'}</Text>
                     <Text style={styles.nameText}>{profile?.name || 'Harshvardhan'}</Text>
-                    <Text style={styles.phoneText}>+91 {profile?.phone || '9162038214'}</Text>
+                    <Text style={[styles.phoneText, darkMode ? styles.phoneTextDark : null]}>+91 {profile?.phone || '9162038214'}</Text>
                     <Animated.Text
-                      style={[styles.inlineTapHint, { transform: [{ scale: hintPulse }] }]}
+                      style={[styles.inlineTapHint, darkMode ? styles.inlineTapHintDark : null, { transform: [{ scale: hintPulse }] }]}
                       numberOfLines={1}
                     >
                       Tap card to view QR & details
@@ -357,12 +359,12 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
           </Animated.View>
 
           <Animated.View pointerEvents="none" style={[styles.face, { opacity: backOpacity, transform: [{ rotateY: backRotate }] }]}>
-            <LinearGradient colors={['#6284C9', '#4B6DB4', '#35518C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
-              <View style={styles.backGlowOne} />
-              <View style={styles.backGlowTwo} />
+            <LinearGradient colors={darkMode ? ['#111827', '#172033', '#243B53'] : ['#6284C9', '#4B6DB4', '#35518C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
+              <View style={[styles.backGlowOne, darkMode ? styles.backGlowOneDark : null]} />
+              <View style={[styles.backGlowTwo, darkMode ? styles.backGlowTwoDark : null]} />
               <View style={styles.backContent}>
                 <View style={styles.backLeft}>
-                  <Text style={styles.backHeading}>{role === 'dealer' ? 'Business Details' : 'Connected Dealer'}</Text>
+                  <Text style={[styles.backHeading, darkMode ? styles.backHeadingDark : null]}>{role === 'dealer' ? 'Business Details' : 'Connected Dealer'}</Text>
                   <View style={styles.metaStack}>
                     <DetailPill label="Name" value={dealerName} compact />
                     <DetailPill label="Location" value={dealerLocation} compact lines={2} />
@@ -382,7 +384,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
         </Pressable>
 
         <TouchableOpacity
-          style={styles.downloadMiniBtn}
+          style={[styles.downloadMiniBtn, darkMode ? styles.downloadMiniBtnDark : null]}
           activeOpacity={0.9}
           onPress={() => void handleDownloadPdf()}
           disabled={isDownloading}
@@ -430,6 +432,9 @@ const styles = StyleSheet.create({
     top: -30,
     right: -40,
   },
+  textureOneDark: {
+    backgroundColor: 'rgba(59,130,246,0.12)',
+  },
   textureTwo: {
     position: 'absolute',
     width: 130,
@@ -438,6 +443,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(232,69,60,0.14)',
     bottom: -24,
     left: -18,
+  },
+  textureTwoDark: {
+    backgroundColor: 'rgba(14,165,233,0.1)',
   },
   downloadMiniBtn: {
     position: 'absolute',
@@ -453,6 +461,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 3,
   },
+  downloadMiniBtnDark: {
+    backgroundColor: 'rgba(15,23,42,0.78)',
+    borderColor: 'rgba(148,163,184,0.28)',
+  },
   backGlowOne: {
     position: 'absolute',
     width: 150,
@@ -461,6 +473,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(56,189,248,0.12)',
     top: -24,
     right: -20,
+  },
+  backGlowOneDark: {
+    backgroundColor: 'rgba(59,130,246,0.1)',
   },
   backGlowTwo: {
     position: 'absolute',
@@ -489,12 +504,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  backGlowTwoDark: {
+    backgroundColor: 'rgba(14,165,233,0.09)',
+  },
   avatarImage: { width: '100%', height: '100%' },
   avatarText: { color: '#10254A', fontSize: 24, fontWeight: '900' },
   roleText: { color: '#AFC0E4', fontSize: 9.5, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 4 },
+  roleTextDark: { color: '#BFDBFE' },
   nameText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', flexShrink: 1 },
   phoneText: { color: '#D8E3F8', fontSize: 12.5, marginTop: 5 },
+  phoneTextDark: { color: '#CBD5E1' },
   inlineTapHint: { color: 'rgba(255,255,255,0.72)', fontSize: 7.8, marginTop: 10, paddingRight: 2, flexShrink: 1 },
+  inlineTapHintDark: { color: 'rgba(226,232,240,0.82)' },
 
   frontBottomRow: {
     position: 'absolute',
@@ -526,6 +547,7 @@ const styles = StyleSheet.create({
   backContent: { flexDirection: 'row', flex: 1, gap: 10, alignItems: 'stretch' },
   backLeft: { flex: 1, justifyContent: 'flex-start', minWidth: 0 },
   backHeading: { color: '#E4EDFF', fontSize: 10.5, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, paddingRight: 34 },
+  backHeadingDark: { color: '#DBEAFE' },
   metaStack: { gap: 5, marginTop: 8, paddingRight: 1 },
   qrPanel: { width: 92, alignItems: 'center', justifyContent: 'center', paddingVertical: 10 },
   qrFrame: {

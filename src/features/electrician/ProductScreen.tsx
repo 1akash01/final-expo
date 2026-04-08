@@ -313,6 +313,7 @@ function ProductCard({
   onScan: () => void;
   showScanButton?: boolean;
 }) {
+  const { darkMode } = usePreferenceContext();
   const pressScale = useRef(new Animated.Value(1)).current;
   const tiltX = useRef(new Animated.Value(0)).current;
 
@@ -339,6 +340,7 @@ function ProductCard({
       <Animated.View
         style={[
           styles.productCard,
+          darkMode ? styles.productCardDark : null,
           {
             width: cardW,
             height: showScanButton ? cardW * 1.72 : cardW * 1.56,
@@ -365,9 +367,9 @@ function ProductCard({
         </LinearGradient>
 
         {/* Info zone — fixed layout */}
-        <View style={[styles.infoZone, !showScanButton ? styles.infoZoneCompact : null]}>
-          <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-          <Text style={styles.productSub} numberOfLines={2}>{product.sub}</Text>
+        <View style={[styles.infoZone, darkMode ? styles.infoZoneDark : null, !showScanButton ? styles.infoZoneCompact : null]}>
+          <Text style={[styles.productName, darkMode ? styles.productNameDark : null]} numberOfLines={1}>{product.name}</Text>
+          <Text style={[styles.productSub, darkMode ? styles.productSubDark : null]} numberOfLines={2}>{product.sub}</Text>
           <View style={showScanButton ? styles.infoSpacer : styles.infoCompactSpacer} />
           {showScanButton ? (
             <TouchableOpacity
@@ -725,6 +727,11 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08, shadowRadius: 10, elevation: 4,
   },
+  productCardDark: {
+    backgroundColor: '#111827',
+    borderColor: '#243043',
+    shadowColor: '#020617',
+  },
   imgZone: {
     alignItems: 'center', justifyContent: 'center',
     position: 'relative', overflow: 'hidden',
@@ -741,11 +748,14 @@ const styles = StyleSheet.create({
   },
   ptsBadgeText: { fontSize: 11, fontWeight: '800' },
   infoZone: { flex: 1, padding: 11, paddingTop: 10 },
+  infoZoneDark: { backgroundColor: '#111827' },
   infoZoneCompact: { paddingBottom: 14, justifyContent: 'flex-start' },
   infoSpacer: { flex: 1 },
   infoCompactSpacer: { height: 6 },
   productName: { fontSize: 12, fontWeight: '800', color: Colors.textDark, textTransform: 'uppercase', letterSpacing: 0.2 },
+  productNameDark: { color: '#F8FAFC' },
   productSub: { fontSize: 10.5, color: Colors.textMuted, marginTop: 3, lineHeight: 14 },
+  productSubDark: { color: '#CBD5E1' },
   scanBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 5, borderRadius: 11, paddingVertical: 8,

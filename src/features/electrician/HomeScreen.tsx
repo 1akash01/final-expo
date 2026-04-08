@@ -137,6 +137,7 @@ function FeaturedProductCard({
   onOpenCategory: (category: string) => void;
   onScan: () => void;
 }) {
+  const { darkMode } = usePreferenceContext();
   const palette = FEATURED_CARD_COLORS[product.category] ?? FEATURED_CARD_COLORS.fanbox;
   const pressScale = useRef(new Animated.Value(1)).current;
   const tilt = useRef(new Animated.Value(0)).current;
@@ -159,6 +160,7 @@ function FeaturedProductCard({
       <Animated.View
         style={[
           styles.productCard,
+          darkMode ? styles.productCardDark : null,
           {
             width,
             transform: [{ scale: pressScale }, { perspective: 900 }, { rotateY }],
@@ -175,10 +177,10 @@ function FeaturedProductCard({
           <FeaturedProductImage uri={product.img} size={width + 6} />
         </LinearGradient>
         <View style={styles.productInfo}>
-          <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-          <Text style={styles.productDesc} numberOfLines={2}>{product.description}</Text>
+          <Text style={[styles.productName, darkMode ? styles.productNameDark : null]} numberOfLines={1}>{product.name}</Text>
+          <Text style={[styles.productDesc, darkMode ? styles.productDescDark : null]} numberOfLines={2}>{product.description}</Text>
           <View style={styles.productFooter}>
-            <Text style={styles.productPrice}>{product.price}</Text>
+            <Text style={[styles.productPrice, darkMode ? styles.productPriceDark : null]}>{product.price}</Text>
           </View>
           <TouchableOpacity
             onPress={() => onScan()}
@@ -411,22 +413,22 @@ export function HomeScreen({
 
   return (
     <ScrollView style={[styles.container, darkMode ? styles.containerDark : null]} showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={['#EAF3FF', '#DDEEFF', '#F6EEFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
+      <LinearGradient colors={darkMode ? ['#0B1220', '#101A2F', '#18263E'] : ['#EAF3FF', '#DDEEFF', '#F6EEFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
         <View style={styles.heroGlowThree} />
 
         <View style={styles.topRow}>
           <View style={styles.brandLockup}>
-            <View style={styles.logoWrap}>
+            <View style={[styles.logoWrap, darkMode ? styles.logoWrapDark : null]}>
               <Image source={logoImage} style={styles.logoImage} resizeMode="contain" />
             </View>
           </View>
 
           <View style={styles.topActions}>
-            <TouchableOpacity onPress={() => onNavigate('notification')} style={styles.topActionBtn} activeOpacity={0.85}>
-              <View style={[styles.topIconCore, styles.notificationCore]}>
-                <BellIcon color="#C2410C" />
+            <TouchableOpacity onPress={() => onNavigate('notification')} style={[styles.topActionBtn, darkMode ? styles.topActionBtnDark : null]} activeOpacity={0.85}>
+              <View style={[styles.topIconCore, styles.notificationCore, darkMode ? styles.notificationCoreDark : null]}>
+                <BellIcon color={darkMode ? '#FDBA74' : '#C2410C'} />
               </View>
             </TouchableOpacity>
 
@@ -436,24 +438,24 @@ export function HomeScreen({
         <ProfileFlipCard profile={DUMMY_PROFILE} role="electrician" photoUri={profilePhotoUri} />
 
         <View style={styles.statRow}>
-          <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statsPulse }] }]}>
-            <LinearGradient colors={['#E0F2FE', '#DBEAFE', '#EDE9FE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+          <Animated.View style={[styles.statCardWrap, darkMode ? styles.statCardWrapDark : null, { transform: [{ scale: statsPulse }] }]}>
+            <LinearGradient colors={darkMode ? ['#0F172A', '#132238', '#1E293B'] : ['#E0F2FE', '#DBEAFE', '#EDE9FE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.statCard, darkMode ? styles.statCardDark : null]}>
               <Animated.View style={[styles.statGlow, styles.statGlowBlue, { opacity: statsPulse }]} />
-              <Text style={styles.statLabel}>Total Points</Text>
-              <Text style={styles.statValue}>4,250</Text>
-              <Text style={styles.statHint}>+120 this week</Text>
+              <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Total Points</Text>
+              <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>4,250</Text>
+              <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>+120 this week</Text>
             </LinearGradient>
           </Animated.View>
-          <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statsPulse }] }]}>
+          <Animated.View style={[styles.statCardWrap, darkMode ? styles.statCardWrapDark : null, { transform: [{ scale: statsPulse }] }]}>
             <TouchableOpacity activeOpacity={0.9} onPress={() => onNavigate('electrician_tier')}>
-              <LinearGradient colors={tier.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+              <LinearGradient colors={darkMode ? ['#111827', '#18263A', '#243B53'] : tier.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.statCard, darkMode ? styles.statCardDark : null]}>
                 <Animated.View style={[styles.statGlow, styles.statGlowWarm, { opacity: statsPulse }]} />
-                <View style={[styles.tierIconChip, { backgroundColor: '#FFFFFFB8' }]}>
+                <View style={[styles.tierIconChip, { backgroundColor: darkMode ? 'rgba(255,255,255,0.12)' : '#FFFFFFB8' }]}>
                   <ElectricianTierIcon tier={tier.tier} size={20} />
                 </View>
-                <Text style={styles.statLabel}>Member Tier</Text>
-                <Text style={styles.statValue}>{tier.tier}</Text>
-                <Text style={styles.statHint}>
+                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Member Tier</Text>
+                <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>{tier.tier}</Text>
+                <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
                   {tier.tier === 'Diamond' ? 'Top reward level unlocked' : `${tier.tier === 'Silver' ? 1001 - totalPoints : tier.tier === 'Gold' ? 5001 - totalPoints : 10001 - totalPoints} to next tier`}
                 </Text>
               </LinearGradient>
@@ -481,7 +483,7 @@ export function HomeScreen({
         <View style={styles.dotsRow}>
           {BANNER_SLIDES.map((_, index) => (
             <TouchableOpacity key={index} onPress={() => { goToSlide(index); setSlide(index); resetAutoSlide(); }} activeOpacity={0.8}>
-              <View style={[styles.dot, index === slide && styles.dotActive]} />
+              <View style={[styles.dot, darkMode ? styles.dotDark : null, index === slide && (darkMode ? styles.dotActiveDark : styles.dotActive)]} />
             </TouchableOpacity>
           ))}
         </View>
@@ -494,8 +496,8 @@ export function HomeScreen({
                 <LinearGradient colors={item.iconColors} style={styles.quickIconBox}>
                   <Icon color={item.iconTint} size={24} />
                 </LinearGradient>
-                <Text style={styles.quickTitle}>{item.title}</Text>
-                <Text style={styles.quickSub}>{item.sub}</Text>
+                <Text style={[styles.quickTitle, darkMode ? styles.quickTitleDark : null]}>{item.title}</Text>
+                <Text style={[styles.quickSub, darkMode ? styles.quickSubDark : null]}>{item.sub}</Text>
               </TouchableOpacity>
             );
           })}
@@ -503,8 +505,8 @@ export function HomeScreen({
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionEyebrow}>Top Picks</Text>
-            <Text style={styles.sectionTitle}>Featured products</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Top Picks</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Featured products</Text>
           </View>
         </View>
 
@@ -516,11 +518,11 @@ export function HomeScreen({
                 <TouchableOpacity
                   key={filter}
                   onPress={() => setSelectedFilter(filter)}
-                  style={[styles.filterChip, active && styles.filterChipActive]}
+                  style={[styles.filterChip, darkMode ? styles.filterChipDark : null, active && styles.filterChipActive]}
                   activeOpacity={0.86}
                 >
-                  {filter === 'All' ? <FilterIcon color={active ? '#FFFFFF' : '#173E80'} size={15} /> : null}
-                  <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>{filter}</Text>
+                  {filter === 'All' ? <FilterIcon color={active ? '#FFFFFF' : darkMode ? '#CBD5E1' : '#173E80'} size={15} /> : null}
+                  <Text style={[styles.filterChipText, darkMode ? styles.filterChipTextDark : null, active && styles.filterChipTextActive]}>{filter}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -546,8 +548,8 @@ export function HomeScreen({
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionEyebrow}>Recent Activity</Text>
-            <Text style={styles.sectionTitle}>Latest actions</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Recent Activity</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Latest actions</Text>
           </View>
           <TouchableOpacity onPress={() => onNavigate('notification')} style={styles.inlineAction} activeOpacity={0.85}>
             <Text style={styles.viewAllText}>Notifications</Text>
@@ -562,8 +564,8 @@ export function HomeScreen({
                 <BellIcon color="#24437A" size={18} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.activityTitle}>{item.title}</Text>
-                <Text style={styles.activityTime}>{item.time}</Text>
+                <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{item.title}</Text>
+                <Text style={[styles.activityTime, darkMode ? styles.activityTimeDark : null]}>{item.time}</Text>
               </View>
               <Text style={[styles.activityAmount, { color: item.amountColor }]}>{item.amount}</Text>
             </View>
@@ -633,6 +635,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.16)',
     overflow: 'hidden',
   },
+  logoWrapDark: {
+    backgroundColor: 'rgba(15,23,42,0.78)',
+    borderColor: 'rgba(148,163,184,0.2)',
+  },
   logoImage: { width: 64, height: 64 },
   topActions: { flexDirection: 'row', gap: 8 },
   topActionBtn: {
@@ -650,6 +656,11 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 4,
   },
+  topActionBtnDark: {
+    backgroundColor: '#0F172A',
+    borderColor: 'rgba(148,163,184,0.24)',
+    shadowColor: '#020617',
+  },
 
   topIconCore: {
     width: 32,
@@ -664,6 +675,9 @@ const styles = StyleSheet.create({
   notificationCore: {
     backgroundColor: '#FFEDD5',
   },
+  notificationCoreDark: {
+    backgroundColor: 'rgba(194,65,12,0.18)',
+  },
   statRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
   statCardWrap: {
     flex: 1,
@@ -675,6 +689,10 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
+  statCardWrapDark: {
+    shadowColor: '#020617',
+    shadowOpacity: 0.26,
+  },
   statCard: {
     flex: 1,
     overflow: 'hidden',
@@ -683,6 +701,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.45)',
+  },
+  statCardDark: {
+    borderColor: 'rgba(148,163,184,0.16)',
   },
   statGlow: {
     position: 'absolute',
@@ -699,13 +720,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(244,114,182,0.2)',
   },
   statLabel: { color: '#5C6F91', fontSize: 9.5, fontWeight: '700', marginBottom: 4 },
+  statLabelDark: { color: '#BFDBFE' },
   statValue: { color: '#13294B', fontSize: 16, fontWeight: '900' },
+  statValueDark: { color: '#F8FAFC' },
   statHint: { color: '#7A8CAA', fontSize: 9.5, marginTop: 2 },
+  statHintDark: { color: '#CBD5E1' },
   tierIconChip: { position: 'absolute', top: 8, right: 8, width: 30, height: 30, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: 14, paddingTop: 18 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
   sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 5 },
+  sectionEyebrowDark: { color: '#94A3B8' },
   sectionTitle: { color: '#14213D', fontSize: 21, fontWeight: '900' },
+  sectionTitleDark: { color: '#F8FAFC' },
   bannerCard: {
     borderRadius: 28,
     overflow: 'hidden',
@@ -719,7 +745,9 @@ const styles = StyleSheet.create({
   bannerImage: { width: '100%', height: '100%' },
   dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 14, marginBottom: 22 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C7D2E3' },
+  dotDark: { backgroundColor: '#334155' },
   dotActive: { width: 28, backgroundColor: '#0F172A' },
+  dotActiveDark: { width: 28, backgroundColor: '#E2E8F0' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
   quickCard: {
     backgroundColor: '#FFFFFF',
@@ -744,7 +772,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   quickTitle: { color: '#152238', fontSize: 14, fontWeight: '800' },
+  quickTitleDark: { color: '#F8FAFC' },
   quickSub: { color: '#74829D', fontSize: 11.5, marginTop: 3 },
+  quickSubDark: { color: '#CBD5E1' },
   inlineAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   viewAllText: { color: '#E8453C', fontSize: 13, fontWeight: '800' },
   productsTopBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 12 },
@@ -760,11 +790,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D9E3F0',
   },
+  filterChipDark: {
+    backgroundColor: '#111827',
+    borderColor: '#243043',
+  },
   filterChipActive: {
     backgroundColor: '#173E80',
     borderColor: '#173E80',
   },
   filterChipText: { color: '#173E80', fontSize: 11.5, fontWeight: '800' },
+  filterChipTextDark: { color: '#CBD5E1' },
   filterChipTextActive: { color: '#FFFFFF' },
   productsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
   productCard: {
@@ -778,6 +813,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 18,
     elevation: 5,
+  },
+  productCardDark: {
+    backgroundColor: '#111827',
+    borderColor: '#243043',
+    shadowColor: '#020617',
   },
   productImageZone: {
     height: 168,
@@ -799,9 +839,12 @@ const styles = StyleSheet.create({
   productImage: { width: 112, height: 112 },
   productInfo: { padding: 13, paddingTop: 11 },
   productName: { color: '#152238', fontSize: 13, fontWeight: '800', textTransform: 'uppercase' },
+  productNameDark: { color: '#F8FAFC' },
   productDesc: { color: '#70819C', fontSize: 11, lineHeight: 16, marginTop: 4, minHeight: 32 },
+  productDescDark: { color: '#CBD5E1' },
   productFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 8 },
   productPrice: { color: '#152238', fontSize: 15, fontWeight: '900' },
+  productPriceDark: { color: '#F8FAFC' },
   pointsPill: {
     backgroundColor: 'rgba(255,255,255,0.92)',
     borderRadius: 999,
@@ -851,7 +894,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activityTitle: { color: '#152238', fontSize: 13, fontWeight: '700' },
+  activityTitleDark: { color: '#F8FAFC' },
   activityTime: { color: '#7E8BA5', fontSize: 11, marginTop: 3 },
+  activityTimeDark: { color: '#94A3B8' },
   activityAmount: { fontSize: 14, fontWeight: '900' },
 });
 
