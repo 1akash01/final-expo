@@ -5,6 +5,7 @@ import {
   Easing,
   Image,
   Linking,
+  PanResponder,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,6 +22,14 @@ import type { Screen } from '@/shared/types/navigation';
 import { associatedElectricians, dealerProfile } from './dealerData';
 
 const logoImage = require('../../../assets/banners/srv-logo.jpeg');
+const BANNER_SLIDES = [
+  { image: require('../../../assets/banners/aco.jpg.jpeg'), resizeMode: 'cover' as const, backgroundColor: '#192F67' },
+  { image: require('../../../assets/banners/appliances.jpg.jpeg'), resizeMode: 'cover' as const, backgroundColor: '#E8C973' },
+  { image: require('../../../assets/banners/co.jpg.jpeg'), resizeMode: 'cover' as const, backgroundColor: '#4153C8' },
+  { image: require('../../../assets/banners/light.jpg.jpeg'), resizeMode: 'cover' as const, backgroundColor: '#8A20B4' },
+  { image: require('../../../assets/banners/mcb-box.jpg.jpeg'), resizeMode: 'cover' as const, backgroundColor: '#7C8BD7' },
+  { image: require('../../../assets/banners/vs-poster.jpg.jpeg'), resizeMode: 'contain' as const, backgroundColor: '#19211F' },
+];
 
 function BellIcon({ color = '#10254A', size = 22 }: { color?: string; size?: number }) {
   return (
@@ -253,11 +262,15 @@ export function HomeScreen({
   const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const statPulse = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const connectedCount = associatedElectricians.length;
   const tier = useMemo(() => getTier(connectedCount), [connectedCount]);
   const cardW = (width - 28 - 12) / 2;
+  const heroImageHeight = Math.round((width - 28) * 0.56);
   const productFilters = ['All', 'Boxes', 'Fans'] as const;
   const [selectedFilter, setSelectedFilter] = useState<(typeof productFilters)[number]>('All');
+  const [slide, setSlide] = useState(0);
 
   const filteredProducts = useMemo(() => {
     const items = featuredProducts.slice(0, 6);
@@ -286,6 +299,55 @@ export function HomeScreen({
     pulse.start();
     return () => pulse.stop();
   }, [statPulse]);
+
+  const goToSlide = (next: number) => {
+    Animated.sequence([
+      Animated.timing(fadeAnim, { toValue: 0.45, duration: 140, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }),
+    ]).start();
+  };
+
+  const resetAutoSlide = () => {
+    if (autoSlideRef.current) {
+      clearInterval(autoSlideRef.current);
+    }
+    autoSlideRef.current = setInterval(() => {
+      setSlide((prev) => (prev + 1) % BANNER_SLIDES.length);
+    }, 4200);
+  };
+
+  useEffect(() => {
+    resetAutoSlide();
+    return () => {
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current);
+      }
+    };
+  }, []);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 12 && Math.abs(gs.dx) > Math.abs(gs.dy),
+      onPanResponderRelease: (_, gs) => {
+        if (gs.dx < -40) {
+          setSlide((prev) => {
+            const next = (prev + 1) % BANNER_SLIDES.length;
+            goToSlide(next);
+            return next;
+          });
+          resetAutoSlide();
+        } else if (gs.dx > 40) {
+          setSlide((prev) => {
+            const next = (prev - 1 + BANNER_SLIDES.length) % BANNER_SLIDES.length;
+            goToSlide(next);
+            return next;
+          });
+          resetAutoSlide();
+        }
+      },
+    })
+  ).current;
 
   const quickActions = [
     {
@@ -370,6 +432,30 @@ export function HomeScreen({
       </LinearGradient>
 
       <View style={styles.body}>
+        <Animated.View style={{ opacity: fadeAnim }} {...panResponder.panHandlers}>
+          <View
+            style={[
+              styles.bannerCard,
+              darkMode ? styles.bannerCardDark : null,
+              { height: heroImageHeight, backgroundColor: BANNER_SLIDES[slide].backgroundColor },
+            ]}
+          >
+            <Image
+              source={BANNER_SLIDES[slide].image}
+              style={styles.bannerImage}
+              resizeMode={BANNER_SLIDES[slide].resizeMode}
+            />
+          </View>
+        </Animated.View>
+
+        <View style={styles.dotsRow}>
+          {BANNER_SLIDES.map((_, index) => (
+            <TouchableOpacity key={index} onPress={() => { goToSlide(index); setSlide(index); resetAutoSlide(); }} activeOpacity={0.8}>
+              <View style={[styles.dot, darkMode ? styles.dotDark : null, index === slide && (darkMode ? styles.dotActiveDark : styles.dotActive)]} />
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <View style={styles.quickGrid}>
           {quickActions.map((item) => {
             const Icon = item.icon;
@@ -548,6 +634,26 @@ const styles = StyleSheet.create({
   tierIconChip: { position: 'absolute', top: 10, right: 12, width: 32, height: 32, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   tierTextStack: { marginTop: -1, paddingRight: 28 },
   body: { paddingHorizontal: 14, paddingTop: 18 },
+  bannerCard: {
+    borderRadius: 28,
+    overflow: 'hidden',
+    backgroundColor: '#D9E3F2',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.16,
+    shadowRadius: 22,
+    elevation: 9,
+  },
+  bannerCardDark: {
+    shadowColor: '#020617',
+    shadowOpacity: 0.24,
+  },
+  bannerImage: { width: '100%', height: '100%' },
+  dotsRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 14, marginBottom: 22 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#C7D2E3' },
+  dotDark: { backgroundColor: '#334155' },
+  dotActive: { width: 28, backgroundColor: '#0F172A' },
+  dotActiveDark: { width: 28, backgroundColor: '#E2E8F0' },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
   quickCard: {
     backgroundColor: '#FFFFFF',
