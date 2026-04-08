@@ -305,11 +305,13 @@ function ProductCard({
   cardW,
   catColor,
   onScan,
+  showScanButton = true,
 }: {
   product: Product;
   cardW: number;
   catColor: (typeof CAT_COLORS)[string];
   onScan: () => void;
+  showScanButton?: boolean;
 }) {
   const pressScale = useRef(new Animated.Value(1)).current;
   const tiltX = useRef(new Animated.Value(0)).current;
@@ -339,7 +341,7 @@ function ProductCard({
           styles.productCard,
           {
             width: cardW,
-            height: cardW * 1.72,
+            height: showScanButton ? cardW * 1.72 : cardW * 1.56,
             transform: [{ scale: pressScale }, { perspective: 900 }, { rotateY: rotate }],
           },
         ]}
@@ -363,18 +365,20 @@ function ProductCard({
         </LinearGradient>
 
         {/* Info zone — fixed layout */}
-        <View style={styles.infoZone}>
+        <View style={[styles.infoZone, !showScanButton ? styles.infoZoneCompact : null]}>
           <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
           <Text style={styles.productSub} numberOfLines={2}>{product.sub}</Text>
-          <View style={{ flex: 1 }} />
-          <TouchableOpacity
-            onPress={onScan}
-            style={[styles.scanBtn, { backgroundColor: catColor.scanBg }]}
-            activeOpacity={0.8}
-          >
-            <ScanIcon size={15} color={catColor.scanText} />
-            <Text style={[styles.scanBtnText, { color: catColor.scanText }]}>Scan to Earn</Text>
-          </TouchableOpacity>
+          <View style={showScanButton ? styles.infoSpacer : styles.infoCompactSpacer} />
+          {showScanButton ? (
+            <TouchableOpacity
+              onPress={onScan}
+              style={[styles.scanBtn, { backgroundColor: catColor.scanBg }]}
+              activeOpacity={0.8}
+            >
+              <ScanIcon size={15} color={catColor.scanText} />
+              <Text style={[styles.scanBtnText, { color: catColor.scanText }]}>Scan to Earn</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </Animated.View>
     </Pressable>
@@ -386,10 +390,12 @@ export function ProductScreen({
   onNavigate,
   initialCategory = 'fanbox',
   showBottomBanner = true,
+  showScanButton = true,
 }: {
   onNavigate: (screen: Screen) => void;
   initialCategory?: string;
   showBottomBanner?: boolean;
+  showScanButton?: boolean;
 }) {
   const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
@@ -573,6 +579,7 @@ export function ProductScreen({
                   cardW={cardW}
                   catColor={productCatColor}
                   onScan={() => onNavigate('scan')}
+                  showScanButton={showScanButton}
                 />
               );
             })}
@@ -734,6 +741,9 @@ const styles = StyleSheet.create({
   },
   ptsBadgeText: { fontSize: 11, fontWeight: '800' },
   infoZone: { flex: 1, padding: 11, paddingTop: 10 },
+  infoZoneCompact: { paddingBottom: 14, justifyContent: 'flex-start' },
+  infoSpacer: { flex: 1 },
+  infoCompactSpacer: { height: 6 },
   productName: { fontSize: 12, fontWeight: '800', color: Colors.textDark, textTransform: 'uppercase', letterSpacing: 0.2 },
   productSub: { fontSize: 10.5, color: Colors.textMuted, marginTop: 3, lineHeight: 14 },
   scanBtn: {

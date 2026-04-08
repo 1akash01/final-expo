@@ -17,6 +17,7 @@ export function ProductScreen({
       onNavigate={handleNavigate}
       initialCategory={initialCategory}
       showBottomBanner={false}
+      showScanButton={false}
     />
   );
 }
