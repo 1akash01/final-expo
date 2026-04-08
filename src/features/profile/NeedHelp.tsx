@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { AppIcon, C, PageHeader, PrimaryBtn, usePreferenceContext } from './ProfileShared';
+import * as MailComposer from 'expo-mail-composer';
+import { LinearGradient } from 'expo-linear-gradient';
+import { AppIcon, C, PageHeader, usePreferenceContext } from './ProfileShared';
 
 export function NeedHelpPage({ onBack }: { onBack: () => void }) {
   const { t, theme } = usePreferenceContext();
@@ -11,6 +13,8 @@ export function NeedHelpPage({ onBack }: { onBack: () => void }) {
   const [pendingPhoto, setPendingPhoto] = useState<string | null>(null);
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
   const subjectOptions = ['Normal Inquiry', 'Bulk Inquiry', 'Electrician Related Inquiry', 'QR Related Inquiry'];
+  const supportMail = 'info@srvelectricals.com';
+  const supportWhatsapp = '918837684004';
 
   const pickPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -31,9 +35,59 @@ export function NeedHelpPage({ onBack }: { onBack: () => void }) {
     setPendingPhoto(null);
   };
 
-  const submitHelp = () => {
-    if (!subject.trim() || !comment.trim()) return Alert.alert(t('incompleteForm'), t('fillSubjectComment'));
-    Alert.alert(t('submitted'), 'Your support request has been submitted.');
+  const buildSupportMessage = () =>
+    `SRV Support Request\nSubject: ${subject.trim()}\n\nComment:\n${comment.trim()}`;
+
+  const openWhatsapp = async () => {
+    if (!subject.trim() || !comment.trim()) {
+      return Alert.alert(t('incompleteForm'), t('fillSubjectComment'));
+    }
+    const message = encodeURIComponent(buildSupportMessage());
+    const appUrl = `whatsapp://send?phone=${supportWhatsapp}&text=${message}`;
+    const webUrl = `https://wa.me/${supportWhatsapp}?text=${message}`;
+    const canOpenApp = await Linking.canOpenURL(appUrl);
+    if (canOpenApp) {
+      await Linking.openURL(appUrl);
+      if (photo) {
+        Alert.alert('Photo ready', 'WhatsApp chat has opened on the SRV number. Please attach the selected photo manually inside WhatsApp.');
+      }
+      return;
+    }
+    const canOpenWeb = await Linking.canOpenURL(webUrl);
+    if (!canOpenWeb) {
+      return Alert.alert('WhatsApp unavailable', 'Please install or enable WhatsApp to send your request.');
+    }
+    await Linking.openURL(webUrl);
+    if (photo) {
+      Alert.alert('Photo ready', 'WhatsApp chat has opened on the SRV number. Please attach the selected photo manually inside WhatsApp.');
+    }
+  };
+
+  const openMail = async () => {
+    if (!subject.trim() || !comment.trim()) {
+      return Alert.alert(t('incompleteForm'), t('fillSubjectComment'));
+    }
+    try {
+      await MailComposer.composeAsync({
+        recipients: [supportMail],
+        subject: `SRV Support: ${subject.trim()}`,
+        body: buildSupportMessage(),
+        attachments: photo ? [photo] : [],
+      });
+      return;
+    } catch {
+      const mailSubject = encodeURIComponent(`SRV Support: ${subject.trim()}`);
+      const mailBody = encodeURIComponent(buildSupportMessage());
+      const fallbackUrl = `mailto:${supportMail}?subject=${mailSubject}&body=${mailBody}`;
+      const canOpenFallback = await Linking.canOpenURL(fallbackUrl);
+      if (!canOpenFallback) {
+        return Alert.alert('Mail unavailable', 'Please configure a mail app to send your request.');
+      }
+      await Linking.openURL(fallbackUrl);
+      if (photo) {
+        Alert.alert('Attachment note', 'Mail app opened, but attachment support is only available when the native mail composer is enabled on the device.');
+      }
+    }
   };
 
   return (
@@ -81,7 +135,31 @@ export function NeedHelpPage({ onBack }: { onBack: () => void }) {
             )}
           </TouchableOpacity>
         </View>
-        <PrimaryBtn label={t('save')} onPress={submitHelp} />
+        <View style={styles.actionGrid}>
+          <TouchableOpacity onPress={() => void openWhatsapp()} activeOpacity={0.9}>
+            <LinearGradient colors={['#E8FFF1', '#C6F3D8', '#E0F2FE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
+              <View style={[styles.actionIconWrap, styles.whatsappIconWrap]}>
+                <AppIcon name="whatsapp" size={18} color="#16A34A" />
+              </View>
+              <View style={styles.actionCopy}>
+                <Text style={styles.actionTitle}>Send to WhatsApp</Text>
+                <Text style={styles.actionSub}>Open SRV support chat</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => void openMail()} activeOpacity={0.9}>
+            <LinearGradient colors={['#FFF4EE', '#FFE1D6', '#FDE7F3']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.actionBtn}>
+              <View style={[styles.actionIconWrap, styles.mailIconWrap]}>
+                <AppIcon name="mail" size={18} color="#E8453C" />
+              </View>
+              <View style={styles.actionCopy}>
+                <Text style={styles.actionTitle}>Send to Mail</Text>
+                <Text style={styles.actionSub}>Send to {supportMail}</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <Modal visible={showSubjectDropdown} animationType="fade" transparent onRequestClose={() => setShowSubjectDropdown(false)}>
@@ -152,4 +230,31 @@ const styles = StyleSheet.create({
   confirmCancelText: { fontSize: 15, fontWeight: '700', color: C.dark },
   confirmDoneBtn: { flex: 1, height: 52, borderRadius: 16, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   confirmDoneText: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  actionGrid: { gap: 12 },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.55)',
+  },
+  actionIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  whatsappIconWrap: {
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+  mailIconWrap: {
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+  actionCopy: { flex: 1 },
+  actionTitle: { color: '#152238', fontSize: 15, fontWeight: '800' },
+  actionSub: { color: '#6B7A93', fontSize: 11.5, marginTop: 3, lineHeight: 16 },
 });

@@ -11,7 +11,8 @@
         {
           "locationWhenInUsePermission": "Allow SRV Electricals to access your location so we can fill your current address during dealer signup."
         }
-      ]
+      ],
+      "expo-mail-composer"
     ],
     "experiments": {
       "typedRoutes": true
