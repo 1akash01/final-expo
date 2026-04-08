@@ -1,19 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AppIcon, C, PageHeader, Screen, usePreferenceContext } from './ProfileShared';
+import type { UserRole } from '@/shared/types/navigation';
 
 const noDataImage = require('./assets/nodata.png');
 const buySchemeImage = require('./assets/giftstore.png');
 const bankTransferImage = require('./assets/upi.png');
 const transferPointImage = require('./assets/transferpoint.png');
 
-type RedemptionTab = 'Buy Schemes' | 'Bank Transfer' | 'Transfer Point';
+type RedemptionTab = 'Buy Schemes' | 'Bank Transfer' | 'Transfer Point' | 'Dealer Bonus';
 type FilterRange = 'This Month' | 'Last 30 Days' | 'All';
 
 const redemptions = [
   { type: 'Buy Schemes' as RedemptionTab, title: 'Premium Fan Box Scheme', points: '-1200', date: '03 Apr 2026', status: 'Processed' },
   { type: 'Bank Transfer' as RedemptionTab, title: 'Bank Transfer Request', points: '-2500', date: '29 Mar 2026', status: 'Completed' },
   { type: 'Transfer Point' as RedemptionTab, title: 'Points Sent to Dealer', points: '-450', date: '18 Mar 2026', status: 'Success' },
+  { type: 'Dealer Bonus' as RedemptionTab, title: '5% bonus from electrician redemptions', points: '+630', date: '06 Apr 2026', status: 'Credited' },
   { type: 'Buy Schemes' as RedemptionTab, title: 'Festival Reward Scheme', points: '-850', date: '11 Mar 2026', status: 'Processed' },
 ];
 
@@ -22,16 +24,21 @@ export function RedemptionPage({
   onNavigate,
   onOpenBankDetails,
   onOpenTransferPoints,
+  currentRole,
 }: {
   onBack: () => void;
   onNavigate: (screen: Screen) => void;
   onOpenBankDetails: () => void;
   onOpenTransferPoints: () => void;
+  currentRole: UserRole;
 }) {
   const { t, theme } = usePreferenceContext();
   const [activeTab, setActiveTab] = useState<RedemptionTab>('Buy Schemes');
   const [activeFilter, setActiveFilter] = useState<FilterRange>('This Month');
-  const tabs: RedemptionTab[] = ['Buy Schemes', 'Bank Transfer', 'Transfer Point'];
+  const tabs: RedemptionTab[] =
+    currentRole === 'dealer'
+      ? ['Buy Schemes', 'Bank Transfer', 'Dealer Bonus']
+      : ['Buy Schemes', 'Bank Transfer', 'Transfer Point'];
   const filters: FilterRange[] = ['This Month', 'Last 30 Days', 'All'];
 
   const filteredItems = useMemo(() => {
@@ -75,7 +82,11 @@ export function RedemptionPage({
                   onPress={() => openTabDestination(tab)}
                   activeOpacity={0.8}
                 >
-                  <Image source={tab === 'Buy Schemes' ? buySchemeImage : tab === 'Bank Transfer' ? bankTransferImage : transferPointImage} style={styles.tabAsset} resizeMode="contain" />
+                  <Image
+                    source={tab === 'Buy Schemes' ? buySchemeImage : tab === 'Bank Transfer' ? bankTransferImage : transferPointImage}
+                    style={styles.tabAsset}
+                    resizeMode="contain"
+                  />
                   <Text style={[styles.tabText, { color: isActive ? C.primary : theme.textSecondary }]}>{tab}</Text>
                 </TouchableOpacity>
               );
@@ -105,8 +116,24 @@ export function RedemptionPage({
         {filteredItems.length > 0 ? filteredItems.map((item, index) => (
           <View key={`${item.title}-${index}`} style={[styles.historyCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.historyHead}>
-              <View style={[styles.historyIcon, { backgroundColor: item.type === 'Bank Transfer' ? C.goldLight : item.type === 'Transfer Point' ? C.blueLight : C.tealLight }]}>
-                <AppIcon name={item.type === 'Bank Transfer' ? 'bank' : item.type === 'Transfer Point' ? 'transfer' : 'gift'} size={18} color={item.type === 'Bank Transfer' ? C.gold : item.type === 'Transfer Point' ? C.blue : C.teal} />
+              <View
+                style={[
+                  styles.historyIcon,
+                  {
+                    backgroundColor:
+                      item.type === 'Bank Transfer'
+                        ? C.goldLight
+                        : item.type === 'Transfer Point' || item.type === 'Dealer Bonus'
+                          ? C.blueLight
+                          : C.tealLight,
+                  },
+                ]}
+              >
+                <AppIcon
+                  name={item.type === 'Bank Transfer' ? 'bank' : item.type === 'Transfer Point' || item.type === 'Dealer Bonus' ? 'transfer' : 'gift'}
+                  size={18}
+                  color={item.type === 'Bank Transfer' ? C.gold : item.type === 'Transfer Point' || item.type === 'Dealer Bonus' ? C.blue : C.teal}
+                />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.historyTitle, { color: theme.textPrimary }]}>{item.title}</Text>

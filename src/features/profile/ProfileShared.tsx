@@ -47,6 +47,7 @@ export type Profile = typeof defaultProfile;
 export type SubPage =
   | null
   | 'My Redemption'
+  | 'Dealer Bonus'
   | 'Transfer Points'
   | 'My Orders'
   | 'Bank Details'

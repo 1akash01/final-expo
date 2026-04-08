@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { colors } from '@/shared/theme/colors';
-import type { Screen } from '@/shared/types/navigation';
+import type { Screen, UserRole } from '@/shared/types/navigation';
 
 type WalletScreenProps = {
+  role?: UserRole;
   onNavigate?: (screen: Screen) => void;
 };
 
@@ -62,19 +63,60 @@ function SparkIcon() {
   );
 }
 
-const actions = [
-  { id: 'buy', label: 'Buy Schemes', detail: 'Premium offers', icon: GiftIcon, tint: '#FBE4CC', iconColor: '#6B3E16' },
-  { id: 'bank', label: 'Bank Transfer', detail: 'Fast withdrawal', icon: TransferIcon, tint: '#DDEAFE', iconColor: '#234975' },
-  { id: 'point', label: 'Transfer Point', detail: 'Send to dealer', icon: SparkIcon, tint: '#FFE0DA', iconColor: '#B53324' },
-];
-
 const historyItems = [
   { id: 'h1', title: 'Referral reward credited', time: 'Today, 10:42 AM', points: '+120', accent: '#1F9C5D' },
   { id: 'h2', title: 'Bank transfer processed', time: 'Yesterday, 06:20 PM', points: '-250', accent: '#B44A3A' },
   { id: 'h3', title: 'Scheme bonus unlocked', time: '02 Apr 2026', points: '+80', accent: '#35538E' },
 ];
 
-export function WalletScreen({ onNavigate }: WalletScreenProps) {
+export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenProps) {
+  const isDealer = role === 'dealer';
+  const actions = isDealer
+    ? [
+        {
+          id: 'bank',
+          label: 'Bank Transfer',
+          detail: 'Fast withdrawal',
+          icon: TransferIcon,
+          tint: '#DDEAFE',
+          target: 'bank_details' as Screen,
+        },
+        {
+          id: 'bonus',
+          label: 'Dealer Bonus',
+          detail: '5% electrician bonus',
+          icon: SparkIcon,
+          tint: '#FFE0DA',
+          target: 'dealer_bonus' as Screen,
+        },
+      ]
+    : [
+        {
+          id: 'buy',
+          label: 'Buy Schemes',
+          detail: 'Premium offers',
+          icon: GiftIcon,
+          tint: '#FBE4CC',
+          target: 'rewards' as Screen,
+        },
+        {
+          id: 'bank',
+          label: 'Bank Transfer',
+          detail: 'Fast withdrawal',
+          icon: TransferIcon,
+          tint: '#DDEAFE',
+          target: 'bank_details' as Screen,
+        },
+        {
+          id: 'point',
+          label: 'Transfer Point',
+          detail: 'Send to dealer',
+          icon: SparkIcon,
+          tint: '#FFE0DA',
+          target: 'transfer_points' as Screen,
+        },
+      ];
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#18345B', '#355C95', '#E18D4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>
@@ -91,18 +133,22 @@ export function WalletScreen({ onNavigate }: WalletScreenProps) {
           </Pressable>
         </View>
 
-        <Text style={styles.eyebrow}>SRV Premium Wallet</Text>
+        <Text style={styles.eyebrow}>{isDealer ? 'SRV Dealer Wallet' : 'SRV Premium Wallet'}</Text>
         <Text style={styles.heroTitle}>0 Points</Text>
-        <Text style={styles.heroSub}>Luxury rewards dashboard for redemptions, transfers, and loyalty growth.</Text>
+        <Text style={styles.heroSub}>
+          {isDealer
+            ? 'Dealer wallet for schemes, bank payouts, and dealer bonus tracking.'
+            : 'Luxury rewards dashboard for redemptions, transfers, and loyalty growth.'}
+        </Text>
 
         <View style={styles.heroStats}>
           <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>Redeem Product</Text>
-            <Text style={styles.heroStatValue}>0</Text>
+            <Text style={styles.heroStatLabel}>{isDealer ? 'Active Electricians' : 'Redeem Product'}</Text>
+            <Text style={styles.heroStatValue}>{isDealer ? '34' : '0'}</Text>
           </View>
           <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>Lifetime Redeem</Text>
-            <Text style={styles.heroStatValue}>0</Text>
+            <Text style={styles.heroStatLabel}>{isDealer ? 'Bonus Withdrawals' : 'Lifetime Redeem'}</Text>
+            <Text style={styles.heroStatValue}>{isDealer ? '12' : '0'}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -111,7 +157,7 @@ export function WalletScreen({ onNavigate }: WalletScreenProps) {
         <View style={styles.sectionHeader}>
           <View>
             <Text style={styles.sectionEyebrow}>Quick Actions</Text>
-            <Text style={styles.sectionTitle}>Move your wallet faster</Text>
+            <Text style={styles.sectionTitle}>{isDealer ? 'Manage dealer payouts' : 'Move your wallet faster'}</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <SparkIcon />
@@ -121,38 +167,21 @@ export function WalletScreen({ onNavigate }: WalletScreenProps) {
           {actions.map((item) => {
             const Icon = item.icon;
             return (
-              <View key={item.id} style={styles.actionTile}>
+              <TouchableOpacity
+                key={item.id}
+                style={styles.actionTile}
+                activeOpacity={0.86}
+                onPress={() => onNavigate?.(item.target)}
+              >
                 <View style={[styles.actionIconWrap, { backgroundColor: item.tint }]}>
                   <Icon />
                 </View>
                 <Text style={styles.actionTileText}>{item.label}</Text>
                 <Text style={styles.actionTileSub}>{item.detail}</Text>
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.balanceRow}>
-          <View>
-            <Text style={styles.sectionEyebrow}>Balance Insights</Text>
-            <Text style={styles.balanceTitle}>Redeemable Vault</Text>
-          </View>
-          <View style={styles.balancePill}>
-            <Text style={styles.balancePillText}>0 Active</Text>
-          </View>
-        </View>
-
-        <LinearGradient colors={['#FFF5E7', '#FFFFFF', '#F7EEE6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.insightPanel}>
-          <View style={styles.insightBadge}>
-            <WalletGlyph />
-          </View>
-          <View style={styles.insightCopy}>
-            <Text style={styles.insightValue}>0 Points</Text>
-            <Text style={styles.balanceSub}>Redeemable points ready for offers, transfers, and future rewards.</Text>
-          </View>
-        </LinearGradient>
       </View>
 
       <View style={styles.card}>
@@ -188,7 +217,11 @@ export function WalletScreen({ onNavigate }: WalletScreenProps) {
             <HistoryGlyph />
           </View>
           <Text style={styles.emptyTitle}>No detailed records yet</Text>
-          <Text style={styles.emptySub}>Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.</Text>
+          <Text style={styles.emptySub}>
+            {isDealer
+              ? 'Jaise hi bank payout ya dealer bonus activity hogi, yahan full wallet history dikh jayegi.'
+              : 'Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.'}
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -297,6 +330,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 10,
+    minHeight: 150,
   },
   actionIconWrap: {
     width: 54,
@@ -307,36 +341,6 @@ const styles = StyleSheet.create({
   },
   actionTileText: { marginTop: 12, textAlign: 'center', fontSize: 13, color: colors.text, fontWeight: '800' },
   actionTileSub: { marginTop: 4, textAlign: 'center', fontSize: 11, color: colors.mutedText, lineHeight: 16 },
-  balanceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  balancePill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: '#FCEBDF',
-  },
-  balancePillText: { color: '#B24A2F', fontSize: 12, fontWeight: '800' },
-  insightPanel: {
-    marginTop: 18,
-    borderRadius: 28,
-    padding: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    borderWidth: 1,
-    borderColor: '#EFE2D5',
-  },
-  insightBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 22,
-    backgroundColor: '#21416E',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  insightCopy: { flex: 1 },
-  insightValue: { fontSize: 28, fontWeight: '900', color: '#221C1A' },
-  balanceTitle: { fontSize: 18, fontWeight: '900', color: '#221C1A' },
-  balanceSub: { marginTop: 4, fontSize: 13, lineHeight: 19, color: '#7C706A', fontWeight: '600' },
   timeline: { marginTop: 18, gap: 14 },
   timelineItem: { flexDirection: 'row', gap: 12 },
   timelineTrack: { width: 18, alignItems: 'center' },

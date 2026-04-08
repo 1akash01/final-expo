@@ -35,11 +35,14 @@ import { NeedHelpPage } from './NeedHelp';
 import { NotificationsPage } from './Notifications';
 import { OffersPage } from './Offers';
 import { PasswordSettingsPage } from './PasswordSettings';
+import { PartnerCommissionPage } from './PartnerCommission';
 import { ReferFriendPage } from './ReferFriend';
 import { ScanHistoryPage } from './ScanHistory';
 import { TransferPointsPage } from './TransferPoints';
+import { TierIcon } from '@/features/dealer/MemberTierScreen';
+import { ElectricianTierIcon, getElectricianTier } from '@/features/electrician/ElectricianTierScreen';
 
-const menuItems: Array<{
+const electricianMenuItems: Array<{
   label: string;
   icon: IconName;
   color: string;
@@ -50,6 +53,24 @@ const menuItems: Array<{
   { label: 'My Redemption', icon: 'gift', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
   { label: 'Gift Store', icon: 'gift', color: C.teal, bg: C.tealLight, route: 'rewards' },
   { label: 'Transfer Points', icon: 'transfer', color: C.blue, bg: C.blueLight, screen: 'Transfer Points' },
+  { label: 'My Orders', icon: 'order', color: C.purple, bg: C.purpleLight, screen: 'My Orders' },
+  { label: 'Bank Details', icon: 'bank', color: C.gold, bg: C.goldLight, screen: 'Bank Details' },
+  { label: 'Refer To A Friend', icon: 'refer', color: C.blue, bg: '#EFF6FF', screen: 'Refer To A Friend' },
+  { label: 'Need Help', icon: 'help', color: C.teal, bg: C.tealLight, screen: 'Need Help' },
+  { label: 'Offers & Promotions', icon: 'offer', color: C.gold, bg: C.goldLight, screen: 'Offers & Promotions' },
+];
+
+const dealerMenuItems: Array<{
+  label: string;
+  icon: IconName;
+  color: string;
+  bg: string;
+  screen?: SubPage;
+  route?: Screen;
+}> = [
+  { label: 'My Redemption', icon: 'gift', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
+  { label: 'Gift Store', icon: 'gift', color: C.teal, bg: C.tealLight, route: 'rewards' },
+  { label: 'Dealer Bonus', icon: 'transfer', color: C.blue, bg: C.blueLight, screen: 'Dealer Bonus' },
   { label: 'My Orders', icon: 'order', color: C.purple, bg: C.purpleLight, screen: 'My Orders' },
   { label: 'Bank Details', icon: 'bank', color: C.gold, bg: C.goldLight, screen: 'Bank Details' },
   { label: 'Refer To A Friend', icon: 'refer', color: C.blue, bg: '#EFF6FF', screen: 'Refer To A Friend' },
@@ -130,6 +151,38 @@ const getTaxIdentityValue = (profile: Profile) => profile.gstNumber || profile.p
 
 const getTaxHolderValue = (profile: Profile) => profile.gstHolderName || profile.panHolderName || '';
 
+const getDealerMembership = (electricianCount: number) => {
+  if (electricianCount <= 100) {
+    return {
+      tier: 'Silver' as const,
+      accent: '#64748B',
+      soft: '#E2E8F0',
+    };
+  }
+
+  if (electricianCount <= 300) {
+    return {
+      tier: 'Gold' as const,
+      accent: '#D97706',
+      soft: '#FEF3C7',
+    };
+  }
+
+  if (electricianCount <= 500) {
+    return {
+      tier: 'Platinum' as const,
+      accent: '#2563EB',
+      soft: '#DBEAFE',
+    };
+  }
+
+  return {
+    tier: 'Diamond' as const,
+    accent: '#0E7490',
+    soft: '#CFFAFE',
+  };
+};
+
 export function ProfileScreen({
   currentRole,
   onNavigate,
@@ -181,6 +234,11 @@ export function ProfileScreen({
   const theme = useMemo(() => getThemePalette(darkMode), [darkMode]);
   const t = (key: keyof (typeof translations)['English']) => fallbackT(language, key);
   const preferenceValue = { language, setLanguage, darkMode, setDarkMode, t, theme };
+  const menuItems = useMemo(() => (currentRole === 'dealer' ? dealerMenuItems : electricianMenuItems), [currentRole]);
+  const electricianCount = 134;
+  const electricianPoints = 4250;
+  const dealerMembership = useMemo(() => getDealerMembership(electricianCount), [electricianCount]);
+  const electricianMembership = useMemo(() => getElectricianTier(electricianPoints), [electricianPoints]);
   const initials = useMemo(
     () =>
       profile.name
@@ -201,6 +259,13 @@ export function ProfileScreen({
     setDraftTaxHolder(getTaxHolderValue(profile));
     setShowImgPicker(false);
     setShowEdit(true);
+  };
+
+  const openPhotoPicker = () => {
+    setDraft(profile);
+    setDraftPhotoUri(profilePhotoUri);
+    setPendingDraftImage(null);
+    setShowImgPicker(true);
   };
 
   const closeEdit = () => {
@@ -285,6 +350,7 @@ export function ProfileScreen({
         const result = await ImagePicker.launchCameraAsync({
           mediaTypes: ['images'],
           allowsEditing: true,
+          aspect: [1, 1],
           quality: 1,
         });
 
@@ -303,6 +369,7 @@ export function ProfileScreen({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: true,
+        aspect: [1, 1],
         quality: 1,
       });
 
@@ -320,8 +387,22 @@ export function ProfileScreen({
     if (!pendingDraftImage) {
       return;
     }
-    setDraftPhotoUri(pendingDraftImage);
+    if (showEdit) {
+      setDraftPhotoUri(pendingDraftImage);
+    } else {
+      setDraftPhotoUri(pendingDraftImage);
+      setProfilePhotoUri(pendingDraftImage);
+    }
     setPendingDraftImage(null);
+  };
+
+  const removeProfilePhoto = () => {
+    setShowImgPicker(false);
+    setPendingDraftImage(null);
+    setDraftPhotoUri(null);
+    if (!showEdit) {
+      setProfilePhotoUri(null);
+    }
   };
 
   const subpages: Record<Exclude<SubPage, null>, React.ReactElement> = {
@@ -330,9 +411,11 @@ export function ProfileScreen({
         onBack={() => setSubPage(null)}
         onNavigate={onNavigate}
         onOpenBankDetails={() => setSubPage('Bank Details')}
-        onOpenTransferPoints={() => setSubPage('Transfer Points')}
+        onOpenTransferPoints={() => setSubPage(currentRole === 'dealer' ? 'Dealer Bonus' : 'Transfer Points')}
+        currentRole={currentRole}
       />
     ),
+    'Dealer Bonus': <PartnerCommissionPage onBack={() => setSubPage(null)} />,
     'Transfer Points': <TransferPointsPage onBack={() => setSubPage(null)} onNavigate={onNavigate} />,
     'My Orders': <MyOrdersPage onBack={() => setSubPage(null)} />,
     'Bank Details': <BankDetailsPage onBack={() => setSubPage(null)} />,
@@ -390,7 +473,7 @@ export function ProfileScreen({
             <View style={styles.blobTL} />
             <View style={styles.blobBR} />
             <View style={styles.heroTop}>
-              <TouchableOpacity onPress={openEdit} activeOpacity={0.85} style={styles.avatarWrap}>
+              <TouchableOpacity onPress={openPhotoPicker} activeOpacity={0.85} style={styles.avatarWrap}>
                 <View style={styles.avatarRing}>
                   {profilePhotoUri ? (
                     <Image source={{ uri: profilePhotoUri }} style={styles.avatarImg} />
@@ -400,8 +483,17 @@ export function ProfileScreen({
                     </View>
                   )}
                 </View>
-                <View style={styles.levelBadge}>
-                  <Text style={styles.levelTxt}>L3</Text>
+                <View
+                  style={[
+                    styles.levelBadge,
+                    { backgroundColor: currentRole === 'dealer' ? dealerMembership.soft : electricianMembership.soft },
+                  ]}
+                >
+                  {currentRole === 'dealer' ? (
+                    <TierIcon tier={dealerMembership.tier} size={15} />
+                  ) : (
+                    <ElectricianTierIcon tier={electricianMembership.tier} size={15} />
+                  )}
                 </View>
               </TouchableOpacity>
               <View style={{ flex: 1 }}>
@@ -418,47 +510,30 @@ export function ProfileScreen({
                 </View>
               </View>
             </View>
-            <View style={[styles.memberStrip, { backgroundColor: theme.heroStrip, borderTopColor: theme.border }]}>
-              <View style={styles.memberLeft}>
-                <View style={styles.memberStarWrap}>
-                  <AppIcon name="star" size={14} color="#F59E0B" />
-                </View>
-                <View>
-                  <Text style={styles.memberTitle}>{t('goldMember')}</Text>
-                  <Text style={[styles.memberSub, { color: theme.textMuted }]}>
-                    {currentRole === 'dealer' ? t('dealerPartner') : t('electricianPartner')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.memberRight}>
-                <Text style={[styles.memberHint, { color: theme.textSecondary }]}>{t('toPlatinum')}</Text>
-                <View style={styles.progressTrack}>
-                  <View style={styles.progressFill} />
-                </View>
-              </View>
-            </View>
           </View>
 
-          <View style={styles.statsRow}>
-            {[
-              { val: '24', label: t('scans'), icon: 'scan' as IconName, bg: C.primaryLight, color: C.primary, onPress: () => setSubPage('Scan History') },
-              { val: '4,250', label: t('points'), icon: 'star' as IconName, bg: C.goldLight, color: C.gold, onPress: () => onNavigate('wallet') },
-              { val: '6', label: t('rewards'), icon: 'gift' as IconName, bg: C.tealLight, color: C.teal, onPress: () => onNavigate('rewards') },
-            ].map((item) => (
-              <TouchableOpacity
-                key={item.label}
-                style={[styles.statBox, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                onPress={item.onPress}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.statIcon, { backgroundColor: item.bg }]}>
-                  <AppIcon name={item.icon} size={18} color={item.color} />
-                </View>
-                <Text style={[styles.statVal, { color: item.color }]}>{item.val}</Text>
-                <Text style={[styles.statLbl, { color: theme.textMuted }]}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {currentRole !== 'dealer' ? (
+            <View style={styles.statsRow}>
+              {[
+                { val: '24', label: t('scans'), icon: 'scan' as IconName, bg: C.primaryLight, color: C.primary, onPress: () => setSubPage('Scan History') },
+                { val: '4,250', label: t('points'), icon: 'star' as IconName, bg: C.goldLight, color: C.gold, onPress: () => onNavigate('wallet') },
+                { val: '6', label: t('rewards'), icon: 'gift' as IconName, bg: C.tealLight, color: C.teal, onPress: () => onNavigate('rewards') },
+              ].map((item) => (
+                <TouchableOpacity
+                  key={item.label}
+                  style={[styles.statBox, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                  onPress={item.onPress}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.statIcon, { backgroundColor: item.bg }]}>
+                    <AppIcon name={item.icon} size={18} color={item.color} />
+                  </View>
+                  <Text style={[styles.statVal, { color: item.color }]}>{item.val}</Text>
+                  <Text style={[styles.statLbl, { color: theme.textMuted }]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
 
           <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.cardHead}>
@@ -514,8 +589,10 @@ export function ProfileScreen({
                   <AppIcon name={item.icon} size={20} color={item.color} />
                 </View>
                 <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{item.label}</Text>
-                <View style={[styles.arrowWrap, { backgroundColor: theme.soft }]}>
-                  <Text style={[styles.arrowTxt, { color: theme.textMuted }]}>{'>'}</Text>
+                <View style={[styles.arrowWrap, { backgroundColor: item.bg, borderColor: `${item.color}22` }]}>
+                  <View style={styles.arrowCore}>
+                    <AppIcon name="chevronRight" size={15} color={item.color} strokeWidth={2.4} />
+                  </View>
                 </View>
               </TouchableOpacity>
             ))}
@@ -537,8 +614,10 @@ export function ProfileScreen({
                   <AppIcon name={item.icon} size={20} color={item.color} />
                 </View>
                 <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{item.label}</Text>
-                <View style={[styles.arrowWrap, { backgroundColor: theme.soft }]}>
-                  <Text style={[styles.arrowTxt, { color: theme.textMuted }]}>{'>'}</Text>
+                <View style={[styles.arrowWrap, { backgroundColor: item.bg, borderColor: `${item.color}22` }]}>
+                  <View style={styles.arrowCore}>
+                    <AppIcon name="chevronRight" size={15} color={item.color} strokeWidth={2.4} />
+                  </View>
                 </View>
               </TouchableOpacity>
             );
@@ -563,14 +642,15 @@ export function ProfileScreen({
             <Pressable style={styles.pickerSheet}>
               <View style={styles.handle} />
               <Text style={styles.pickerTitle}>{t('updateProfilePhoto')}</Text>
-              <Text style={styles.pickerHelper}>Adjust the crop if needed. Your photo will update only after you tap Done on the next screen.</Text>
+              <Text style={styles.pickerHelper}>Choose a photo source or remove the current photo. Your initials will appear again if no photo is selected.</Text>
               {[
                 { icon: 'camera' as IconName, label: t('takePhoto'), sub: 'Capture a photo, crop it if needed, then confirm it on the next screen', fn: () => pickDraftPhoto('camera') },
                 { icon: 'gallery' as IconName, label: t('chooseGallery'), sub: 'Select a photo, crop it if needed, then confirm it on the next screen', fn: () => pickDraftPhoto('gallery') },
+                { icon: 'eyeOff' as IconName, label: 'Remove Photo', sub: 'Remove the profile photo and show initials again', fn: removeProfilePhoto },
               ].map((option) => (
                 <TouchableOpacity key={option.label} style={styles.pickerOption} onPress={option.fn} activeOpacity={0.8}>
                   <View style={styles.pickerOptionIcon}>
-                    <AppIcon name={option.icon} size={22} color={C.blue} />
+                    <AppIcon name={option.icon} size={22} color={option.label === 'Remove Photo' ? C.primary : C.blue} />
                   </View>
                   <View>
                     <Text style={styles.pickerOptionLabel}>{option.label}</Text>
@@ -589,8 +669,8 @@ export function ProfileScreen({
           <View style={styles.overlay}>
             <View style={[styles.confirmPhotoCard, { backgroundColor: theme.surface }]}>
               {pendingDraftImage ? <Image source={{ uri: pendingDraftImage }} style={styles.confirmPhotoPreview} /> : null}
-              <Text style={[styles.confirmPhotoTitle, { color: theme.textPrimary }]}>Crop complete</Text>
-              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>Your profile photo will change only after you tap Done here.</Text>
+              <Text style={[styles.confirmPhotoTitle, { color: theme.textPrimary }]}>Review photo</Text>
+              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>If the crop looks right, tap Done to update your profile photo.</Text>
               <View style={styles.confirmPhotoActions}>
                 <Pressable onPress={cancelDraftPhoto} style={[styles.cancelBtn, { backgroundColor: theme.soft, borderColor: theme.border }]}>
                   <Text style={[styles.cancelTxt, { color: theme.textPrimary }]}>{t('cancel')}</Text>
@@ -619,7 +699,11 @@ export function ProfileScreen({
                   <TouchableOpacity
                     onPress={() => setShowImgPicker(true)}
                     activeOpacity={0.8}
-                    style={[styles.uploadBox, { backgroundColor: theme.soft, borderColor: theme.border }]}
+                    style={[
+                      styles.uploadBox,
+                      draftPhotoUri ? styles.uploadBoxFilled : null,
+                      { backgroundColor: theme.soft, borderColor: theme.border },
+                    ]}
                   >
                     {draftPhotoUri ? (
                       <Image source={{ uri: draftPhotoUri }} style={styles.previewImage} />
@@ -747,21 +831,26 @@ const styles = StyleSheet.create({
   avatarImg: { width: '100%', height: '100%' },
   avatarFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   avatarInitials: { color: '#fff', fontSize: 28, fontWeight: '900' },
-  levelBadge: { position: 'absolute', right: 2, bottom: 2, minWidth: 34, height: 34, borderRadius: 17, backgroundColor: C.gold, borderWidth: 2, borderColor: C.surface, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 7 },
-  levelTxt: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  levelBadge: { position: 'absolute', right: 4, bottom: 4, width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: C.surface, alignItems: 'center', justifyContent: 'center' },
   heroName: { fontSize: 20, fontWeight: '900', marginBottom: 3 },
   heroPhone: { fontSize: 13, marginBottom: 10 },
   tagRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   tag: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 4 },
   tagTxt: { fontSize: 11, fontWeight: '700' },
-  memberStrip: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, paddingHorizontal: 22, paddingVertical: 14 },
-  memberLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  memberRight: { alignItems: 'flex-end', gap: 5 },
+  memberStrip: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', borderTopWidth: 1, paddingHorizontal: 18, paddingVertical: 14, gap: 12, flexWrap: 'wrap' },
+  memberLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 1, flexGrow: 1, minWidth: 0 },
+  memberTextBlock: { flexShrink: 1, minWidth: 0 },
+  memberRight: { alignItems: 'flex-start', gap: 5, flexBasis: '100%' },
   memberStarWrap: { width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(245,158,11,0.14)', alignItems: 'center', justifyContent: 'center' },
-  memberTitle: { fontSize: 13, fontWeight: '800', color: '#F59E0B' },
-  memberSub: { fontSize: 11, marginTop: 1 },
-  memberHint: { fontSize: 11, fontWeight: '600' },
+  memberTierBadge: { minWidth: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  memberTierBadgeText: { fontSize: 13, fontWeight: '900', letterSpacing: 0.4 },
+  memberTitle: { fontSize: 13, fontWeight: '800', color: '#F59E0B', flexShrink: 1 },
+  memberSub: { fontSize: 11, marginTop: 1, flexShrink: 1 },
+  memberHint: { fontSize: 11, fontWeight: '600', lineHeight: 16, flexShrink: 1 },
+  memberNetworkChip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, marginBottom: 2 },
+  memberNetworkText: { fontSize: 11, fontWeight: '800' },
   progressTrack: { width: 100, height: 5, borderRadius: 3, backgroundColor: '#E8EAF1' },
+  dealerProgressTrack: { width: '100%', maxWidth: 230 },
   progressFill: { width: '72%', height: '100%', borderRadius: 3, backgroundColor: '#F59E0B' },
   statsRow: { flexDirection: 'row', gap: 10 },
   statBox: { flex: 1, borderRadius: 20, padding: 14, alignItems: 'center', gap: 6, borderWidth: 1 },
@@ -788,8 +877,8 @@ const styles = StyleSheet.create({
   menuBorder: { borderBottomWidth: 1, borderBottomColor: '#F2F2FA' },
   menuIcon: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center', position: 'relative' },
   menuLabel: { flex: 1, fontSize: 15, fontWeight: '600' },
-  arrowWrap: { width: 28, height: 28, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  arrowTxt: { fontSize: 20, lineHeight: 24 },
+  arrowWrap: { width: 28, height: 30, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, shadowColor: '#0F172A', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
+  arrowCore: { width: 18, height: 22, borderRadius: 10, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
   notifDot: { position: 'absolute', top: 7, right: 7, width: 9, height: 9, borderRadius: 5, backgroundColor: C.primary, borderWidth: 1.5, borderColor: C.surface },
   signOutBtn: { borderRadius: 20, paddingVertical: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1.5 },
   signOutIconWrap: { width: 34, height: 34, borderRadius: 11, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
@@ -817,7 +906,7 @@ const styles = StyleSheet.create({
   pickerOption: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.border },
   pickerOptionIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.blueLight, alignItems: 'center', justifyContent: 'center' },
   pickerOptionLabel: { fontSize: 16, fontWeight: '700', color: C.dark },
-  pickerOptionSub: { fontSize: 13, color: C.muted, marginTop: 2 },
+  pickerOptionSub: { fontSize: 10, color: C.muted, marginTop: 2, lineHeight: 14, flexShrink: 1, maxWidth: 220 },
   pickerCancel: { marginTop: 16, height: 52, borderRadius: 18, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' },
   pickerCancelTxt: { fontSize: 15, fontWeight: '700', color: C.mid },
   editOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(15,17,32,0.45)' },
@@ -828,12 +917,13 @@ const styles = StyleSheet.create({
   closeTxt: { fontSize: 15, fontWeight: '700' },
   avatarSection: { marginBottom: 24 },
   uploadBox: { minHeight: 110, borderRadius: 16, borderWidth: 1.5, borderStyle: 'dashed', overflow: 'hidden', marginTop: 7 },
+  uploadBoxFilled: { minHeight: 0, alignSelf: 'center', width: 120, borderStyle: 'solid' },
   uploadInner: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 18, gap: 12 },
   uploadIconWrap: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   uploadCopy: { flex: 1 },
   uploadTitle: { fontSize: 14, fontWeight: '800' },
   uploadText: { fontSize: 12, fontWeight: '600', lineHeight: 18, marginTop: 4 },
-  previewImage: { width: '100%', height: 160, resizeMode: 'cover' },
+  previewImage: { width: 120, height: 120, borderRadius: 18, alignSelf: 'center' },
   photoHint: { fontSize: 12, fontWeight: '600', marginTop: 8, textAlign: 'center' },
   editAvatarRing: { width: 96, height: 96, borderRadius: 30, borderWidth: 3, overflow: 'hidden', position: 'relative' },
   editAvatarImg: { width: '100%', height: '100%' },
@@ -849,3 +939,7 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 2, height: 54, borderRadius: 18, backgroundColor: C.primary, alignItems: 'center', justifyContent: 'center' },
   saveTxt: { color: '#fff', fontSize: 15, fontWeight: '900' },
 });
+
+
+
+

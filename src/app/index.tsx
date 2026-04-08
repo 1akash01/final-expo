@@ -6,9 +6,11 @@ import { BottomNav as DealerBottomNav } from '@/features/dealer/BottomNav';
 import { CallElectricianScreen as DealerCallElectricianScreen } from '@/features/dealer/CallElectricianScreen';
 import { ElectriciansScreen as DealerElectriciansScreen } from '@/features/dealer/ElectriciansScreen';
 import { HomeScreen as DealerHomeScreen } from '@/features/dealer/HomeScreen';
+import { MemberTierScreen as DealerMemberTierScreen } from '@/features/dealer/MemberTierScreen';
 import { ProfileScreen as DealerProfileScreen } from '@/features/dealer/ProfileScreen';
 import { ProductScreen as DealerProductScreen } from '@/features/dealer/ProductScreen';
 import { BottomNav as ElectricianBottomNav } from '@/features/electrician/BottomNav';
+import { ElectricianTierScreen } from '@/features/electrician/ElectricianTierScreen';
 import { HomeScreen as ElectricianHomeScreen } from '@/features/electrician/HomeScreen';
 import { NotificationScreen as ElectricianNotificationScreen } from '@/features/electrician/NotificationScreen';
 import { OnboardingScreen } from '@/features/electrician/OnboardingScreen';
@@ -17,12 +19,18 @@ import { ProfileScreen as ElectricianProfileScreen } from '@/features/electricia
 import { RewardsScreen as ElectricianRewardsScreen } from '@/features/electrician/RewardsScreen';
 import { ScanScreen as ElectricianScanScreen } from '@/features/electrician/ScanScreen';
 import { WalletScreen as ElectricianWalletScreen } from '@/features/electrician/WalletScreen';
+import {
+  WalletBankDetailsScreen,
+  WalletDealerBonusScreen,
+  WalletTransferPointsScreen,
+} from '@/features/profile/WalletLinkedPages';
 import { colors } from '@/shared/theme/colors';
 import type { Screen, UserRole } from '@/shared/types/navigation';
 
 export default function Index() {
   const insets = useSafeAreaInsets();
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [screenResetKey, setScreenResetKey] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [currentRole, setCurrentRole] = useState<UserRole>('electrician');
   const [selectedProductCategory, setSelectedProductCategory] = useState('fanbox');
@@ -38,6 +46,10 @@ export default function Index() {
   const isDealer = currentRole === 'dealer';
 
   const handleNavigate = (screen: Screen) => {
+    if (screen === currentScreen) {
+      setScreenResetKey((current) => current + 1);
+    }
+
     if (screen === 'product') {
       setSelectedProductCategory((current) => current || 'fanbox');
     }
@@ -85,7 +97,7 @@ export default function Index() {
         case 'rewards':
           return <ElectricianRewardsScreen />;
         case 'wallet':
-          return <ElectricianWalletScreen onNavigate={handleNavigate} />;
+          return <ElectricianWalletScreen role="dealer" onNavigate={handleNavigate} />;
         case 'profile':
           return (
             <DealerProfileScreen
@@ -101,6 +113,14 @@ export default function Index() {
               }
             />
           );
+        case 'dealer_tier':
+          return <DealerMemberTierScreen onBack={() => setCurrentScreen('home')} />;
+        case 'bank_details':
+          return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} />;
+        case 'dealer_bonus':
+          return <WalletDealerBonusScreen onBack={() => setCurrentScreen('wallet')} />;
+        case 'transfer_points':
+          return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} />;
         default:
           return (
             <DealerHomeScreen
@@ -148,7 +168,13 @@ export default function Index() {
           />
         );
       case 'wallet':
-        return <ElectricianWalletScreen onNavigate={handleNavigate} />;
+        return <ElectricianWalletScreen role="electrician" onNavigate={handleNavigate} />;
+      case 'electrician_tier':
+        return <ElectricianTierScreen onBack={() => setCurrentScreen('home')} />;
+      case 'bank_details':
+        return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} />;
+      case 'transfer_points':
+        return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} />;
       default:
         return (
           <ElectricianHomeScreen
@@ -194,7 +220,7 @@ export default function Index() {
   return (
     <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ExpoStatusBar style="dark" />
-      <View style={styles.content}>{activeScreen}</View>
+      <View style={styles.content} key={`${currentRole}-${currentScreen}-${screenResetKey}`}>{activeScreen}</View>
       {isDealer ? (
         <DealerBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
       ) : (

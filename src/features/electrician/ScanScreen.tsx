@@ -48,6 +48,24 @@ function GalleryIcon({ size = 22, color = Colors.textDark }: { size?: number; co
   );
 }
 
+function CameraIcon({ size = 22, color = Colors.textDark }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="6" width="18" height="14" rx="3" stroke={color} strokeWidth={1.8} />
+      <Path d="M8 6l1.2-2h5.6L16 6" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
+      <Circle cx="12" cy="13" r="3.4" stroke={color} strokeWidth={1.8} />
+    </Svg>
+  );
+}
+
+function BackArrowIcon({ size = 20, color = Colors.textDark }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M15 6l-6 6 6 6M9 12h10" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 // ── Real QR Code — fetched from quickchart.io free API ───────────────
 // URL: https://quickchart.io/qr?text=SRV-MCB-32A&size=400&margin=2&dark=000000&light=ffffff
 // Returns a real PNG QR image — black dots on white, proper finder patterns
@@ -189,6 +207,33 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     setTimeout(() => { setScanning(false); setScanned(true); }, 3000);
   };
 
+  const handleOpenCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Camera access allow karo taaki aap QR scan kar sako.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (result.canceled || !result.assets?.length) {
+      return;
+    }
+
+    setSelectedImage(result.assets[0].uri);
+    setScanned(false);
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      setScanned(true);
+    }, 1800);
+  };
+
   const handlePickFromGallery = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -228,7 +273,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     <View style={styles.root}>
       <View style={styles.header}>
         <Pressable onPress={() => onNavigate('home')} style={styles.backBtn}>
-          <Text style={styles.backIcon}>←</Text>
+          <BackArrowIcon />
         </Pressable>
         <Text style={styles.headerTitle}>Scan QR Code</Text>
         <View style={{ width: 40 }} />
@@ -247,7 +292,11 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
             {!scanned && (
               <View style={styles.qrCenter}>
-                <RealQRCode size={qrSize} />
+                {selectedImage ? (
+                  <Image source={{ uri: selectedImage }} style={{ width: qrSize, height: qrSize, borderRadius: 12 }} resizeMode="cover" />
+                ) : (
+                  <RealQRCode size={qrSize} />
+                )}
               </View>
             )}
 
@@ -291,11 +340,12 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         )}
 
         <TouchableOpacity
-          onPress={scanned ? () => onNavigate('home') : startScan}
+          onPress={scanned ? () => onNavigate('home') : handleOpenCamera}
           disabled={scanning}
           style={[styles.primaryBtn, scanning && styles.primaryBtnDisabled]}
           activeOpacity={0.85}
         >
+          {!scanned ? <CameraIcon size={20} color="#FFFFFF" /> : null}
           <Text style={styles.primaryBtnText}>
             {scanned ? 'Claim Points & Continue' : scanning ? 'Scanning...' : 'Start Scanning'}
           </Text>
@@ -344,8 +394,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 14, backgroundColor: Colors.surface,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
-  backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#F2F3F7', alignItems: 'center', justifyContent: 'center' },
-  backIcon: { fontSize: 20, color: Colors.textDark, fontWeight: '600' },
+  backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#F2F3F7', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#E5E7EB' },
   headerTitle: { fontSize: 18, fontWeight: '800', color: Colors.textDark },
   scroll: { flex: 1 },
   content: { alignItems: 'center', padding: 20, gap: 16 },
@@ -377,7 +426,7 @@ const styles = StyleSheet.create({
   successTitle: { fontSize: 15, fontWeight: '800', color: Colors.success },
   successSub: { marginTop: 4, fontSize: 13, color: '#5E7A69' },
   primaryBtn: {
-    width: '100%', backgroundColor: Colors.primary, borderRadius: 18, paddingVertical: 17, alignItems: 'center',
+    width: '100%', backgroundColor: Colors.primary, borderRadius: 18, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 10,
     shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
   },
   primaryBtnDisabled: { backgroundColor: '#C0C0CC', shadowOpacity: 0 },

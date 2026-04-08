@@ -58,6 +58,23 @@ function WalletIcon({ color = '#7A4D14', size = 24 }: { color?: string; size?: n
   );
 }
 
+function TierBadgeIcon({ tier, size = 24 }: { tier: string; size?: number }) {
+  const colorMap: Record<string, { ring: string; fill: string; accent: string }> = {
+    Silver: { ring: '#94A3B8', fill: '#E2E8F0', accent: '#64748B' },
+    Gold: { ring: '#D97706', fill: '#FEF3C7', accent: '#B45309' },
+    Platinum: { ring: '#2563EB', fill: '#DBEAFE', accent: '#1D4ED8' },
+    Diamond: { ring: '#0891B2', fill: '#CFFAFE', accent: '#0E7490' },
+  };
+  const palette = colorMap[tier] ?? colorMap.Gold;
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="9" fill={palette.fill} stroke={palette.ring} strokeWidth={1.8} />
+      <Path d="M12 5.8l1.9 3.85 4.25.62-3.07 3 0.72 4.23L12 15.6l-3.8 1.9.73-4.23-3.08-3 4.25-.62L12 5.8z" fill={palette.accent} />
+    </Svg>
+  );
+}
+
 function WhatsAppIcon({ color = '#1A8F58', size = 22 }: { color?: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -185,10 +202,40 @@ function FeaturedCard({
 }
 
 function getTier(count: number) {
-  if (count <= 100) return { tier: 'Silver', nextAt: 101, gradient: ['#EEF2F7', '#DDE4ED', '#CFD6E0'] as [string, string, string] };
-  if (count <= 200) return { tier: 'Gold', nextAt: 201, gradient: ['#FFF4D8', '#FFE6A8', '#FFD375'] as [string, string, string] };
-  if (count <= 300) return { tier: 'Platinum', nextAt: 301, gradient: ['#E9F0F8', '#D3E0EF', '#B7CADF'] as [string, string, string] };
-  return { tier: 'Diamond', nextAt: null, gradient: ['#EAF4FF', '#CEE7FF', '#9FCEFF'] as [string, string, string] };
+  if (count <= 100) {
+    return {
+      tier: 'Silver',
+      nextAt: 101,
+      gradient: ['#EEF2F7', '#DDE4ED', '#CFD6E0'] as [string, string, string],
+      accent: '#64748B',
+      chip: '#F8FAFC',
+    };
+  }
+  if (count <= 300) {
+    return {
+      tier: 'Gold',
+      nextAt: 301,
+      gradient: ['#FFF4D8', '#FFE6A8', '#FFD375'] as [string, string, string],
+      accent: '#B45309',
+      chip: '#FFF8E6',
+    };
+  }
+  if (count <= 500) {
+    return {
+      tier: 'Platinum',
+      nextAt: 501,
+      gradient: ['#E9F0F8', '#D3E0EF', '#B7CADF'] as [string, string, string],
+      accent: '#1D4ED8',
+      chip: '#EFF6FF',
+    };
+  }
+  return {
+    tier: 'Diamond',
+    nextAt: null,
+    gradient: ['#EAF4FF', '#CEE7FF', '#9FCEFF'] as [string, string, string],
+    accent: '#0E7490',
+    chip: '#ECFEFF',
+  };
 }
 
 export function HomeScreen({
@@ -298,13 +345,20 @@ export function HomeScreen({
           </Animated.View>
 
           <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statPulse }] }]}>
-            <LinearGradient colors={tier.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-              <Text style={styles.statLabel}>Member Tier</Text>
-              <Text style={styles.statValue}>{tier.tier}</Text>
-              <Text style={styles.statHint}>
-                {tier.nextAt ? `${tier.nextAt - connectedCount} more electricians for next grade` : 'Top dealer grade unlocked'}
-              </Text>
-            </LinearGradient>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => onNavigate('dealer_tier')}>
+              <LinearGradient colors={tier.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+                <View style={[styles.tierIconChip, { backgroundColor: tier.chip }]}>
+                  <TierBadgeIcon tier={tier.tier} size={20} />
+                </View>
+                <Text style={styles.statLabel}>Member Tier</Text>
+                <View style={styles.tierTextStack}>
+                  <Text style={styles.statValue}>{tier.tier}</Text>
+                  <Text style={styles.statHint}>
+                    {tier.nextAt ? `${tier.nextAt - connectedCount} more electricians for next grade` : 'Top dealer grade unlocked'}
+                  </Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </LinearGradient>
@@ -457,10 +511,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
+    height: 96,
+    justifyContent: 'center',
   },
   statLabel: { color: '#5C6F91', fontSize: 10, fontWeight: '700', marginBottom: 5 },
   statValue: { color: '#13294B', fontSize: 16, fontWeight: '900' },
-  statHint: { color: '#6F819D', fontSize: 10.5, marginTop: 3, lineHeight: 15 },
+  statHint: { color: '#6F819D', fontSize: 10.5, marginTop: 1, lineHeight: 14 },
+  tierIconChip: { position: 'absolute', top: 10, right: 12, width: 32, height: 32, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  tierTextStack: { marginTop: -1, paddingRight: 28 },
   body: { paddingHorizontal: 14, paddingTop: 18 },
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 22 },
   quickCard: {

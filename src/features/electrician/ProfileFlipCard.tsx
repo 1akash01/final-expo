@@ -7,6 +7,7 @@ import {
   Animated,
   Image,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -317,8 +318,8 @@ export default function ProfileFlipCard({ profile, role = 'electrician' }: Props
   return (
     <View>
       <View style={styles.container}>
-        <TouchableOpacity activeOpacity={0.98} onPress={onToggle}>
-          <Animated.View style={[styles.face, { opacity: frontOpacity, transform: [{ rotateY: frontRotate }] }]}>
+        <Pressable onPress={onToggle} style={styles.pressArea}>
+          <Animated.View pointerEvents="none" style={[styles.face, { opacity: frontOpacity, transform: [{ rotateY: frontRotate }] }]}>
             <LinearGradient colors={['#587AC7', '#4768B7', '#38549B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
               <View style={styles.textureOne} />
               <View style={styles.textureTwo} />
@@ -354,7 +355,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician' }: Props
             </LinearGradient>
           </Animated.View>
 
-          <Animated.View style={[styles.face, { opacity: backOpacity, transform: [{ rotateY: backRotate }] }]}>
+          <Animated.View pointerEvents="none" style={[styles.face, { opacity: backOpacity, transform: [{ rotateY: backRotate }] }]}>
             <LinearGradient colors={['#6284C9', '#4B6DB4', '#35518C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill}>
               <View style={styles.backGlowOne} />
               <View style={styles.backGlowTwo} />
@@ -377,7 +378,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician' }: Props
               </View>
             </LinearGradient>
           </Animated.View>
-        </TouchableOpacity>
+        </Pressable>
 
         <TouchableOpacity
           style={styles.downloadMiniBtn}
@@ -410,6 +411,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.22,
     shadowRadius: 20,
     elevation: 9,
+  },
+  pressArea: {
+    width: '100%',
+    height: '100%',
   },
   gradientFill: {
     flex: 1,

@@ -17,6 +17,7 @@ import {
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { Screen } from '@/shared/types/navigation';
 import ProfileFlipCard from './ProfileFlipCard';
+import { ElectricianTierIcon, getElectricianTier } from './ElectricianTierScreen';
 
 const logoImage = require('../../../assets/banners/srv-logo.jpeg');
 
@@ -290,6 +291,8 @@ export function HomeScreen({
   const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const cardW = (width - 28 - 12) / 2;
   const heroImageHeight = Math.round((width - 28) * 0.56);
+  const totalPoints = 4250;
+  const tier = useMemo(() => getElectricianTier(totalPoints), [totalPoints]);
   const filteredProducts = useMemo(() => {
     if (selectedFilter === 'Boxes') {
       return PRODUCTS.filter((product) => {
@@ -438,12 +441,19 @@ export function HomeScreen({
             </LinearGradient>
           </Animated.View>
           <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statsPulse }] }]}>
-            <LinearGradient colors={['#FEF3C7', '#FDE68A', '#FBCFE8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
-              <Animated.View style={[styles.statGlow, styles.statGlowWarm, { opacity: statsPulse }]} />
-              <Text style={styles.statLabel}>Member Tier</Text>
-              <Text style={styles.statValue}>Gold</Text>
-              <Text style={styles.statHint}>750 to Platinum</Text>
-            </LinearGradient>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => onNavigate('electrician_tier')}>
+              <LinearGradient colors={tier.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.statCard}>
+                <Animated.View style={[styles.statGlow, styles.statGlowWarm, { opacity: statsPulse }]} />
+                <View style={[styles.tierIconChip, { backgroundColor: '#FFFFFFB8' }]}>
+                  <ElectricianTierIcon tier={tier.tier} size={20} />
+                </View>
+                <Text style={styles.statLabel}>Member Tier</Text>
+                <Text style={styles.statValue}>{tier.tier}</Text>
+                <Text style={styles.statHint}>
+                  {tier.tier === 'Diamond' ? 'Top reward level unlocked' : `${tier.tier === 'Silver' ? 1001 - totalPoints : tier.tier === 'Gold' ? 5001 - totalPoints : 10001 - totalPoints} to next tier`}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </Animated.View>
         </View>
       </LinearGradient>
@@ -686,6 +696,7 @@ const styles = StyleSheet.create({
   statLabel: { color: '#5C6F91', fontSize: 9.5, fontWeight: '700', marginBottom: 4 },
   statValue: { color: '#13294B', fontSize: 16, fontWeight: '900' },
   statHint: { color: '#7A8CAA', fontSize: 9.5, marginTop: 2 },
+  tierIconChip: { position: 'absolute', top: 8, right: 8, width: 30, height: 30, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   body: { paddingHorizontal: 14, paddingTop: 18 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
   sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 5 },
