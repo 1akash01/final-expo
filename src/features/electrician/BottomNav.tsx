@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import { colors } from '@/shared/theme/colors';
 import type { Screen } from '@/shared/types/navigation';
 
@@ -296,8 +297,9 @@ export function BottomNav({
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
 }) {
+  const { darkMode } = usePreferenceContext();
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
       <View style={styles.side}>
         {LEFT.map((item) => (
           <NavTab
@@ -346,6 +348,11 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     shadowOffset: { width: 0, height: -4 },
     elevation: 12,
+  },
+  wrapDark: {
+    backgroundColor: '#0F172A',
+    borderTopColor: '#243043',
+    shadowColor: '#020617',
   },
   side: {
     flex: 1,

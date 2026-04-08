@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import { associatedElectricians } from './dealerData';
 
 function BackIcon({ color = '#173E80', size = 18 }: { color?: string; size?: number }) {
@@ -115,6 +116,7 @@ function getTier(count: number): TierInfo {
 }
 
 export function MemberTierScreen({ onBack }: { onBack: () => void }) {
+  const { darkMode } = usePreferenceContext();
   const count = associatedElectricians.length;
   const currentTier = useMemo(() => getTier(count), [count]);
   const pulse = useRef(new Animated.Value(0)).current;
@@ -147,12 +149,12 @@ export function MemberTierScreen({ onBack }: { onBack: () => void }) {
   });
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, darkMode ? styles.screenDark : null]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.85}>
-          <BackIcon />
+        <TouchableOpacity style={[styles.backBtn, darkMode ? styles.backBtnDark : null]} onPress={onBack} activeOpacity={0.85}>
+          <BackIcon color={darkMode ? '#F8FAFC' : '#173E80'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Member Tier</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Member Tier</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -181,8 +183,8 @@ export function MemberTierScreen({ onBack }: { onBack: () => void }) {
           </LinearGradient>
         </Animated.View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Grading system</Text>
+        <View style={[styles.sectionCard, darkMode ? styles.sectionCardDark : null]}>
+          <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Grading system</Text>
           {tierLevels.map((level, index) => {
             const active = level.tier === currentTier.tier;
             return (
@@ -201,27 +203,27 @@ export function MemberTierScreen({ onBack }: { onBack: () => void }) {
                     <Text style={[styles.tierName, { color: active ? level.accent : '#17324D' }]}>{level.tier}</Text>
                     {active ? <Text style={[styles.currentChip, { color: level.accent, backgroundColor: level.soft }]}>Current</Text> : null}
                   </View>
-                  <Text style={styles.tierRange}>{level.range}</Text>
-                  <Text style={styles.tierDetail}>{level.detail}</Text>
+                  <Text style={[styles.tierRange, darkMode ? styles.tierRangeDark : null]}>{level.range}</Text>
+                  <Text style={[styles.tierDetail, darkMode ? styles.tierDetailDark : null]}>{level.detail}</Text>
                 </View>
               </LinearGradient>
             );
           })}
         </View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>How dealer level works</Text>
+        <View style={[styles.sectionCard, darkMode ? styles.sectionCardDark : null]}>
+          <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>How dealer level works</Text>
           <View style={styles.pointRow}>
             <View style={[styles.pointDot, { backgroundColor: '#CBD5E1' }]} />
-            <Text style={styles.pointText}>Level is calculated from total electricians added in your dealer network.</Text>
+            <Text style={[styles.pointText, darkMode ? styles.pointTextDark : null]}>Level is calculated from total electricians added in your dealer network.</Text>
           </View>
           <View style={styles.pointRow}>
             <View style={[styles.pointDot, { backgroundColor: '#FBBF24' }]} />
-            <Text style={styles.pointText}>Each grade uses a different icon and color so status is easy to identify.</Text>
+            <Text style={[styles.pointText, darkMode ? styles.pointTextDark : null]}>Each grade uses a different icon and color so status is easy to identify.</Text>
           </View>
           <View style={styles.pointRow}>
             <View style={[styles.pointDot, { backgroundColor: '#60A5FA' }]} />
-            <Text style={styles.pointText}>As you add more electricians, your level updates automatically to the next tier.</Text>
+            <Text style={[styles.pointText, darkMode ? styles.pointTextDark : null]}>As you add more electricians, your level updates automatically to the next tier.</Text>
           </View>
         </View>
       </ScrollView>
@@ -231,6 +233,7 @@ export function MemberTierScreen({ onBack }: { onBack: () => void }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#EEF3F8' },
+  screenDark: { backgroundColor: '#08111F' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,7 +255,9 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 4,
   },
+  backBtnDark: { backgroundColor: '#111827', shadowColor: '#020617' },
   headerTitle: { fontSize: 18, fontWeight: '900', color: '#17324D' },
+  headerTitleDark: { color: '#F8FAFC' },
   headerSpacer: { width: 44 },
   content: { padding: 16, paddingTop: 6, gap: 16, paddingBottom: 34 },
   heroCard: { borderRadius: 30, overflow: 'hidden', padding: 22 },
@@ -289,7 +294,9 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 4,
   },
+  sectionCardDark: { backgroundColor: '#111827', shadowColor: '#020617' },
   sectionTitle: { fontSize: 18, fontWeight: '900', color: '#17324D', marginBottom: 14 },
+  sectionTitleDark: { color: '#F8FAFC' },
   tierRow: {
     flexDirection: 'row',
     gap: 14,
@@ -307,7 +314,10 @@ const styles = StyleSheet.create({
   currentChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, fontSize: 11, fontWeight: '800' },
   tierRange: { marginTop: 4, fontSize: 12, fontWeight: '800', color: '#52667F' },
   tierDetail: { marginTop: 6, fontSize: 12.5, lineHeight: 19, color: '#6A7E98' },
+  tierRangeDark: { color: '#CBD5E1' },
+  tierDetailDark: { color: '#94A3B8' },
   pointRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 12 },
   pointDot: { width: 10, height: 10, borderRadius: 5, marginTop: 5 },
   pointText: { flex: 1, fontSize: 13.5, lineHeight: 21, color: '#52667F', fontWeight: '600' },
+  pointTextDark: { color: '#94A3B8' },
 });

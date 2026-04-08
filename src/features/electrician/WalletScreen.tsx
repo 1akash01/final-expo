@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import { colors } from '@/shared/theme/colors';
 import type { Screen, UserRole } from '@/shared/types/navigation';
 
@@ -70,6 +71,7 @@ const historyItems = [
 ];
 
 export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenProps) {
+  const { darkMode } = usePreferenceContext();
   const isDealer = role === 'dealer';
   const actions = isDealer
     ? [
@@ -118,7 +120,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
       ];
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#18345B', '#355C95', '#E18D4E']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>
         <View style={styles.heroGlow} />
         <View style={styles.heroHeader}>
@@ -153,11 +155,11 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         </View>
       </LinearGradient>
 
-      <View style={styles.card}>
+      <View style={[styles.card, darkMode ? styles.cardDark : null]}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionEyebrow}>Quick Actions</Text>
-            <Text style={styles.sectionTitle}>{isDealer ? 'Manage dealer payouts' : 'Move your wallet faster'}</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Quick Actions</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{isDealer ? 'Manage dealer payouts' : 'Move your wallet faster'}</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <SparkIcon />
@@ -169,26 +171,26 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
             return (
               <TouchableOpacity
                 key={item.id}
-                style={styles.actionTile}
+                style={[styles.actionTile, darkMode ? styles.actionTileDark : null]}
                 activeOpacity={0.86}
                 onPress={() => onNavigate?.(item.target)}
               >
                 <View style={[styles.actionIconWrap, { backgroundColor: item.tint }]}>
                   <Icon />
                 </View>
-                <Text style={styles.actionTileText}>{item.label}</Text>
-                <Text style={styles.actionTileSub}>{item.detail}</Text>
+                <Text style={[styles.actionTileText, darkMode ? styles.actionTileTextDark : null]}>{item.label}</Text>
+                <Text style={[styles.actionTileSub, darkMode ? styles.actionTileSubDark : null]}>{item.detail}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, darkMode ? styles.cardDark : null]}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionEyebrow}>Redeem Point History</Text>
-            <Text style={styles.sectionTitle}>Elegant activity timeline</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Redeem Point History</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Elegant activity timeline</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <HistoryGlyph />
@@ -201,23 +203,23 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
               <View style={styles.timelineTrack}>
                 <View style={[styles.timelineDot, { backgroundColor: item.accent }]} />
               </View>
-              <View style={styles.timelineCard}>
+              <View style={[styles.timelineCard, darkMode ? styles.timelineCardDark : null]}>
                 <View style={styles.timelineTop}>
-                  <Text style={styles.timelineTitle}>{item.title}</Text>
+                  <Text style={[styles.timelineTitle, darkMode ? styles.timelineTitleDark : null]}>{item.title}</Text>
                   <Text style={[styles.timelinePoints, { color: item.accent }]}>{item.points}</Text>
                 </View>
-                <Text style={styles.timelineTime}>{item.time}</Text>
+                <Text style={[styles.timelineTime, darkMode ? styles.timelineTimeDark : null]}>{item.time}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        <View style={styles.emptyState}>
+        <View style={[styles.emptyState, darkMode ? styles.emptyStateDark : null]}>
           <View style={styles.emptyIconWrap}>
             <HistoryGlyph />
           </View>
-          <Text style={styles.emptyTitle}>No detailed records yet</Text>
-          <Text style={styles.emptySub}>
+          <Text style={[styles.emptyTitle, darkMode ? styles.emptyTitleDark : null]}>No detailed records yet</Text>
+          <Text style={[styles.emptySub, darkMode ? styles.emptySubDark : null]}>
             {isDealer
               ? 'Jaise hi bank payout ya dealer bonus activity hogi, yahan full wallet history dikh jayegi.'
               : 'Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.'}
@@ -230,6 +232,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#F4EFE8' },
+  screenDark: { backgroundColor: '#08111F' },
   content: { padding: 18, gap: 18, paddingBottom: 120 },
   heroCard: {
     overflow: 'hidden',
@@ -309,9 +312,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 4,
   },
+  cardDark: {
+    backgroundColor: '#111827',
+    borderColor: '#243043',
+    shadowColor: '#020617',
+  },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionEyebrow: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, color: '#B57846' },
   sectionTitle: { marginTop: 4, fontSize: 18, fontWeight: '900', color: '#221C1A' },
+  sectionEyebrowDark: { color: '#F59E0B' },
+  sectionTitleDark: { color: '#F8FAFC' },
   sectionIconWrap: {
     width: 46,
     height: 46,
@@ -332,6 +342,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     minHeight: 150,
   },
+  actionTileDark: {
+    backgroundColor: '#182133',
+    borderColor: '#243043',
+  },
   actionIconWrap: {
     width: 54,
     height: 54,
@@ -341,6 +355,8 @@ const styles = StyleSheet.create({
   },
   actionTileText: { marginTop: 12, textAlign: 'center', fontSize: 13, color: colors.text, fontWeight: '800' },
   actionTileSub: { marginTop: 4, textAlign: 'center', fontSize: 11, color: colors.mutedText, lineHeight: 16 },
+  actionTileTextDark: { color: '#F8FAFC' },
+  actionTileSubDark: { color: '#94A3B8' },
   timeline: { marginTop: 18, gap: 14 },
   timelineItem: { flexDirection: 'row', gap: 12 },
   timelineTrack: { width: 18, alignItems: 'center' },
@@ -353,10 +369,16 @@ const styles = StyleSheet.create({
     borderColor: '#EEE0D5',
     padding: 15,
   },
+  timelineCardDark: {
+    backgroundColor: '#182133',
+    borderColor: '#243043',
+  },
   timelineTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   timelineTitle: { flex: 1, fontSize: 14, fontWeight: '800', color: '#241B16' },
   timelinePoints: { fontSize: 14, fontWeight: '900' },
   timelineTime: { marginTop: 6, fontSize: 12, color: '#887B74' },
+  timelineTitleDark: { color: '#F8FAFC' },
+  timelineTimeDark: { color: '#94A3B8' },
   emptyState: {
     marginTop: 18,
     borderRadius: 24,
@@ -366,6 +388,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#F0E1D3',
+  },
+  emptyStateDark: {
+    backgroundColor: '#182133',
+    borderColor: '#243043',
   },
   emptyIconWrap: {
     width: 58,
@@ -377,5 +403,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { marginTop: 14, fontSize: 20, fontWeight: '900', color: '#B04D2E' },
   emptySub: { marginTop: 8, fontSize: 13, textAlign: 'center', color: colors.mutedText, lineHeight: 19 },
+  emptyTitleDark: { color: '#F8FAFC' },
+  emptySubDark: { color: '#94A3B8' },
 });
 

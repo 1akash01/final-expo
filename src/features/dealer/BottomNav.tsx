@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 
 function HomeIcon({ color, size = 24 }: { color: string; size?: number }) {
@@ -189,8 +190,9 @@ export function BottomNav({
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
 }) {
+  const { darkMode } = usePreferenceContext();
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
       <View style={styles.side}>
         {LEFT.map((item) => (
           <NavTab key={item.id} id={item.id} label={item.label} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />
@@ -224,6 +226,11 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     shadowOffset: { width: 0, height: -4 },
     elevation: 12,
+  },
+  wrapDark: {
+    backgroundColor: '#0F172A',
+    borderTopColor: '#243043',
+    shadowColor: '#020617',
   },
   side: { flex: 1, flexDirection: 'row', justifyContent: 'space-around' },
   tab: {

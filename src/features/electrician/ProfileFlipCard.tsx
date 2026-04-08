@@ -34,6 +34,7 @@ interface Profile {
 interface Props {
   profile?: Profile;
   role?: 'dealer' | 'electrician';
+  photoUri?: string | null;
 }
 
 function DownloadIcon({ color = '#FFFFFF', size = 16 }: { color?: string; size?: number }) {
@@ -110,7 +111,7 @@ function DetailPill({
   );
 }
 
-export default function ProfileFlipCard({ profile, role = 'electrician' }: Props) {
+export default function ProfileFlipCard({ profile, role = 'electrician', photoUri }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -327,7 +328,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician' }: Props
               <View style={styles.frontTopRow}>
                 <View style={styles.identityWrap}>
                   <View style={styles.avatarWrap}>
-                    <Text style={styles.avatarText}>{initials}</Text>
+                    {photoUri ? <Image source={{ uri: photoUri }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.roleText}>{role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner'}</Text>
@@ -486,7 +487,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
+  avatarImage: { width: '100%', height: '100%' },
   avatarText: { color: '#10254A', fontSize: 24, fontWeight: '900' },
   roleText: { color: '#AFC0E4', fontSize: 9.5, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 4 },
   nameText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', flexShrink: 1 },

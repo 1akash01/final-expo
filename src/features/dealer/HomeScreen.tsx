@@ -16,6 +16,7 @@ import {
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { featuredProducts } from '@/shared/data/mock';
 import ProfileFlipCard from '@/features/electrician/ProfileFlipCard';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 import { associatedElectricians, dealerProfile } from './dealerData';
 
@@ -241,10 +242,13 @@ function getTier(count: number) {
 export function HomeScreen({
   onNavigate,
   onOpenProductCategory,
+  profilePhotoUri,
 }: {
   onNavigate: (screen: Screen) => void;
   onOpenProductCategory: (category: string) => void;
+  profilePhotoUri?: string | null;
 }) {
+  const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const statPulse = useRef(new Animated.Value(1)).current;
   const connectedCount = associatedElectricians.length;
@@ -317,7 +321,7 @@ export function HomeScreen({
   ];
 
   return (
-    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#EDF4FF', '#E3EEFF', '#F8F4FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
@@ -331,7 +335,7 @@ export function HomeScreen({
           </TouchableOpacity>
         </View>
 
-        <ProfileFlipCard profile={dealerProfile} role="dealer" />
+        <ProfileFlipCard profile={dealerProfile} role="dealer" photoUri={profilePhotoUri} />
 
         <View style={styles.statRow}>
           <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statPulse }] }]}>
@@ -368,7 +372,7 @@ export function HomeScreen({
           {quickActions.map((item) => {
             const Icon = item.icon;
             return (
-              <TouchableOpacity key={item.title} style={[styles.quickCard, { width: cardW }]} onPress={item.onPress} activeOpacity={0.9}>
+              <TouchableOpacity key={item.title} style={[styles.quickCard, darkMode ? styles.quickCardDark : null, { width: cardW }]} onPress={item.onPress} activeOpacity={0.9}>
                 <LinearGradient colors={item.iconColors} style={styles.quickIconBox}>
                   <Icon color={item.iconTint} size={24} />
                 </LinearGradient>
@@ -431,7 +435,7 @@ export function HomeScreen({
           ))}
         </View>
 
-        <View style={styles.activityCard}>
+        <View style={[styles.activityCard, darkMode ? styles.activityCardDark : null]}>
           <Text style={styles.activityTitle}>Dealer Growth</Text>
           <Text style={styles.activityCopy}>
             Dealer network is growing steadily with {connectedCount} associated electricians. Use the electricians page to manage and expand your dealer network.
@@ -446,6 +450,7 @@ export function HomeScreen({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#EEF3F8' },
+  screenDark: { backgroundColor: '#08111F' },
   heroShell: {
     paddingTop: 26,
     paddingHorizontal: 14,
@@ -531,6 +536,10 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 4,
   },
+  quickCardDark: {
+    backgroundColor: '#111827',
+    shadowColor: '#020617',
+  },
   quickIconBox: {
     width: 56,
     height: 56,
@@ -613,6 +622,9 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     padding: 18,
     marginBottom: 12,
+  },
+  activityCardDark: {
+    backgroundColor: '#111827',
   },
   activityTitle: { color: '#173E80', fontSize: 16, fontWeight: '900' },
   activityCopy: { color: '#70819C', fontSize: 12.5, lineHeight: 19, marginTop: 8 },

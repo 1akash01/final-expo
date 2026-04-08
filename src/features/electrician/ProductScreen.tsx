@@ -16,6 +16,7 @@ import {
 import Svg, {
   Path, Rect, Circle, Ellipse, Line, G, Polygon,
 } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 const Colors = {
   primary: '#E8453C',
@@ -381,7 +382,16 @@ function ProductCard({
 }
 
 // ── Main Screen ───────────────────────────────────────────────────────
-export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNavigate: (screen: Screen) => void; initialCategory?: string }) {
+export function ProductScreen({
+  onNavigate,
+  initialCategory = 'fanbox',
+  showBottomBanner = true,
+}: {
+  onNavigate: (screen: Screen) => void;
+  initialCategory?: string;
+  showBottomBanner?: boolean;
+}) {
+  const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState(initialCategory);
   const [search, setSearch] = useState('');
@@ -417,18 +427,18 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.pageTitle}>All Products</Text>
+    <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <Text style={[styles.pageTitle, darkMode ? styles.pageTitleDark : null]}>All Products</Text>
 
       {/* Search */}
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, darkMode ? styles.searchWrapDark : null]}>
         <Text style={{ fontSize: 15, color: Colors.textMuted }}>🔍</Text>
         <TextInput
           value={search}
           onChangeText={setSearch}
           placeholder="Search all products..."
           placeholderTextColor={Colors.textMuted}
-          style={styles.searchInput}
+          style={[styles.searchInput, darkMode ? styles.searchInputDark : null]}
         />
         {search.length > 0 && (
           <Pressable onPress={() => setSearch('')}>
@@ -445,11 +455,11 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
       </View>
 
       {showFilters ? (
-        <View style={styles.filterPanel}>
+        <View style={[styles.filterPanel, darkMode ? styles.filterPanelDark : null]}>
           <View style={styles.filterPanelHeader}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.filterPanelTitle}>Filter products</Text>
-              <Text style={styles.filterPanelSub}>Choose a category to see matching product names and items.</Text>
+              <Text style={[styles.filterPanelTitle, darkMode ? styles.filterPanelTitleDark : null]}>Filter products</Text>
+              <Text style={[styles.filterPanelSub, darkMode ? styles.filterPanelSubDark : null]}>Choose a category to see matching product names and items.</Text>
             </View>
             <TouchableOpacity onPress={() => setShowFilters(false)} activeOpacity={0.8}>
               <Text style={styles.filterPanelClose}>Close</Text>
@@ -470,6 +480,7 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
                   }}
                   style={[
                     styles.filterCard,
+                    darkMode ? styles.filterCardDark : null,
                     active && { backgroundColor: cc.scanText, borderColor: cc.scanText },
                   ]}
                   activeOpacity={0.86}
@@ -477,10 +488,10 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
                   <View style={[styles.filterCardIcon, { backgroundColor: active ? 'rgba(255,255,255,0.2)' : cc.iconBg }]}>
                     <CatIcon id={cat.id} size={22} color={active ? '#fff' : cc.scanText} />
                   </View>
-                  <Text style={[styles.filterCardTitle, active && styles.filterCardTitleActive]} numberOfLines={1}>
+                    <Text style={[styles.filterCardTitle, darkMode && !active ? styles.filterCardTitleDark : null, active && styles.filterCardTitleActive]} numberOfLines={1}>
                     {cat.label}
                   </Text>
-                  <Text style={[styles.filterCardMeta, active && styles.filterCardMetaActive]}>
+                    <Text style={[styles.filterCardMeta, darkMode && !active ? styles.filterCardMetaDark : null, active && styles.filterCardMetaActive]}>
                     {allProducts.filter((product) => product.category === cat.id).length} products
                   </Text>
                 </TouchableOpacity>
@@ -504,6 +515,7 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
               }}
               style={[
                 styles.categoryTab,
+                darkMode ? styles.categoryTabDark : null,
                 active && { backgroundColor: cc.scanText, borderColor: cc.scanText },
               ]}
               activeOpacity={0.8}
@@ -511,7 +523,7 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
               <View style={[styles.tabIconWrap, { backgroundColor: active ? 'rgba(255,255,255,0.2)' : cc.iconBg }]}>
                 <CatIcon id={cat.id} size={18} color={active ? '#fff' : cc.scanText} />
               </View>
-              <Text style={[styles.categoryText, active && { color: '#fff' }]}>{cat.label}</Text>
+              <Text style={[styles.categoryText, darkMode && !active ? styles.categoryTextDark : null, active && { color: '#fff' }]}>{cat.label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -519,14 +531,14 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
 
       {/* Category Banner — hide during search, show search result info instead */}
       {isSearching ? (
-        <View style={styles.searchResultBanner}>
-          <Text style={styles.searchResultText}>
+        <View style={[styles.searchResultBanner, darkMode ? styles.searchResultBannerDark : null]}>
+          <Text style={[styles.searchResultText, darkMode ? styles.searchResultTextDark : null]}>
             {filtered.length > 0
               ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${search}"`
               : `No results for "${search}"`}
           </Text>
           {filtered.length === 0 && (
-            <Text style={styles.searchResultSub}>Try searching by product name or size</Text>
+            <Text style={[styles.searchResultSub, darkMode ? styles.searchResultSubDark : null]}>Try searching by product name or size</Text>
           )}
         </View>
       ) : (
@@ -570,14 +582,20 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
       })}
 
       {/* Bottom Banner */}
-      <View style={styles.bottomBanner}>
-        <Text style={{ fontSize: 26 }}>🏭</Text>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.bottomBannerTitle}>North India's Largest Manufacturer</Text>
-          <Text style={styles.bottomBannerSub}>SRV Electricals — since 2000. Scan any QR to earn points!</Text>
-        </View>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18 }}>›</Text>
-      </View>
+      {showBottomBanner ? (
+        <TouchableOpacity
+          style={[styles.bottomBanner, darkMode ? styles.bottomBannerDark : null]}
+          activeOpacity={0.88}
+          onPress={() => onNavigate('scan')}
+        >
+          <Text style={{ fontSize: 26 }}>🏭</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bottomBannerTitle}>North India's Largest Manufacturer</Text>
+            <Text style={styles.bottomBannerSub}>SRV Electricals — since 2000. Scan any QR to earn points!</Text>
+          </View>
+          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18 }}>›</Text>
+        </TouchableOpacity>
+      ) : null}
 
       <View style={{ height: 30 }} />
     </ScrollView>
@@ -586,15 +604,19 @@ export function ProductScreen({ onNavigate, initialCategory = 'fanbox' }: { onNa
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.background },
+  screenDark: { backgroundColor: '#08111F' },
   content: { padding: 14, gap: 14 },
   pageTitle: { fontSize: 22, fontWeight: '800', color: Colors.textDark, textAlign: 'center' },
+  pageTitleDark: { color: '#F8FAFC' },
 
   searchWrap: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: Colors.surface, borderRadius: 18, borderWidth: 1,
     borderColor: Colors.border, paddingHorizontal: 14, height: 50,
   },
+  searchWrapDark: { backgroundColor: '#111827', borderColor: '#243043' },
   searchInput: { flex: 1, fontSize: 15, color: Colors.textDark },
+  searchInputDark: { color: '#F8FAFC' },
   filterToggleBtn: {
     width: 38,
     height: 38,
@@ -618,6 +640,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
+  filterPanelDark: { backgroundColor: '#111827', borderColor: '#243043', shadowColor: '#020617' },
   filterPanelHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -627,6 +650,8 @@ const styles = StyleSheet.create({
   },
   filterPanelTitle: { fontSize: 16, fontWeight: '800', color: Colors.textDark },
   filterPanelSub: { fontSize: 12, color: Colors.textMuted, marginTop: 3, lineHeight: 17 },
+  filterPanelTitleDark: { color: '#F8FAFC' },
+  filterPanelSubDark: { color: '#94A3B8' },
   filterPanelClose: { fontSize: 12.5, fontWeight: '800', color: Colors.primary },
   filterGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   filterCard: {
@@ -637,6 +662,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 12,
   },
+  filterCardDark: { backgroundColor: '#182133', borderColor: '#243043' },
   filterCardIcon: {
     width: 42,
     height: 42,
@@ -649,6 +675,8 @@ const styles = StyleSheet.create({
   filterCardTitleActive: { color: '#FFFFFF' },
   filterCardMeta: { fontSize: 11.5, color: Colors.textMuted, marginTop: 4 },
   filterCardMetaActive: { color: 'rgba(255,255,255,0.86)' },
+  filterCardTitleDark: { color: '#F8FAFC' },
+  filterCardMetaDark: { color: '#94A3B8' },
 
   tabList: { gap: 10, paddingVertical: 2 },
   categoryTab: {
@@ -656,8 +684,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 9, borderRadius: 22,
     backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border,
   },
+  categoryTabDark: { backgroundColor: '#111827', borderColor: '#243043' },
   tabIconWrap: { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   categoryText: { fontSize: 13, fontWeight: '700', color: Colors.textDark },
+  categoryTextDark: { color: '#F8FAFC' },
 
   catBanner: { borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   catBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
@@ -674,6 +704,9 @@ const styles = StyleSheet.create({
   },
   searchResultText: { fontSize: 15, fontWeight: '700', color: Colors.textDark },
   searchResultSub: { fontSize: 12, color: Colors.textMuted, marginTop: 4 },
+  searchResultBannerDark: { backgroundColor: '#111827', borderColor: '#243043' },
+  searchResultTextDark: { color: '#F8FAFC' },
+  searchResultSubDark: { color: '#94A3B8' },
 
   // Grid rows
   row: { flexDirection: 'row', gap: 12 },
@@ -710,6 +743,7 @@ const styles = StyleSheet.create({
   scanBtnText: { fontSize: 11.5, fontWeight: '700' },
 
   bottomBanner: { backgroundColor: '#2D3561', borderRadius: 20, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  bottomBannerDark: { backgroundColor: '#172554' },
   bottomBannerTitle: { fontSize: 14, fontWeight: '800', color: '#fff' },
   bottomBannerSub: { fontSize: 11.5, color: 'rgba(255,255,255,0.7)', marginTop: 3, lineHeight: 16 },
 });

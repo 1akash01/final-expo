@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 const Colors = {
   primary: '#E8453C',
@@ -85,6 +86,7 @@ function RealQRCode({ size = 200 }: { size?: number }) {
 }
 
 export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
+  const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -270,25 +272,25 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
   const qrSize = frameSize - 32;
 
   return (
-    <View style={styles.root}>
-      <View style={styles.header}>
-        <Pressable onPress={() => onNavigate('home')} style={styles.backBtn}>
-          <BackArrowIcon />
+    <View style={[styles.root, darkMode ? styles.rootDark : null]}>
+      <View style={[styles.header, darkMode ? styles.headerDark : null]}>
+        <Pressable onPress={() => onNavigate('home')} style={[styles.backBtn, darkMode ? styles.backBtnDark : null]}>
+          <BackArrowIcon color={darkMode ? '#F8FAFC' : Colors.textDark} />
         </Pressable>
-        <Text style={styles.headerTitle}>Scan QR Code</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Scan QR Code</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, darkMode ? styles.subtitleDark : null]}>
           Point camera at the QR sticker{'\n'}on any SRV product box
         </Text>
 
         <View style={styles.frameWrap}>
           <Animated.View
-            style={[styles.frame, { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 }]}
+            style={[styles.frame, darkMode ? styles.frameDark : null, { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 }]}
           >
-            <View style={[StyleSheet.absoluteFill, styles.frameInner]} />
+            <View style={[StyleSheet.absoluteFill, styles.frameInner, darkMode ? styles.frameInnerDark : null]} />
 
             {!scanned && (
               <View style={styles.qrCenter}>
@@ -327,15 +329,15 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
           <View style={styles.statusRow}>
             {scanning && (<><View style={styles.statusDot} /><Text style={styles.statusActive}>Scanning...</Text></>)}
-            {!scanning && !scanned && <Text style={styles.statusIdle}>Align QR code within the frame</Text>}
+            {!scanning && !scanned && <Text style={[styles.statusIdle, darkMode ? styles.statusIdleDark : null]}>Align QR code within the frame</Text>}
             {scanned && <Text style={styles.statusSuccess}>✓ QR Code detected</Text>}
           </View>
         </View>
 
         {scanned && (
-          <Animated.View style={[styles.successBox, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
+          <Animated.View style={[styles.successBox, darkMode ? styles.successBoxDark : null, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
             <Text style={styles.successTitle}>✅ SRV MCB 32A detected</Text>
-            <Text style={styles.successSub}>You earned +80 reward points.</Text>
+            <Text style={[styles.successSub, darkMode ? styles.successSubDark : null]}>You earned +80 reward points.</Text>
           </Animated.View>
         )}
 
@@ -352,18 +354,18 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         </TouchableOpacity>
 
         <View style={styles.actionRow}>
-          <Pressable style={styles.secondaryAction}>
-            <FlashlightIcon size={20} color={Colors.textDark} />
-            <Text style={styles.secondaryActionText}>Flashlight</Text>
+          <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]}>
+            <FlashlightIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
+            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>Flashlight</Text>
           </Pressable>
-          <Pressable style={styles.secondaryAction} onPress={handlePickFromGallery}>
-            <GalleryIcon size={20} color={Colors.textDark} />
-            <Text style={styles.secondaryActionText}>Gallery</Text>
+          <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]} onPress={handlePickFromGallery}>
+            <GalleryIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
+            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>Gallery</Text>
           </Pressable>
         </View>
 
-        <View style={styles.howCard}>
-          <Text style={styles.howTitle}>How to Scan</Text>
+        <View style={[styles.howCard, darkMode ? styles.howCardDark : null]}>
+          <Text style={[styles.howTitle, darkMode ? styles.howTitleDark : null]}>How to Scan</Text>
           {[
             { step: '1', text: 'Look for the QR code sticker on your SRV product box.' },
             { step: '2', text: 'Place the code inside the frame and keep the phone steady.' },
@@ -371,7 +373,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
           ].map((item) => (
             <View key={item.step} style={styles.howRow}>
               <View style={styles.howIndex}><Text style={styles.howIndexText}>{item.step}</Text></View>
-              <Text style={styles.howText}>{item.text}</Text>
+              <Text style={[styles.howText, darkMode ? styles.howTextDark : null]}>{item.text}</Text>
             </View>
           ))}
         </View>
@@ -389,19 +391,26 @@ const CORNER_OFFSET = 14;
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
+  rootDark: { backgroundColor: '#08111F' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingVertical: 14, backgroundColor: Colors.surface,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
+  headerDark: { backgroundColor: '#0F172A', borderBottomColor: '#243043' },
   backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#F2F3F7', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#E5E7EB' },
+  backBtnDark: { backgroundColor: '#182133', borderColor: '#243043' },
   headerTitle: { fontSize: 18, fontWeight: '800', color: Colors.textDark },
+  headerTitleDark: { color: '#F8FAFC' },
   scroll: { flex: 1 },
   content: { alignItems: 'center', padding: 20, gap: 16 },
   subtitle: { fontSize: 14, color: Colors.textMuted, textAlign: 'center', lineHeight: 21 },
+  subtitleDark: { color: '#94A3B8' },
   frameWrap: { alignItems: 'center', gap: 14, marginTop: 4 },
   frame: { borderRadius: 24, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' },
   frameInner: { backgroundColor: '#FFFFFF', borderRadius: 24 },
+  frameDark: { backgroundColor: '#111827' },
+  frameInnerDark: { backgroundColor: '#111827' },
   qrCenter: { alignItems: 'center', justifyContent: 'center' },
   laser: {
     position: 'absolute', top: CORNER_OFFSET, left: CORNER_OFFSET, height: 3, borderRadius: 3,
@@ -421,10 +430,13 @@ const styles = StyleSheet.create({
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
   statusActive: { fontSize: 14, fontWeight: '700', color: Colors.primary },
   statusIdle: { fontSize: 13, color: Colors.textMuted },
+  statusIdleDark: { color: '#94A3B8' },
   statusSuccess: { fontSize: 14, fontWeight: '700', color: Colors.success },
   successBox: { width: '100%', padding: 16, borderRadius: 18, backgroundColor: '#E8FEF0', borderWidth: 1, borderColor: '#bbf7d0' },
   successTitle: { fontSize: 15, fontWeight: '800', color: Colors.success },
   successSub: { marginTop: 4, fontSize: 13, color: '#5E7A69' },
+  successBoxDark: { backgroundColor: '#0F2A1C', borderColor: '#166534' },
+  successSubDark: { color: '#BBF7D0' },
   primaryBtn: {
     width: '100%', backgroundColor: Colors.primary, borderRadius: 18, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 10,
     shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 6,
@@ -438,12 +450,17 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1,
   },
   secondaryActionText: { color: Colors.textDark, fontSize: 13, fontWeight: '700' },
+  secondaryActionDark: { backgroundColor: '#111827', borderColor: '#243043', shadowOpacity: 0 },
+  secondaryActionTextDark: { color: '#F8FAFC' },
   howCard: { width: '100%', backgroundColor: Colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: Colors.border },
+  howCardDark: { backgroundColor: '#111827', borderColor: '#243043' },
   howTitle: { fontSize: 17, fontWeight: '800', color: Colors.textDark, marginBottom: 4 },
+  howTitleDark: { color: '#F8FAFC' },
   howRow: { flexDirection: 'row', gap: 14, marginTop: 16, alignItems: 'flex-start' },
   howIndex: { width: 30, height: 30, borderRadius: 15, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
   howIndexText: { color: '#fff', fontSize: 13, fontWeight: '800' },
   howText: { flex: 1, fontSize: 13, lineHeight: 20, color: Colors.textMuted },
+  howTextDark: { color: '#94A3B8' },
 });
 
 

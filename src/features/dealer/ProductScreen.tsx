@@ -16,6 +16,7 @@ export function ProductScreen({
     <ElectricianProductScreen
       onNavigate={handleNavigate}
       initialCategory={initialCategory}
+      showBottomBanner={false}
     />
   );
 }

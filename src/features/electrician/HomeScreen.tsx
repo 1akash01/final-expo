@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { Screen } from '@/shared/types/navigation';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import ProfileFlipCard from './ProfileFlipCard';
 import { ElectricianTierIcon, getElectricianTier } from './ElectricianTierScreen';
 
@@ -278,10 +279,13 @@ function FilterIcon({ color = '#173E80', size = 16 }: { color?: string; size?: n
 export function HomeScreen({
   onNavigate,
   onOpenProductCategory,
+  profilePhotoUri,
 }: {
   onNavigate: (screen: Screen) => void;
   onOpenProductCategory: (category: string) => void;
+  profilePhotoUri?: string | null;
 }) {
+  const { darkMode } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [slide, setSlide] = useState(0);
   const productFilters = ['All', 'Boxes', 'Fans'] as const;
@@ -406,7 +410,7 @@ export function HomeScreen({
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, darkMode ? styles.containerDark : null]} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#EAF3FF', '#DDEEFF', '#F6EEFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
@@ -429,7 +433,7 @@ export function HomeScreen({
           </View>
         </View>
 
-        <ProfileFlipCard profile={DUMMY_PROFILE} role="electrician" />
+        <ProfileFlipCard profile={DUMMY_PROFILE} role="electrician" photoUri={profilePhotoUri} />
 
         <View style={styles.statRow}>
           <Animated.View style={[styles.statCardWrap, { transform: [{ scale: statsPulse }] }]}>
@@ -486,7 +490,7 @@ export function HomeScreen({
           {quickActions.map((item) => {
             const Icon = item.icon;
             return (
-              <TouchableOpacity key={item.title} style={[styles.quickCard, { width: cardW }]} onPress={item.onPress} activeOpacity={0.9}>
+              <TouchableOpacity key={item.title} style={[styles.quickCard, darkMode ? styles.quickCardDark : null, { width: cardW }]} onPress={item.onPress} activeOpacity={0.9}>
                 <LinearGradient colors={item.iconColors} style={styles.quickIconBox}>
                   <Icon color={item.iconTint} size={24} />
                 </LinearGradient>
@@ -551,7 +555,7 @@ export function HomeScreen({
           </TouchableOpacity>
         </View>
 
-        <View style={styles.activityCard}>
+        <View style={[styles.activityCard, darkMode ? styles.activityCardDark : null]}>
           {RECENT_ACTIVITY.map((item, index) => (
             <View key={item.title} style={[styles.activityRow, index < RECENT_ACTIVITY.length - 1 && styles.activityDivider]}>
               <View style={styles.activityIconWrap}>
@@ -574,6 +578,7 @@ export function HomeScreen({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#EEF3F8' },
+  containerDark: { backgroundColor: '#08111F' },
   heroShell: {
     paddingTop: 26,
     paddingHorizontal: 14,
@@ -726,6 +731,10 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 4,
   },
+  quickCardDark: {
+    backgroundColor: '#111827',
+    shadowColor: '#020617',
+  },
   quickIconBox: {
     width: 56,
     height: 56,
@@ -826,6 +835,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 18,
     elevation: 4,
+  },
+  activityCardDark: {
+    backgroundColor: '#111827',
+    shadowColor: '#020617',
   },
   activityRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   activityDivider: { borderBottomWidth: 1, borderBottomColor: '#EEF2F7' },

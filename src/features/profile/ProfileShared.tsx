@@ -61,7 +61,7 @@ export type SubPage =
   | 'Contact Support';
 
 export type IconName =
-  | 'edit' | 'eye' | 'eyeOff' | 'star' | 'scan' | 'gift' | 'signOut' | 'transfer'
+  | 'edit' | 'eye' | 'eyeOff' | 'star' | 'scan' | 'gift' | 'redeem' | 'signOut' | 'transfer'
   | 'order' | 'bank' | 'refer' | 'help' | 'offer' | 'notification' | 'settings'
   | 'history' | 'support' | 'camera' | 'gallery' | 'phone' | 'mail' | 'building'
   | 'link' | 'message' | 'whatsapp' | 'moon' | 'warning' | 'arrowLeft' | 'check' | 'lock'
@@ -123,6 +123,11 @@ export const translations = {
   },
 } as const;
 
+export const getSafeTranslation = (language: AppLanguage, key: keyof (typeof translations)['English']) => {
+  const value = translations[language][key];
+  return /[Ãàâ¨]/.test(value) ? translations.English[key] : value;
+};
+
 export type ThemePalette = {
   bg: string; surface: string; soft: string; border: string; textPrimary: string; textSecondary: string; textMuted: string; heroSurface: string; heroStrip: string;
 };
@@ -163,6 +168,7 @@ export function AppIcon({ name, size = 18, color = '#0F1120', strokeWidth = 1.8 
     case 'star': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M12 3.5l2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3.5z" stroke={color} strokeWidth={strokeWidth} strokeLinejoin="round" /></Svg>;
     case 'scan': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Rect x="4" y="4" width="6" height="6" rx="1.3" stroke={color} strokeWidth={strokeWidth} /><Rect x="14" y="4" width="6" height="6" rx="1.3" stroke={color} strokeWidth={strokeWidth} /><Rect x="4" y="14" width="6" height="6" rx="1.3" stroke={color} strokeWidth={strokeWidth} /><Path d="M14 14h2v2h-2zM18 14h2v6h-6v-2h4v-4z" fill={color} /></Svg>;
     case 'gift': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Rect x="3" y="8" width="18" height="4" rx="1.2" stroke={color} strokeWidth={strokeWidth} /><Path d="M19 12v7a2 2 0 01-2 2H7a2 2 0 01-2-2v-7" stroke={color} strokeWidth={strokeWidth} /><Path d="M12 8v13M12 8C12 8 9.5 6.1 9.5 4.7a2.5 2.5 0 015 0C14.5 6.1 12 8 12 8z" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
+    case 'redeem': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M7 6.5h10a2 2 0 012 2v3.5c0 4.1-2.7 7.2-7 8.5-4.3-1.3-7-4.4-7-8.5V8.5a2 2 0 012-2z" stroke={color} strokeWidth={strokeWidth} strokeLinejoin="round" /><Path d="M9 10.5l2 2 4-4" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /><Path d="M9 4.5h6" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" /></Svg>;
     case 'signOut': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M10 5H6a2 2 0 00-2 2v10a2 2 0 002 2h4" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" /><Path d="M14 8l4 4-4 4M8 12h10" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
     case 'transfer': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 13l-4 4 4 4" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" /></Svg>;
     case 'order': return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"><Path d="M4 7l8-4 8 4-8 4-8-4zM4 7v10l8 4 8-4V7" stroke={color} strokeWidth={strokeWidth} strokeLinejoin="round" /><Path d="M12 11v10" stroke={color} strokeWidth={strokeWidth} /></Svg>;

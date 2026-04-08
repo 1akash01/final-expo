@@ -24,6 +24,7 @@ import {
   WalletDealerBonusScreen,
   WalletTransferPointsScreen,
 } from '@/features/profile/WalletLinkedPages';
+import { PreferenceContext, getSafeTranslation, getThemePalette, translations, type AppLanguage } from '@/features/profile/ProfileShared';
 import { colors } from '@/shared/theme/colors';
 import type { Screen, UserRole } from '@/shared/types/navigation';
 
@@ -34,9 +35,15 @@ export default function Index() {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [currentRole, setCurrentRole] = useState<UserRole>('electrician');
   const [selectedProductCategory, setSelectedProductCategory] = useState('fanbox');
+  const [language, setLanguage] = useState<AppLanguage>('English');
+  const [darkMode, setDarkMode] = useState(false);
   const [passwordConfiguredByRole, setPasswordConfiguredByRole] = useState<Record<UserRole, boolean>>({
     dealer: false,
     electrician: false,
+  });
+  const [profilePhotoByRole, setProfilePhotoByRole] = useState<Record<UserRole, string | null>>({
+    dealer: null,
+    electrician: null,
   });
   const [passwordValueByRole, setPasswordValueByRole] = useState<Record<UserRole, string>>({
     dealer: '',
@@ -44,6 +51,20 @@ export default function Index() {
   });
 
   const isDealer = currentRole === 'dealer';
+  const appTheme = useMemo(() => getThemePalette(darkMode), [darkMode]);
+  const statusBarStyle = darkMode ? 'light' : 'dark';
+  const t = (key: keyof (typeof translations)['English']) => getSafeTranslation(language, key);
+  const preferenceValue = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      darkMode,
+      setDarkMode,
+      t,
+      theme: appTheme,
+    }),
+    [language, darkMode, appTheme]
+  );
 
   const handleNavigate = (screen: Screen) => {
     if (screen === currentScreen) {
@@ -77,6 +98,7 @@ export default function Index() {
             <DealerHomeScreen
               onNavigate={handleNavigate}
               onOpenProductCategory={handleOpenProductCategory}
+              profilePhotoUri={profilePhotoByRole.dealer}
             />
           );
         case 'product':
@@ -111,21 +133,28 @@ export default function Index() {
               onPasswordChange={(password) =>
                 setPasswordValueByRole((current) => ({ ...current, dealer: password }))
               }
+              language={language}
+              onLanguageChange={setLanguage}
+              darkMode={darkMode}
+              onDarkModeChange={setDarkMode}
+              profilePhotoUri={profilePhotoByRole.dealer}
+              onProfilePhotoChange={(photoUri) => setProfilePhotoByRole((current) => ({ ...current, dealer: photoUri }))}
             />
           );
         case 'dealer_tier':
           return <DealerMemberTierScreen onBack={() => setCurrentScreen('home')} />;
         case 'bank_details':
-          return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} />;
+          return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} language={language} onLanguageChange={setLanguage} darkMode={darkMode} onDarkModeChange={setDarkMode} />;
         case 'dealer_bonus':
-          return <WalletDealerBonusScreen onBack={() => setCurrentScreen('wallet')} />;
+          return <WalletDealerBonusScreen onBack={() => setCurrentScreen('wallet')} language={language} onLanguageChange={setLanguage} darkMode={darkMode} onDarkModeChange={setDarkMode} />;
         case 'transfer_points':
-          return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} />;
+          return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} language={language} onLanguageChange={setLanguage} darkMode={darkMode} onDarkModeChange={setDarkMode} />;
         default:
           return (
             <DealerHomeScreen
               onNavigate={handleNavigate}
               onOpenProductCategory={handleOpenProductCategory}
+              profilePhotoUri={profilePhotoByRole.dealer}
             />
           );
       }
@@ -137,6 +166,7 @@ export default function Index() {
           <ElectricianHomeScreen
             onNavigate={handleNavigate}
             onOpenProductCategory={handleOpenProductCategory}
+            profilePhotoUri={profilePhotoByRole.electrician}
           />
         );
       case 'product':
@@ -165,6 +195,12 @@ export default function Index() {
             onPasswordChange={(password) =>
               setPasswordValueByRole((current) => ({ ...current, electrician: password }))
             }
+            language={language}
+            onLanguageChange={setLanguage}
+            darkMode={darkMode}
+            onDarkModeChange={setDarkMode}
+            profilePhotoUri={profilePhotoByRole.electrician}
+            onProfilePhotoChange={(photoUri) => setProfilePhotoByRole((current) => ({ ...current, electrician: photoUri }))}
           />
         );
       case 'wallet':
@@ -172,14 +208,15 @@ export default function Index() {
       case 'electrician_tier':
         return <ElectricianTierScreen onBack={() => setCurrentScreen('home')} />;
       case 'bank_details':
-        return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} />;
+        return <WalletBankDetailsScreen onBack={() => setCurrentScreen('wallet')} language={language} onLanguageChange={setLanguage} darkMode={darkMode} onDarkModeChange={setDarkMode} />;
       case 'transfer_points':
-        return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} />;
+        return <WalletTransferPointsScreen onBack={() => setCurrentScreen('wallet')} onNavigate={handleNavigate} language={language} onLanguageChange={setLanguage} darkMode={darkMode} onDarkModeChange={setDarkMode} />;
       default:
         return (
           <ElectricianHomeScreen
             onNavigate={handleNavigate}
             onOpenProductCategory={handleOpenProductCategory}
+            profilePhotoUri={profilePhotoByRole.electrician}
           />
         );
     }
@@ -188,45 +225,53 @@ export default function Index() {
     isDealer,
     passwordConfiguredByRole.dealer,
     passwordConfiguredByRole.electrician,
+    profilePhotoByRole.dealer,
+    profilePhotoByRole.electrician,
     passwordValueByRole.dealer,
     passwordValueByRole.electrician,
+    language,
+    darkMode,
     selectedProductCategory,
   ]);
 
   if (showOnboarding) {
     return (
       <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <ExpoStatusBar style="dark" />
-        <OnboardingScreen
-          onGetStarted={(role, options) => {
-            if (typeof options?.passwordConfigured === 'boolean') {
-              setPasswordConfiguredByRole((current) => ({ ...current, [role]: options.passwordConfigured as boolean }));
-              if (!options.passwordConfigured) {
-                setPasswordValueByRole((current) => ({ ...current, [role]: '' }));
+        <ExpoStatusBar style={statusBarStyle} />
+        <PreferenceContext.Provider value={preferenceValue}>
+          <OnboardingScreen
+            onGetStarted={(role, options) => {
+              if (typeof options?.passwordConfigured === 'boolean') {
+                setPasswordConfiguredByRole((current) => ({ ...current, [role]: options.passwordConfigured as boolean }));
+                if (!options.passwordConfigured) {
+                  setPasswordValueByRole((current) => ({ ...current, [role]: '' }));
+                }
               }
-            }
-            if (typeof options?.passwordValue === 'string') {
-              setPasswordValueByRole((current) => ({ ...current, [role]: options.passwordValue as string }));
-            }
-            setCurrentRole(role);
-            setCurrentScreen('home');
-            setShowOnboarding(false);
-          }}
-        />
+              if (typeof options?.passwordValue === 'string') {
+                setPasswordValueByRole((current) => ({ ...current, [role]: options.passwordValue as string }));
+              }
+              setCurrentRole(role);
+              setCurrentScreen('home');
+              setShowOnboarding(false);
+            }}
+          />
+        </PreferenceContext.Provider>
       </View>
     );
   }
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <ExpoStatusBar style="dark" />
-      <View style={styles.content} key={`${currentRole}-${currentScreen}-${screenResetKey}`}>{activeScreen}</View>
-      {isDealer ? (
-        <DealerBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
-      ) : (
-        <ElectricianBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
-      )}
-    </View>
+    <PreferenceContext.Provider value={preferenceValue}>
+      <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: appTheme.bg }]}>
+        <ExpoStatusBar style={statusBarStyle} />
+        <View style={styles.content} key={`${currentRole}-${currentScreen}-${screenResetKey}`}>{activeScreen}</View>
+        {isDealer ? (
+          <DealerBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+        ) : (
+          <ElectricianBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+        )}
+      </View>
+    </PreferenceContext.Provider>
   );
 }
 

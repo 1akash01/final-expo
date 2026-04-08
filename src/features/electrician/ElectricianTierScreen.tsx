@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 export type ElectricianTierName = 'Silver' | 'Gold' | 'Platinum' | 'Diamond';
 
@@ -109,6 +110,7 @@ export function getElectricianTier(points: number): TierInfo {
 }
 
 export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
+  const { darkMode } = usePreferenceContext();
   const points = 4250;
   const currentTier = useMemo(() => getElectricianTier(points), [points]);
   const pulse = useRef(new Animated.Value(0)).current;
@@ -141,12 +143,12 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
   });
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, darkMode ? styles.screenDark : null]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={onBack} activeOpacity={0.85}>
-          <BackIcon />
+        <TouchableOpacity style={[styles.backBtn, darkMode ? styles.backBtnDark : null]} onPress={onBack} activeOpacity={0.85}>
+          <BackIcon color={darkMode ? '#F8FAFC' : '#173E80'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Member Tier</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Member Tier</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -175,8 +177,8 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
           </LinearGradient>
         </Animated.View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Points grading system</Text>
+        <View style={[styles.sectionCard, darkMode ? styles.sectionCardDark : null]}>
+          <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Points grading system</Text>
           {tierLevels.map((level) => {
             const active = level.tier === currentTier.tier;
             return (
@@ -195,8 +197,8 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
                     <Text style={[styles.tierName, { color: active ? level.accent : '#17324D' }]}>{level.tier} Member</Text>
                     {active ? <Text style={[styles.currentChip, { color: level.accent, backgroundColor: level.soft }]}>Current</Text> : null}
                   </View>
-                  <Text style={styles.tierRange}>{level.range}</Text>
-                  <Text style={styles.tierDetail}>{level.detail}</Text>
+                  <Text style={[styles.tierRange, darkMode ? styles.tierRangeDark : null]}>{level.range}</Text>
+                  <Text style={[styles.tierDetail, darkMode ? styles.tierDetailDark : null]}>{level.detail}</Text>
                 </View>
               </LinearGradient>
             );
@@ -209,9 +211,12 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#EEF3F8' },
+  screenDark: { backgroundColor: '#08111F' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 12 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#94A3B8', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 4 },
   headerTitle: { fontSize: 18, fontWeight: '900', color: '#17324D' },
+  backBtnDark: { backgroundColor: '#111827', shadowColor: '#020617' },
+  headerTitleDark: { color: '#F8FAFC' },
   headerSpacer: { width: 44 },
   content: { padding: 16, paddingTop: 6, gap: 16, paddingBottom: 34 },
   heroCard: { borderRadius: 30, overflow: 'hidden', padding: 22 },
@@ -226,6 +231,8 @@ const styles = StyleSheet.create({
   heroStatLabel: { fontSize: 11.5, lineHeight: 17, color: '#5D7391', marginTop: 4, fontWeight: '700' },
   sectionCard: { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 18, shadowColor: '#0F172A', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 4 },
   sectionTitle: { fontSize: 18, fontWeight: '900', color: '#17324D', marginBottom: 14 },
+  sectionCardDark: { backgroundColor: '#111827', shadowColor: '#020617' },
+  sectionTitleDark: { color: '#F8FAFC' },
   tierRow: { flexDirection: 'row', gap: 14, borderRadius: 22, padding: 14, borderWidth: 1.4, marginBottom: 12 },
   tierRowActive: { shadowColor: '#94A3B8', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
   tierRowIdle: { borderColor: '#E2E8F0' },
@@ -236,4 +243,6 @@ const styles = StyleSheet.create({
   currentChip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, fontSize: 11, fontWeight: '800' },
   tierRange: { marginTop: 4, fontSize: 12, fontWeight: '800', color: '#52667F' },
   tierDetail: { marginTop: 6, fontSize: 12.5, lineHeight: 19, color: '#6A7E98' },
+  tierRangeDark: { color: '#CBD5E1' },
+  tierDetailDark: { color: '#94A3B8' },
 });

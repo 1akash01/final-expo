@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 const Colors = {
   primary: '#E8453C',
@@ -35,6 +36,7 @@ const rewards = [
 export function RewardsScreen() {
   const [activeTab, setActiveTab] = require('react').useState('All');
   const headerScale = useRef(new Animated.Value(1)).current;
+  const { darkMode } = usePreferenceContext();
 
   const handleRedeem = (id: string) => {
     Animated.sequence([
@@ -44,11 +46,11 @@ export function RewardsScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Rewards Store</Text>
-        <View style={styles.pointsBadge}>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Rewards Store</Text>
+        <View style={[styles.pointsBadge, darkMode ? styles.pointsBadgeDark : null]}>
           <Text style={{ fontSize: 16 }}>⭐</Text>
           <Text style={styles.pointsBadgeText}>4,250 pts</Text>
         </View>
@@ -59,22 +61,22 @@ export function RewardsScreen() {
         {TABS.map((tab) => (
           <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={styles.tabItem}>
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
-            {activeTab === tab && <View style={styles.tabUnderline} />}
+            {activeTab === tab && <View style={[styles.tabUnderline, darkMode ? styles.tabUnderlineDark : null]} />}
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Rewards List */}
       {rewards.map((reward) => (
-        <View key={reward.id} style={styles.rewardCard}>
+        <View key={reward.id} style={[styles.rewardCard, darkMode ? styles.rewardCardDark : null]}>
           <View style={styles.rewardRow}>
             <View style={[styles.rewardIcon, { backgroundColor: reward.bg }]}>
               <Text style={{ fontSize: 26 }}>{reward.emoji}</Text>
             </View>
             <View style={styles.rewardInfo}>
-              <Text style={styles.rewardName}>{reward.name}</Text>
-              <Text style={styles.rewardDesc}>{reward.description}</Text>
-              <Text style={styles.rewardPts}>{reward.points} pts</Text>
+              <Text style={[styles.rewardName, darkMode ? styles.rewardNameDark : null]}>{reward.name}</Text>
+              <Text style={[styles.rewardDesc, darkMode ? styles.rewardDescDark : null]}>{reward.description}</Text>
+              <Text style={[styles.rewardPts, darkMode ? styles.rewardPtsDark : null]}>{reward.points} pts</Text>
             </View>
             <TouchableOpacity
               onPress={() => handleRedeem(reward.id)}
@@ -84,15 +86,15 @@ export function RewardsScreen() {
               <Text style={styles.redeemBtnText}>Redeem</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.progressTrack}>
+          <View style={[styles.progressTrack, darkMode ? styles.progressTrackDark : null]}>
             <View style={[styles.progressFill, { width: `${reward.progress}%`, backgroundColor: reward.color }]} />
           </View>
-          <Text style={styles.progressLabel}>{reward.progress}% to unlock</Text>
+          <Text style={[styles.progressLabel, darkMode ? styles.progressLabelDark : null]}>{reward.progress}% to unlock</Text>
         </View>
       ))}
 
       {/* Mega Event Banner */}
-      <View style={styles.eventBanner}>
+      <View style={[styles.eventBanner, darkMode ? styles.eventBannerDark : null]}>
         <View style={styles.eventLeft}>
           <Text style={styles.eventTitle}>Mega Rewards Event! 🎉</Text>
           <Text style={styles.eventSub}>Earn 2x points on all scans this week. Limited time offer!</Text>
@@ -110,11 +112,14 @@ export function RewardsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.background },
+  screenDark: { backgroundColor: '#08111F' },
   content: { padding: 16, gap: 0 },
 
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   headerTitle: { fontSize: 22, fontWeight: '800', color: Colors.textDark },
+  headerTitleDark: { color: '#F8FAFC' },
   pointsBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 2, borderColor: Colors.success, borderRadius: 22, paddingHorizontal: 14, paddingVertical: 7 },
+  pointsBadgeDark: { borderColor: '#22C55E', backgroundColor: '#0F2A1C' },
   pointsBadgeText: { fontSize: 14, fontWeight: '800', color: Colors.success },
 
   tabRow: { flexDirection: 'row', marginBottom: 20, borderBottomWidth: 1, borderBottomColor: Colors.border },
@@ -122,22 +127,30 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 14, fontWeight: '600', color: Colors.textMuted },
   tabTextActive: { color: Colors.primary, fontWeight: '800' },
   tabUnderline: { position: 'absolute', bottom: -1, left: '10%', right: '10%', height: 2, backgroundColor: Colors.primary, borderRadius: 1 },
+  tabUnderlineDark: { backgroundColor: '#F87171' },
 
   rewardCard: { backgroundColor: Colors.surface, borderRadius: 18, padding: 16, marginBottom: 14, borderWidth: 1, borderColor: Colors.border, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  rewardCardDark: { backgroundColor: '#111827', borderColor: '#243043', shadowColor: '#020617' },
   rewardRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 14 },
   rewardIcon: { width: 60, height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   rewardInfo: { flex: 1 },
   rewardName: { fontSize: 16, fontWeight: '800', color: Colors.textDark },
   rewardDesc: { fontSize: 12, color: Colors.textMuted, marginTop: 3 },
   rewardPts: { fontSize: 16, fontWeight: '800', color: Colors.textDark, marginTop: 6 },
+  rewardNameDark: { color: '#F8FAFC' },
+  rewardDescDark: { color: '#94A3B8' },
+  rewardPtsDark: { color: '#F8FAFC' },
   redeemBtn: { borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12 },
   redeemBtnText: { color: '#fff', fontSize: 13, fontWeight: '800' },
 
   progressTrack: { height: 7, backgroundColor: '#F0F0F5', borderRadius: 4, overflow: 'hidden' },
+  progressTrackDark: { backgroundColor: '#243043' },
   progressFill: { height: '100%', borderRadius: 4 },
   progressLabel: { marginTop: 6, fontSize: 11, color: Colors.textMuted },
+  progressLabelDark: { color: '#94A3B8' },
 
   eventBanner: { backgroundColor: Colors.primary, borderRadius: 22, padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
+  eventBannerDark: { backgroundColor: '#7F1D1D' },
   eventLeft: { flex: 1, marginRight: 12 },
   eventTitle: { fontSize: 18, fontWeight: '900', color: '#fff' },
   eventSub: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 6, lineHeight: 18 },

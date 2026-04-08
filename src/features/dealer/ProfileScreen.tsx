@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProfileScreen as SharedProfileScreen } from '@/features/profile/ProfileScreen';
+import type { AppLanguage } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 
 export function ProfileScreen({
@@ -9,6 +10,12 @@ export function ProfileScreen({
   storedPassword,
   onPasswordConfiguredChange,
   onPasswordChange,
+  language,
+  onLanguageChange,
+  darkMode,
+  onDarkModeChange,
+  profilePhotoUri,
+  onProfilePhotoChange,
 }: {
   onNavigate: (screen: Screen) => void;
   onSignOut: () => void;
@@ -16,6 +23,12 @@ export function ProfileScreen({
   storedPassword: string;
   onPasswordConfiguredChange: (configured: boolean) => void;
   onPasswordChange: (password: string) => void;
+  language: AppLanguage;
+  onLanguageChange: (language: AppLanguage) => void;
+  darkMode: boolean;
+  onDarkModeChange: (enabled: boolean) => void;
+  profilePhotoUri: string | null;
+  onProfilePhotoChange: (photoUri: string | null) => void;
 }) {
   return (
     <SharedProfileScreen
@@ -26,6 +39,12 @@ export function ProfileScreen({
       storedPassword={storedPassword}
       onPasswordConfiguredChange={onPasswordConfiguredChange}
       onPasswordChange={onPasswordChange}
+      language={language}
+      onLanguageChange={onLanguageChange}
+      darkMode={darkMode}
+      onDarkModeChange={onDarkModeChange}
+      profilePhotoUri={profilePhotoUri}
+      onProfilePhotoChange={onProfilePhotoChange}
     />
   );
 }

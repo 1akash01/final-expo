@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 
 function BellIcon({ color = '#0F172A', size = 22 }: { color?: string; size?: number }) {
@@ -55,48 +56,49 @@ function WalletIcon({ color = '#0F172A', size = 22 }: { color?: string; size?: n
 
 const notifications = [
   {
-    title: 'New reward campaign is live',
-    body: 'Redeem bonus gifts on selected scanned products this week.',
-    time: '2 min ago',
-    type: 'Offers',
-    colors: ['#FFF4E8', '#FDE1B7'],
+    title: 'Price Update',
+    body: 'The price of 4 way DD has been updated to Rs.306.',
+    time: '2 hr ago',
+    type: 'Price Alert',
+    colors: ['#FFF4E8', '#FDE1B7'] as [string, string],
     icon: OfferIcon,
   },
   {
-    title: 'Scan approved successfully',
-    body: 'Your last QR scan has been credited with +50 points.',
-    time: '15 min ago',
-    type: 'Scans',
-    colors: ['#EBF8FF', '#CBE7FF'],
+    title: 'Price Update',
+    body: 'The price of 6 Way DD has been updated to Rs.363.',
+    time: '3 hr ago',
+    type: 'Catalog',
+    colors: ['#EBF8FF', '#CBE7FF'] as [string, string],
     icon: ScanIcon,
   },
   {
-    title: 'Wallet payout updated',
-    body: 'Your reward wallet balance summary has been refreshed.',
-    time: '1 hr ago',
-    type: 'Wallet',
-    colors: ['#EEF7F0', '#D2F0DA'],
+    title: 'Scheme Notice',
+    body: 'Selected SRV reward schemes have updated slabs for this week.',
+    time: 'Today',
+    type: 'Rewards',
+    colors: ['#EEF7F0', '#D2F0DA'] as [string, string],
     icon: WalletIcon,
   },
   {
     title: 'Important SRV announcement',
-    body: 'New premium product range banners and updates are now available.',
+    body: 'Keep your profile and bank details updated for smooth redemptions and withdrawals.',
     time: 'Today',
     type: 'Alerts',
-    colors: ['#F2EEFF', '#DDD2FF'],
+    colors: ['#F2EEFF', '#DDD2FF'] as [string, string],
     icon: BellIcon,
   },
 ];
 
 export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
+  const { darkMode } = usePreferenceContext();
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#09111F', '#12284A', '#18396A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.heroCopy}>
             <Text style={styles.heroEyebrow}>Notification Center</Text>
             <Text style={styles.heroTitle}>Stay updated with SRV</Text>
-            <Text style={styles.heroSub}>Important activity, scans, wallet updates, and offers in one place.</Text>
+            <Text style={styles.heroSub}>Important price updates, reward alerts, and account notices in one place.</Text>
           </View>
           <View style={styles.heroIconWrap}>
             <BellIcon color="#FFFFFF" size={26} />
@@ -114,27 +116,27 @@ export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen
       </LinearGradient>
 
       <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Latest updates</Text>
+        <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Latest updates</Text>
         <View style={styles.unreadPill}>
-          <Text style={styles.unreadText}>4 new</Text>
+          <Text style={styles.unreadText}>{notifications.length} new</Text>
         </View>
       </View>
 
-      {notifications.map((item) => {
+      {notifications.map((item, index) => {
         const Icon = item.icon;
         return (
-          <LinearGradient key={item.title} colors={item.colors as [string, string]} style={styles.card}>
+          <LinearGradient key={`${item.title}-${item.time}-${index}`} colors={darkMode ? ['#182133', '#23324C'] as [string, string] : (item.colors as [string, string])} style={[styles.card, darkMode ? styles.cardDark : null]}>
             <View style={styles.cardTop}>
-              <View style={styles.iconWrap}>
+              <View style={[styles.iconWrap, darkMode ? styles.iconWrapDark : null]}>
                 <Icon />
               </View>
               <View style={styles.meta}>
-                <Text style={styles.cardType}>{item.type}</Text>
-                <Text style={styles.cardTime}>{item.time}</Text>
+                <Text style={[styles.cardType, darkMode ? styles.cardTypeDark : null]}>{item.type}</Text>
+                <Text style={[styles.cardTime, darkMode ? styles.cardTimeDark : null]}>{item.time}</Text>
               </View>
             </View>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardBody}>{item.body}</Text>
+            <Text style={[styles.cardTitle, darkMode ? styles.cardTitleDark : null]}>{item.title}</Text>
+            <Text style={[styles.cardBody, darkMode ? styles.cardBodyDark : null]}>{item.body}</Text>
           </LinearGradient>
         );
       })}
@@ -144,6 +146,7 @@ export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#EEF3F8' },
+  screenDark: { backgroundColor: '#08111F' },
   content: { padding: 14, gap: 14, paddingBottom: 30 },
   hero: {
     borderRadius: 28,
@@ -188,6 +191,7 @@ const styles = StyleSheet.create({
   heroGhostText: { color: '#FFFFFF', fontWeight: '800', fontSize: 12.5 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
   sectionTitle: { color: '#14213D', fontSize: 20, fontWeight: '900' },
+  sectionTitleDark: { color: '#F8FAFC' },
   unreadPill: { backgroundColor: '#E8453C', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
   unreadText: { color: '#FFFFFF', fontSize: 11, fontWeight: '800' },
   card: {
@@ -199,6 +203,9 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
+  cardDark: {
+    shadowColor: '#020617',
+  },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
   iconWrap: {
     width: 46,
@@ -208,10 +215,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  iconWrapDark: { backgroundColor: 'rgba(255,255,255,0.08)' },
   meta: { flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
   cardType: { color: '#10254A', fontSize: 12.5, fontWeight: '800' },
   cardTime: { color: '#5F718E', fontSize: 11.5, fontWeight: '700' },
   cardTitle: { color: '#10254A', fontSize: 17, fontWeight: '900' },
   cardBody: { color: '#41536F', fontSize: 12.5, lineHeight: 19, marginTop: 8 },
+  cardTypeDark: { color: '#E2E8F0' },
+  cardTimeDark: { color: '#94A3B8' },
+  cardTitleDark: { color: '#F8FAFC' },
+  cardBodyDark: { color: '#CBD5E1' },
 });
 

@@ -19,6 +19,7 @@ import {
   C,
   PreferenceContext,
   defaultProfile,
+  getSafeTranslation,
   getThemePalette,
   translations,
   type AppLanguage,
@@ -50,7 +51,7 @@ const electricianMenuItems: Array<{
   screen?: SubPage;
   route?: Screen;
 }> = [
-  { label: 'My Redemption', icon: 'gift', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
+  { label: 'My Redemption', icon: 'redeem', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
   { label: 'Gift Store', icon: 'gift', color: C.teal, bg: C.tealLight, route: 'rewards' },
   { label: 'Transfer Points', icon: 'transfer', color: C.blue, bg: C.blueLight, screen: 'Transfer Points' },
   { label: 'My Orders', icon: 'order', color: C.purple, bg: C.purpleLight, screen: 'My Orders' },
@@ -68,7 +69,7 @@ const dealerMenuItems: Array<{
   screen?: SubPage;
   route?: Screen;
 }> = [
-  { label: 'My Redemption', icon: 'gift', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
+  { label: 'My Redemption', icon: 'redeem', color: C.primary, bg: C.primaryLight, screen: 'My Redemption' },
   { label: 'Gift Store', icon: 'gift', color: C.teal, bg: C.tealLight, route: 'rewards' },
   { label: 'Dealer Bonus', icon: 'transfer', color: C.blue, bg: C.blueLight, screen: 'Dealer Bonus' },
   { label: 'My Orders', icon: 'order', color: C.purple, bg: C.purpleLight, screen: 'My Orders' },
@@ -85,8 +86,9 @@ const settingsItems: Array<{
   bg: string;
   screen: SubPage;
   badge?: boolean;
+  route?: Screen;
 }> = [
-  { label: 'Notifications', icon: 'notification', color: C.gold, bg: C.goldLight, screen: 'Notifications', badge: true },
+  { label: 'Notifications', icon: 'notification', color: C.gold, bg: C.goldLight, screen: 'Notifications', badge: true, route: 'notification' },
   { label: 'Password', icon: 'lock', color: C.blue, bg: C.blueLight, screen: 'Password' },
   { label: 'App Settings', icon: 'settings', color: C.purple, bg: C.purpleLight, screen: 'App Settings' },
   { label: 'Scan History', icon: 'history', color: C.primary, bg: C.primaryLight, screen: 'Scan History' },
@@ -116,11 +118,6 @@ const editRows: Array<{ label: string; key: keyof Profile; keyboardType?: 'defau
   { label: 'Pincode', key: 'pincode', keyboardType: 'phone-pad' },
   { label: 'Address', key: 'address' },
 ];
-
-const fallbackT = (language: AppLanguage, key: keyof (typeof translations)['English']) => {
-  const value = translations[language][key];
-  return /[Ãàâ¨]/.test(value) ? translations.English[key] : value;
-};
 
 const getProfileByRole = (currentRole: UserRole): Profile =>
   currentRole === 'dealer'
@@ -191,6 +188,12 @@ export function ProfileScreen({
   storedPassword,
   onPasswordConfiguredChange,
   onPasswordChange,
+  language,
+  onLanguageChange,
+  darkMode,
+  onDarkModeChange,
+  profilePhotoUri,
+  onProfilePhotoChange,
 }: {
   currentRole: UserRole;
   onNavigate: (screen: Screen) => void;
@@ -199,9 +202,13 @@ export function ProfileScreen({
   storedPassword: string;
   onPasswordConfiguredChange: (configured: boolean) => void;
   onPasswordChange: (password: string) => void;
+  language: AppLanguage;
+  onLanguageChange: (language: AppLanguage) => void;
+  darkMode: boolean;
+  onDarkModeChange: (enabled: boolean) => void;
+  profilePhotoUri: string | null;
+  onProfilePhotoChange: (photoUri: string | null) => void;
 }) {
-  const [language, setLanguage] = useState<AppLanguage>('English');
-  const [darkMode, setDarkMode] = useState(false);
   const initialProfile = useMemo(() => getProfileByRole(currentRole), [currentRole]);
   const [profile, setProfile] = useState<Profile>(initialProfile);
   const [draft, setDraft] = useState<Profile>(initialProfile);
@@ -210,7 +217,6 @@ export function ProfileScreen({
   const [showSignOut, setShowSignOut] = useState(false);
   const [showImgPicker, setShowImgPicker] = useState(false);
   const [showFullProfile, setShowFullProfile] = useState(false);
-  const [profilePhotoUri, setProfilePhotoUri] = useState<string | null>(null);
   const [draftPhotoUri, setDraftPhotoUri] = useState<string | null>(null);
   const [pendingDraftImage, setPendingDraftImage] = useState<string | null>(null);
   const [draftTaxIdentity, setDraftTaxIdentity] = useState(getTaxIdentityValue(initialProfile));
@@ -224,7 +230,6 @@ export function ProfileScreen({
     setShowSignOut(false);
     setShowImgPicker(false);
     setShowFullProfile(false);
-    setProfilePhotoUri(null);
     setDraftPhotoUri(null);
     setPendingDraftImage(null);
     setDraftTaxIdentity(getTaxIdentityValue(initialProfile));
@@ -232,8 +237,8 @@ export function ProfileScreen({
   }, [initialProfile]);
 
   const theme = useMemo(() => getThemePalette(darkMode), [darkMode]);
-  const t = (key: keyof (typeof translations)['English']) => fallbackT(language, key);
-  const preferenceValue = { language, setLanguage, darkMode, setDarkMode, t, theme };
+  const t = (key: keyof (typeof translations)['English']) => getSafeTranslation(language, key);
+  const preferenceValue = { language, setLanguage: onLanguageChange, darkMode, setDarkMode: onDarkModeChange, t, theme };
   const menuItems = useMemo(() => (currentRole === 'dealer' ? dealerMenuItems : electricianMenuItems), [currentRole]);
   const electricianCount = 134;
   const electricianPoints = 4250;
@@ -332,7 +337,7 @@ export function ProfileScreen({
           };
 
     setProfile(nextProfile);
-    setProfilePhotoUri(draftPhotoUri);
+    onProfilePhotoChange(draftPhotoUri);
     setPendingDraftImage(null);
     setShowEdit(false);
   };
@@ -391,7 +396,7 @@ export function ProfileScreen({
       setDraftPhotoUri(pendingDraftImage);
     } else {
       setDraftPhotoUri(pendingDraftImage);
-      setProfilePhotoUri(pendingDraftImage);
+      onProfilePhotoChange(pendingDraftImage);
     }
     setPendingDraftImage(null);
   };
@@ -401,7 +406,7 @@ export function ProfileScreen({
     setPendingDraftImage(null);
     setDraftPhotoUri(null);
     if (!showEdit) {
-      setProfilePhotoUri(null);
+      onProfilePhotoChange(null);
     }
   };
 
@@ -606,7 +611,7 @@ export function ProfileScreen({
               <TouchableOpacity
                 key={item.screen}
                 style={[styles.menuRow, index < settingsItems.length - 1 ? [styles.menuBorder, { borderBottomColor: theme.border }] : null]}
-                onPress={() => setSubPage(item.screen)}
+                onPress={() => (item.route ? onNavigate(item.route) : setSubPage(item.screen))}
                 activeOpacity={0.75}
               >
                 <View style={[styles.menuIcon, { backgroundColor: item.bg }]}>

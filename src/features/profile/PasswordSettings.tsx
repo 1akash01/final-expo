@@ -30,6 +30,64 @@ type PasswordErrors = {
   confirmNewPassword?: string;
 };
 
+type PasswordFieldProps = {
+  theme: ReturnType<typeof usePreferenceContext>['theme'];
+  label: string;
+  value: string;
+  onChangeText: (value: string) => void;
+  secureTextEntry: boolean;
+  onToggle: () => void;
+  error?: string;
+  placeholder: string;
+  inputRef?: React.RefObject<TextInput | null>;
+  returnKeyType?: 'done' | 'next';
+  onSubmitEditing?: () => void;
+};
+
+function PasswordField({
+  theme,
+  label,
+  value,
+  onChangeText,
+  secureTextEntry,
+  onToggle,
+  error,
+  placeholder,
+  inputRef,
+  returnKeyType,
+  onSubmitEditing,
+}: PasswordFieldProps) {
+  return (
+    <View style={styles.field}>
+      <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{label}</Text>
+      <View style={[styles.inputWrap, { borderColor: error ? C.primary : theme.border, backgroundColor: theme.soft }]}>
+        <TextInput
+          ref={inputRef}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={theme.textMuted}
+          secureTextEntry={secureTextEntry}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
+          textContentType="none"
+          importantForAutofill="no"
+          keyboardType="default"
+          returnKeyType={returnKeyType}
+          blurOnSubmit={false}
+          onSubmitEditing={onSubmitEditing}
+          style={[styles.input, { color: theme.textPrimary }]}
+        />
+        <TouchableOpacity onPress={onToggle} style={styles.eyeBtn} activeOpacity={0.8}>
+          <AppIcon name={secureTextEntry ? 'eye' : 'eyeOff'} size={18} color={theme.textSecondary} />
+        </TouchableOpacity>
+      </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+    </View>
+  );
+}
+
 export function PasswordSettingsPage({
   hasPasswordConfigured,
   storedPassword,
@@ -149,58 +207,6 @@ export function PasswordSettingsPage({
     setConfirmNewPassword('');
   };
 
-  const PasswordField = ({
-    label,
-    value,
-    onChangeText,
-    secureTextEntry,
-    onToggle,
-    error,
-    placeholder,
-    inputRef,
-    returnKeyType,
-    onSubmitEditing,
-  }: {
-    label: string;
-    value: string;
-    onChangeText: (value: string) => void;
-    secureTextEntry: boolean;
-    onToggle: () => void;
-    error?: string;
-    placeholder: string;
-    inputRef?: React.RefObject<TextInput | null>;
-    returnKeyType?: 'done' | 'next';
-    onSubmitEditing?: () => void;
-  }) => (
-    <View style={styles.field}>
-      <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{label}</Text>
-      <View style={[styles.inputWrap, { borderColor: error ? C.primary : theme.border, backgroundColor: theme.soft }]}>
-        <TextInput
-          ref={inputRef}
-          value={value}
-          onChangeText={(nextValue) => {
-            onChangeText(nextValue);
-            setSuccessMessage('');
-          }}
-          placeholder={placeholder}
-          placeholderTextColor={theme.textMuted}
-          secureTextEntry={secureTextEntry}
-          autoCapitalize="none"
-          autoCorrect={false}
-          submitBehavior="submit"
-          returnKeyType={returnKeyType}
-          blurOnSubmit={returnKeyType !== 'next'}
-          onSubmitEditing={onSubmitEditing}
-          style={[styles.input, { color: theme.textPrimary }]}
-        />
-        <TouchableOpacity onPress={onToggle} style={styles.eyeBtn} activeOpacity={0.8}>
-          <AppIcon name={secureTextEntry ? 'eye' : 'eyeOff'} size={18} color={theme.textSecondary} />
-        </TouchableOpacity>
-      </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
-  );
-
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -272,6 +278,7 @@ export function PasswordSettingsPage({
             {mode === 'set' ? (
               <>
                 <PasswordField
+                  theme={theme}
                   label="Password"
                   value={setPassword}
                   onChangeText={(value) => {
@@ -287,6 +294,7 @@ export function PasswordSettingsPage({
                   onSubmitEditing={() => confirmSetPasswordRef.current?.focus()}
                 />
                 <PasswordField
+                  theme={theme}
                   label="Confirm Password"
                   value={confirmSetPassword}
                   onChangeText={(value) => {
@@ -299,12 +307,13 @@ export function PasswordSettingsPage({
                   placeholder="Re-enter the same password"
                   inputRef={confirmSetPasswordRef}
                   returnKeyType="done"
-                  onSubmitEditing={Keyboard.dismiss}
+                  onSubmitEditing={handleSave}
                 />
               </>
             ) : (
               <>
                 <PasswordField
+                  theme={theme}
                   label="Current Password"
                   value={currentPassword}
                   onChangeText={(value) => {
@@ -321,6 +330,7 @@ export function PasswordSettingsPage({
                 />
 
                 <PasswordField
+                  theme={theme}
                   label="New Password"
                   value={newPassword}
                   onChangeText={(value) => {
@@ -336,6 +346,7 @@ export function PasswordSettingsPage({
                   onSubmitEditing={() => confirmNewPasswordRef.current?.focus()}
                 />
                 <PasswordField
+                  theme={theme}
                   label="Confirm New Password"
                   value={confirmNewPassword}
                   onChangeText={(value) => {
@@ -348,7 +359,7 @@ export function PasswordSettingsPage({
                   placeholder="Re-enter the new password"
                   inputRef={confirmNewPasswordRef}
                   returnKeyType="done"
-                  onSubmitEditing={Keyboard.dismiss}
+                  onSubmitEditing={handleSave}
                 />
               </>
             )}
