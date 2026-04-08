@@ -42,6 +42,8 @@ type PasswordFieldProps = {
   inputRef?: React.RefObject<TextInput | null>;
   returnKeyType?: 'done' | 'next';
   onSubmitEditing?: () => void;
+  onFieldLayout?: (y: number) => void;
+  onFocusField?: () => void;
 };
 
 function PasswordField({
@@ -56,15 +58,18 @@ function PasswordField({
   inputRef,
   returnKeyType,
   onSubmitEditing,
+  onFieldLayout,
+  onFocusField,
 }: PasswordFieldProps) {
   return (
-    <View style={styles.field}>
+    <View style={styles.field} onLayout={({ nativeEvent }) => onFieldLayout?.(nativeEvent.layout.y)}>
       <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{label}</Text>
       <View style={[styles.inputWrap, { borderColor: error ? C.primary : theme.border, backgroundColor: theme.soft }]}>
         <TextInput
           ref={inputRef}
           value={value}
           onChangeText={onChangeText}
+          onFocus={onFocusField}
           placeholder={placeholder}
           placeholderTextColor={theme.textMuted}
           secureTextEntry={secureTextEntry}
@@ -109,11 +114,14 @@ export function PasswordSettingsPage({
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [errors, setErrors] = useState<PasswordErrors>({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [fieldOffsets, setFieldOffsets] = useState<Record<string, number>>({});
   const setPasswordRef = useRef<TextInput | null>(null);
   const confirmSetPasswordRef = useRef<TextInput | null>(null);
   const currentPasswordRef = useRef<TextInput | null>(null);
   const newPasswordRef = useRef<TextInput | null>(null);
   const confirmNewPasswordRef = useRef<TextInput | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
   const isSetDisabled = hasPasswordConfigured && mode === 'set';
   const isChangeDisabled = !hasPasswordConfigured && mode === 'change';
 
@@ -128,8 +136,41 @@ export function PasswordSettingsPage({
     setSuccessMessage('');
   }, [hasPasswordConfigured, storedPassword]);
 
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   const clearFieldError = (field: keyof PasswordErrors) => {
     setErrors((current) => ({ ...current, [field]: undefined }));
+  };
+
+  const saveFieldOffset = (field: string, y: number) => {
+    setFieldOffsets((current) => ({ ...current, [field]: y }));
+  };
+
+  const scrollToField = (field: string) => {
+    const y = fieldOffsets[field];
+    if (typeof y === 'number') {
+      scrollRef.current?.scrollTo({ y: Math.max(0, y - 140), animated: true });
+    }
+  };
+
+  const focusField = (field: string) => {
+    requestAnimationFrame(() => scrollToField(field));
+    setTimeout(() => scrollToField(field), Platform.OS === 'ios' ? 120 : 260);
   };
 
   const selectMode = (nextMode: PasswordMode) => {
@@ -209,13 +250,19 @@ export function PasswordSettingsPage({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+      >
         <PageHeader title="Password" onBack={onBack} />
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          ref={scrollRef}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="always"
           keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'none'}
+          contentInset={{ bottom: keyboardHeight }}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: keyboardHeight + 32 }]}
         >
           <View style={[styles.heroCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.heroIconWrap}>
@@ -292,6 +339,8 @@ export function PasswordSettingsPage({
                   inputRef={setPasswordRef}
                   returnKeyType="next"
                   onSubmitEditing={() => confirmSetPasswordRef.current?.focus()}
+                  onFieldLayout={(y) => saveFieldOffset('setPassword', y)}
+                  onFocusField={() => focusField('setPassword')}
                 />
                 <PasswordField
                   theme={theme}
@@ -308,6 +357,8 @@ export function PasswordSettingsPage({
                   inputRef={confirmSetPasswordRef}
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
+                  onFieldLayout={(y) => saveFieldOffset('confirmSetPassword', y)}
+                  onFocusField={() => focusField('confirmSetPassword')}
                 />
               </>
             ) : (
@@ -327,6 +378,8 @@ export function PasswordSettingsPage({
                   inputRef={currentPasswordRef}
                   returnKeyType="next"
                   onSubmitEditing={() => newPasswordRef.current?.focus()}
+                  onFieldLayout={(y) => saveFieldOffset('currentPassword', y)}
+                  onFocusField={() => focusField('currentPassword')}
                 />
 
                 <PasswordField
@@ -344,6 +397,8 @@ export function PasswordSettingsPage({
                   inputRef={newPasswordRef}
                   returnKeyType="next"
                   onSubmitEditing={() => confirmNewPasswordRef.current?.focus()}
+                  onFieldLayout={(y) => saveFieldOffset('newPassword', y)}
+                  onFocusField={() => focusField('newPassword')}
                 />
                 <PasswordField
                   theme={theme}
@@ -360,6 +415,8 @@ export function PasswordSettingsPage({
                   inputRef={confirmNewPasswordRef}
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
+                  onFieldLayout={(y) => saveFieldOffset('confirmNewPassword', y)}
+                  onFocusField={() => focusField('confirmNewPassword')}
                 />
               </>
             )}

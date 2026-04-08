@@ -240,6 +240,10 @@ export function ProfileScreen({
   const t = (key: keyof (typeof translations)['English']) => getSafeTranslation(language, key);
   const preferenceValue = { language, setLanguage: onLanguageChange, darkMode, setDarkMode: onDarkModeChange, t, theme };
   const menuItems = useMemo(() => (currentRole === 'dealer' ? dealerMenuItems : electricianMenuItems), [currentRole]);
+  const settingsMenuItems = useMemo(
+    () => (currentRole === 'dealer' ? settingsItems.filter((item) => item.screen !== 'Scan History') : settingsItems),
+    [currentRole]
+  );
   const electricianCount = 134;
   const electricianPoints = 4250;
   const dealerMembership = useMemo(() => getDealerMembership(electricianCount), [electricianCount]);
@@ -606,11 +610,11 @@ export function ProfileScreen({
           <View style={[styles.sectionCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{t('settings')}</Text>
             <View style={{ height: 12 }} />
-            {settingsItems.map((item, index) => {
+            {settingsMenuItems.map((item, index) => {
               return (
               <TouchableOpacity
                 key={item.screen}
-                style={[styles.menuRow, index < settingsItems.length - 1 ? [styles.menuBorder, { borderBottomColor: theme.border }] : null]}
+                style={[styles.menuRow, index < settingsMenuItems.length - 1 ? [styles.menuBorder, { borderBottomColor: theme.border }] : null]}
                 onPress={() => (item.route ? onNavigate(item.route) : setSubPage(item.screen))}
                 activeOpacity={0.75}
               >
