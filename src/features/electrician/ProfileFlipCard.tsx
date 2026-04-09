@@ -101,9 +101,10 @@ function DetailPill({
   lines?: number;
   icon?: React.ReactNode;
 }) {
+  const { tx } = usePreferenceContext();
   return (
     <View style={[styles.detailPill, compact && styles.detailPillCompact]}>
-      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailLabel}>{tx(label)}</Text>
       <View style={styles.detailValueRow}>
         {icon ? <View style={styles.detailIconWrap}>{icon}</View> : null}
         <Text style={styles.detailValue} numberOfLines={lines}>{value}</Text>
@@ -113,7 +114,7 @@ function DetailPill({
 }
 
 export default function ProfileFlipCard({ profile, role = 'electrician', photoUri }: Props) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const [flipped, setFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -181,7 +182,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
   const dealerAddress = profile?.address || 'Green Valley Colony, Mansa, Punjab 151505, India';
   const frontLocation = role === 'dealer' ? dealerLocation : (profile?.town || 'Chauke, Punjab');
   const codeLabel = role === 'dealer' ? 'Dealer Code' : 'Electrician Code';
-  const backThirdLabel = role === 'dealer' ? 'Address' : 'Phone';
+  const backThirdLabel = role === 'dealer' ? 'Address' : 'Phone Number';
   const backThirdValue = role === 'dealer' ? dealerAddress : dealerPhone;
   const exportName = ((profile?.name || dealerName || 'srv-profile-card')
     .toLowerCase()
@@ -289,7 +290,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
       if (Platform.OS === 'android') {
         const permission = await LegacyFileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
         if (!permission.granted) {
-          Alert.alert('Save cancelled', 'Folder not selected.');
+          Alert.alert(tx('Save cancelled'), tx('Folder not selected.'));
           return;
         }
 
@@ -304,15 +305,15 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
         await LegacyFileSystem.StorageAccessFramework.writeAsStringAsync(targetUri, base64, {
           encoding: LegacyFileSystem.EncodingType.Base64,
         });
-        Alert.alert('PDF saved', 'Profile card PDF saved to your selected device folder.');
+        Alert.alert(tx('PDF saved'), tx('Profile card PDF saved to your selected device folder.'));
         return;
       }
 
       const destination = `${LegacyFileSystem.documentDirectory ?? LegacyFileSystem.cacheDirectory}${fileName}`;
       await LegacyFileSystem.copyAsync({ from: uri, to: destination });
-      Alert.alert('PDF saved', `Saved in local files:\n${destination}`);
+      Alert.alert(tx('PDF saved'), `${tx('Saved in local files:')}\n${destination}`);
     } catch {
-      Alert.alert('Download failed', 'Unable to create the profile card PDF right now.');
+      Alert.alert(tx('Download failed'), tx('Unable to create the profile card PDF right now.'));
     } finally {
       setIsDownloading(false);
     }
@@ -333,14 +334,14 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
                     {photoUri ? <Image source={{ uri: photoUri }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.roleText, darkMode ? styles.roleTextDark : null]}>{role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner'}</Text>
+                    <Text style={[styles.roleText, darkMode ? styles.roleTextDark : null]}>{role === 'dealer' ? tx('Dealer Partner') : tx('Electrician Partner')}</Text>
                     <Text style={styles.nameText}>{profile?.name || 'Harshvardhan'}</Text>
                     <Text style={[styles.phoneText, darkMode ? styles.phoneTextDark : null]}>+91 {profile?.phone || '9162038214'}</Text>
                     <Animated.Text
                       style={[styles.inlineTapHint, darkMode ? styles.inlineTapHintDark : null, { transform: [{ scale: hintPulse }] }]}
                       numberOfLines={1}
                     >
-                      Tap card to view QR & details
+                      {tx('Tap card to view QR & details')}
                     </Animated.Text>
                   </View>
                 </View>
@@ -364,7 +365,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
               <View style={[styles.backGlowTwo, darkMode ? styles.backGlowTwoDark : null]} />
               <View style={styles.backContent}>
                 <View style={styles.backLeft}>
-                  <Text style={[styles.backHeading, darkMode ? styles.backHeadingDark : null]}>{role === 'dealer' ? 'Business Details' : 'Connected Dealer'}</Text>
+                  <Text style={[styles.backHeading, darkMode ? styles.backHeadingDark : null]}>{tx(role === 'dealer' ? 'Business Details' : 'Connected Dealer')}</Text>
                   <View style={styles.metaStack}>
                     <DetailPill label="Name" value={dealerName} compact />
                     <DetailPill label="Location" value={dealerLocation} compact lines={2} />

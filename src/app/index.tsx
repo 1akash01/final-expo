@@ -24,7 +24,7 @@ import {
   WalletDealerBonusScreen,
   WalletTransferPointsScreen,
 } from '@/features/profile/WalletLinkedPages';
-import { PreferenceContext, getSafeTranslation, getThemePalette, translations, type AppLanguage } from '@/features/profile/ProfileShared';
+import { PreferenceContext, getSafeTranslation, getThemePalette, translations, translateUiText, type AppLanguage } from '@/features/profile/ProfileShared';
 import { colors } from '@/shared/theme/colors';
 import type { Screen, UserRole } from '@/shared/types/navigation';
 
@@ -54,6 +54,7 @@ export default function Index() {
   const appTheme = useMemo(() => getThemePalette(darkMode), [darkMode]);
   const statusBarStyle = darkMode ? 'light' : 'dark';
   const t = (key: keyof (typeof translations)['English']) => getSafeTranslation(language, key);
+  const tx = (text: string) => translateUiText(language, text);
   const preferenceValue = useMemo(
     () => ({
       language,
@@ -61,6 +62,7 @@ export default function Index() {
       darkMode,
       setDarkMode,
       t,
+      tx,
       theme: appTheme,
     }),
     [language, darkMode, appTheme]

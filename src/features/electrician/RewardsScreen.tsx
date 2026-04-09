@@ -36,7 +36,7 @@ const rewards = [
 export function RewardsScreen() {
   const [activeTab, setActiveTab] = require('react').useState('All');
   const headerScale = useRef(new Animated.Value(1)).current;
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
 
   const handleRedeem = (id: string) => {
     Animated.sequence([
@@ -49,7 +49,7 @@ export function RewardsScreen() {
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Rewards Store</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>{tx('Rewards Store')}</Text>
         <View style={[styles.pointsBadge, darkMode ? styles.pointsBadgeDark : null]}>
           <Text style={{ fontSize: 16 }}>⭐</Text>
           <Text style={styles.pointsBadgeText}>4,250 pts</Text>
@@ -60,7 +60,7 @@ export function RewardsScreen() {
       <View style={styles.tabRow}>
         {TABS.map((tab) => (
           <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={styles.tabItem}>
-            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tab}</Text>
+            <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>{tx(tab)}</Text>
             {activeTab === tab && <View style={[styles.tabUnderline, darkMode ? styles.tabUnderlineDark : null]} />}
           </TouchableOpacity>
         ))}
@@ -83,23 +83,23 @@ export function RewardsScreen() {
               style={[styles.redeemBtn, { backgroundColor: reward.color }]}
               activeOpacity={0.85}
             >
-              <Text style={styles.redeemBtnText}>Redeem</Text>
+              <Text style={styles.redeemBtnText}>{tx('Redeem')}</Text>
             </TouchableOpacity>
           </View>
           <View style={[styles.progressTrack, darkMode ? styles.progressTrackDark : null]}>
             <View style={[styles.progressFill, { width: `${reward.progress}%`, backgroundColor: reward.color }]} />
           </View>
-          <Text style={[styles.progressLabel, darkMode ? styles.progressLabelDark : null]}>{reward.progress}% to unlock</Text>
+          <Text style={[styles.progressLabel, darkMode ? styles.progressLabelDark : null]}>{reward.progress}% {tx('to unlock')}</Text>
         </View>
       ))}
 
       {/* Mega Event Banner */}
       <View style={[styles.eventBanner, darkMode ? styles.eventBannerDark : null]}>
         <View style={styles.eventLeft}>
-          <Text style={styles.eventTitle}>Mega Rewards Event! 🎉</Text>
-          <Text style={styles.eventSub}>Earn 2x points on all scans this week. Limited time offer!</Text>
+          <Text style={styles.eventTitle}>{tx('Mega Rewards Event!')} 🎉</Text>
+          <Text style={styles.eventSub}>{tx('Earn 2x points on all scans this week. Limited time offer!')}</Text>
           <TouchableOpacity style={styles.learnMoreBtn}>
-            <Text style={styles.learnMoreText}>Learn More</Text>
+            <Text style={styles.learnMoreText}>{tx('Learn More')}</Text>
           </TouchableOpacity>
         </View>
         <Text style={{ fontSize: 52 }}>🎁</Text>

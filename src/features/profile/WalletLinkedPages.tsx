@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { BankDetailsPage } from './BankDetails';
 import { PartnerCommissionPage } from './PartnerCommission';
-import { PreferenceContext, getSafeTranslation, getThemePalette, type AppLanguage } from './ProfileShared';
+import { PreferenceContext, getSafeTranslation, getThemePalette, translateUiText, type AppLanguage } from './ProfileShared';
 import { TransferPointsPage } from './TransferPoints';
 import type { Screen } from '@/shared/types/navigation';
 
@@ -20,7 +20,7 @@ function useWalletPreferenceValue({
   const t = (key: keyof ReturnType<typeof getTranslationKeys>) => getSafeTranslation(language, key);
 
   return useMemo(
-    () => ({ language, setLanguage, darkMode, setDarkMode, t, theme }),
+    () => ({ language, setLanguage, darkMode, setDarkMode, t, tx: (text: string) => translateUiText(language, text), theme }),
     [darkMode, language, setDarkMode, setLanguage, theme]
   );
 }

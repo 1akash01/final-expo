@@ -90,15 +90,15 @@ const notifications = [
 ];
 
 export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   return (
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#09111F', '#12284A', '#18396A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.heroCopy}>
-            <Text style={styles.heroEyebrow}>Notification Center</Text>
-            <Text style={styles.heroTitle}>Stay updated with SRV</Text>
-            <Text style={styles.heroSub}>Important price updates, reward alerts, and account notices in one place.</Text>
+            <Text style={styles.heroEyebrow}>{tx('Notification Center')}</Text>
+            <Text style={styles.heroTitle}>{tx('Stay updated with SRV')}</Text>
+            <Text style={styles.heroSub}>{tx('Important price updates, reward alerts, and account notices in one place.')}</Text>
           </View>
           <View style={styles.heroIconWrap}>
             <BellIcon color="#FFFFFF" size={26} />
@@ -107,18 +107,18 @@ export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen
 
         <View style={styles.heroActions}>
           <TouchableOpacity style={styles.heroActionBtn} activeOpacity={0.85} onPress={() => onNavigate('home')}>
-            <Text style={styles.heroActionText}>Back Home</Text>
+            <Text style={styles.heroActionText}>{tx('Back Home')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.heroGhostBtn} activeOpacity={0.85} onPress={() => onNavigate('profile')}>
-            <Text style={styles.heroGhostText}>More</Text>
+            <Text style={styles.heroGhostText}>{tx('More')}</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
 
       <View style={styles.headerRow}>
-        <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Latest updates</Text>
+        <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Latest updates')}</Text>
         <View style={styles.unreadPill}>
-          <Text style={styles.unreadText}>{notifications.length} new</Text>
+          <Text style={styles.unreadText}>{notifications.length} {tx('new')}</Text>
         </View>
       </View>
 
@@ -131,12 +131,12 @@ export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen
                 <Icon />
               </View>
               <View style={styles.meta}>
-                <Text style={[styles.cardType, darkMode ? styles.cardTypeDark : null]}>{item.type}</Text>
-                <Text style={[styles.cardTime, darkMode ? styles.cardTimeDark : null]}>{item.time}</Text>
+                <Text style={[styles.cardType, darkMode ? styles.cardTypeDark : null]}>{tx(item.type)}</Text>
+                <Text style={[styles.cardTime, darkMode ? styles.cardTimeDark : null]}>{tx(item.time)}</Text>
               </View>
             </View>
-            <Text style={[styles.cardTitle, darkMode ? styles.cardTitleDark : null]}>{item.title}</Text>
-            <Text style={[styles.cardBody, darkMode ? styles.cardBodyDark : null]}>{item.body}</Text>
+            <Text style={[styles.cardTitle, darkMode ? styles.cardTitleDark : null]}>{tx(item.title)}</Text>
+            <Text style={[styles.cardBody, darkMode ? styles.cardBodyDark : null]}>{tx(item.body)}</Text>
           </LinearGradient>
         );
       })}

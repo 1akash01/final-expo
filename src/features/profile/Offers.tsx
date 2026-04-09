@@ -9,7 +9,7 @@ const offers = [
 ];
 
 export function OffersPage({ onBack }: { onBack: () => void }) {
-  const { t, theme } = usePreferenceContext();
+  const { t, tx, theme } = usePreferenceContext();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
@@ -31,14 +31,14 @@ export function OffersPage({ onBack }: { onBack: () => void }) {
                 <AppIcon name="offer" size={20} color={C.gold} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.offerTitle, { color: theme.textPrimary }]}>{offer.title}</Text>
+                <Text style={[styles.offerTitle, { color: theme.textPrimary }]}>{tx(offer.title)}</Text>
                 <Text style={[styles.offerId, { color: theme.textMuted }]}>{offer.id}</Text>
               </View>
               <View style={styles.offerTag}>
-                <Text style={styles.offerTagText}>{offer.tag}</Text>
+                <Text style={styles.offerTagText}>{tx(offer.tag)}</Text>
               </View>
             </View>
-            <Text style={[styles.offerBody, { color: theme.textSecondary }]}>{offer.body}</Text>
+            <Text style={[styles.offerBody, { color: theme.textSecondary }]}>{tx(offer.body)}</Text>
           </View>
         ))}
       </ScrollView>

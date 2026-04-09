@@ -17,7 +17,7 @@ import {
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { featuredProducts } from '@/shared/data/mock';
 import ProfileFlipCard from '@/features/electrician/ProfileFlipCard';
-import { usePreferenceContext } from '@/features/profile/ProfileShared';
+import { formatCountText, usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 import { associatedElectricians, dealerProfile } from './dealerData';
 
@@ -165,7 +165,7 @@ function FeaturedCard({
   badge: string;
   onPress: () => void;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx, language } = usePreferenceContext();
   const pressScale = useRef(new Animated.Value(1)).current;
   const tilt = useRef(new Animated.Value(0)).current;
 
@@ -259,7 +259,7 @@ export function HomeScreen({
   onOpenProductCategory: (category: string) => void;
   profilePhotoUri?: string | null;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx, language } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const statPulse = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -351,32 +351,32 @@ export function HomeScreen({
 
   const quickActions = [
     {
-      title: 'Associate Electrician',
-      sub: `${connectedCount} connected`,
+      title: tx('Associate Electrician'),
+      sub: formatCountText(language, connectedCount, 'connected', 'जुड़े हुए', 'ਜੁੜੇ ਹੋਏ'),
       icon: UserPlusIcon,
       iconColors: ['#E8F1FF', '#CFE0FF'] as const,
       iconTint: '#0F4BA8',
       onPress: () => onNavigate('electricians'),
     },
     {
-      title: 'Wallet',
-      sub: 'Payout and history',
+      title: tx('Wallet'),
+      sub: tx('Payout and history'),
       icon: WalletIcon,
       iconColors: ['#FFF3DB', '#FFE1B0'] as const,
       iconTint: '#9A5A0E',
       onPress: () => onNavigate('wallet'),
     },
     {
-      title: 'Call Electrician',
-      sub: 'Reach your network',
+      title: tx('Call Electrician'),
+      sub: tx('Reach your network'),
       icon: PhoneIcon,
       iconColors: ['#FFF0EA', '#FFD2C4'] as const,
       iconTint: '#B14B16',
       onPress: () => onNavigate('call_electrician'),
     },
     {
-      title: 'WhatsApp',
-      sub: 'Business support',
+      title: tx('WhatsApp'),
+      sub: tx('Business support'),
       icon: WhatsAppIcon,
       iconColors: ['#E8FFF1', '#C6F3D8'] as const,
       iconTint: '#1A8F58',
@@ -405,9 +405,13 @@ export function HomeScreen({
           <Animated.View style={[styles.statCardWrap, darkMode ? styles.statCardWrapDark : null, { transform: [{ scale: statPulse }] }]}>
             <TouchableOpacity activeOpacity={0.9} onPress={() => onNavigate('call_electrician')}>
               <LinearGradient colors={darkMode ? ['#0F172A', '#132238', '#1E293B'] : ['#E8F1FF', '#D7E7FF', '#CEE0FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.statCard, darkMode ? styles.statCardDark : null]}>
-                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Call Electrician</Text>
-                <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>{connectedCount} contacts</Text>
-                <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>Open phone and WhatsApp actions</Text>
+                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>{tx('Call Electrician')}</Text>
+                <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>
+                  {formatCountText(language, connectedCount, 'contacts', 'कॉन्टैक्ट्स', 'ਸੰਪਰਕ')}
+                </Text>
+                <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
+                  {tx('Open phone and WhatsApp actions')}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
@@ -418,11 +422,13 @@ export function HomeScreen({
                 <View style={[styles.tierIconChip, { backgroundColor: darkMode ? 'rgba(255,255,255,0.12)' : tier.chip }]}>
                   <TierBadgeIcon tier={tier.tier} size={20} />
                 </View>
-                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Member Tier</Text>
+                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>{tx('Member Tier')}</Text>
                 <View style={styles.tierTextStack}>
                   <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>{tier.tier}</Text>
                   <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
-                    {tier.nextAt ? `${tier.nextAt - connectedCount} more electricians for next grade` : 'Top dealer grade unlocked'}
+                    {tier.nextAt
+                      ? formatCountText(language, tier.nextAt - connectedCount, 'more electricians for next grade', 'अगले ग्रेड के लिए और इलेक्ट्रीशियन', 'ਅਗਲੇ ਗ੍ਰੇਡ ਲਈ ਹੋਰ ਇਲੈਕਟ੍ਰੀਸ਼ਨ')
+                      : tx('Top dealer grade unlocked')}
                   </Text>
                 </View>
               </LinearGradient>
@@ -473,8 +479,8 @@ export function HomeScreen({
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Catalog</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Featured products</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Catalog')}</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Featured products')}</Text>
           </View>
         </View>
 
@@ -490,14 +496,14 @@ export function HomeScreen({
                   activeOpacity={0.86}
                 >
                   {filter === 'All' ? <FilterIcon color={active ? '#FFFFFF' : darkMode ? '#CBD5E1' : '#173E80'} size={15} /> : null}
-                  <Text style={[styles.filterChipText, darkMode ? styles.filterChipTextDark : null, active && styles.filterChipTextActive]}>{filter}</Text>
+                  <Text style={[styles.filterChipText, darkMode ? styles.filterChipTextDark : null, active && styles.filterChipTextActive]}>{tx(filter)}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
           <TouchableOpacity onPress={() => onNavigate('product')} style={styles.inlineAction} activeOpacity={0.85}>
-            <Text style={styles.viewAllText}>View all</Text>
+            <Text style={styles.viewAllText}>{tx('View all')}</Text>
             <ChevronRight />
           </TouchableOpacity>
         </View>
@@ -517,16 +523,20 @@ export function HomeScreen({
                     ? ['#F2F8FF', '#D9EFFF', '#B8DDFF']
                     : ['#FAF2FF', '#E9D5FF', '#D8B4FE']
               }
-              badge={index % 2 === 0 ? 'Top Pick' : 'Hot Deal'}
+              badge={tx(index % 2 === 0 ? 'Top Pick' : 'Hot Deal')}
               onPress={() => onOpenProductCategory('fanbox')}
             />
           ))}
         </View>
 
         <View style={[styles.activityCard, darkMode ? styles.activityCardDark : null]}>
-          <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>Dealer Growth</Text>
+          <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{tx('Dealer Growth')}</Text>
           <Text style={[styles.activityCopy, darkMode ? styles.activityCopyDark : null]}>
-            Dealer network is growing steadily with {connectedCount} associated electricians. Use the electricians page to manage and expand your dealer network.
+            {language === 'Hindi'
+              ? `डीलर नेटवर्क लगातार बढ़ रहा है और ${connectedCount} जुड़े हुए इलेक्ट्रीशियन हैं। अपने नेटवर्क को मैनेज और बढ़ाने के लिए इलेक्ट्रीशियन पेज खोलें।`
+              : language === 'Punjabi'
+                ? `ਡੀਲਰ ਨੈੱਟਵਰਕ ਲਗਾਤਾਰ ਵੱਧ ਰਿਹਾ ਹੈ ਅਤੇ ${connectedCount} ਜੁੜੇ ਹੋਏ ਇਲੈਕਟ੍ਰੀਸ਼ਨ ਹਨ। ਆਪਣੇ ਨੈੱਟਵਰਕ ਨੂੰ ਸੰਭਾਲਣ ਅਤੇ ਵਧਾਉਣ ਲਈ ਇਲੈਕਟ੍ਰੀਸ਼ਨ ਪੇਜ ਖੋਲ੍ਹੋ।`
+                : `Dealer network is growing steadily with ${connectedCount} associated electricians. Use the electricians page to manage and expand your dealer network.`}
           </Text>
         </View>
 

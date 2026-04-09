@@ -21,6 +21,7 @@ import {
   defaultProfile,
   getSafeTranslation,
   getThemePalette,
+  translateUiText,
   translations,
   type AppLanguage,
   type IconName,
@@ -238,7 +239,8 @@ export function ProfileScreen({
 
   const theme = useMemo(() => getThemePalette(darkMode), [darkMode]);
   const t = (key: keyof (typeof translations)['English']) => getSafeTranslation(language, key);
-  const preferenceValue = { language, setLanguage: onLanguageChange, darkMode, setDarkMode: onDarkModeChange, t, theme };
+  const tx = (text: string) => translateUiText(language, text);
+  const preferenceValue = { language, setLanguage: onLanguageChange, darkMode, setDarkMode: onDarkModeChange, t, tx, theme };
   const menuItems = useMemo(() => (currentRole === 'dealer' ? dealerMenuItems : electricianMenuItems), [currentRole]);
   const settingsMenuItems = useMemo(
     () => (currentRole === 'dealer' ? settingsItems.filter((item) => item.screen !== 'Scan History') : settingsItems),
@@ -302,25 +304,25 @@ export function ProfileScreen({
 
   const saveProfile = () => {
     if (draft.name.trim() && !/^[A-Za-z ]+$/.test(draft.name.trim())) {
-      return Alert.alert('Invalid name', 'Name should contain only alphabets and spaces.');
+      return Alert.alert(tx('Invalid name'), tx('Name should contain only alphabets and spaces.'));
     }
     if (draft.phone.trim() && !/^\d+$/.test(draft.phone.trim())) {
-      return Alert.alert('Invalid phone number', 'Phone number should contain only integers.');
+      return Alert.alert(tx('Invalid phone number'), tx('Phone number should contain only integers.'));
     }
     if (draft.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())) {
-      return Alert.alert('Invalid email', 'Please enter a valid email address.');
+      return Alert.alert(tx('Invalid email'), tx('Please enter a valid email address.'));
     }
     if (draft.city.trim() && !/^[A-Za-z ]+$/.test(draft.city.trim())) {
-      return Alert.alert('Invalid city', 'City should contain only alphabets and spaces.');
+      return Alert.alert(tx('Invalid city'), tx('City should contain only alphabets and spaces.'));
     }
     if (draft.state.trim() && !/^[A-Za-z ]+$/.test(draft.state.trim())) {
-      return Alert.alert('Invalid state', 'State should contain only alphabets and spaces.');
+      return Alert.alert(tx('Invalid state'), tx('State should contain only alphabets and spaces.'));
     }
     if (draft.pincode.trim() && !/^\d+$/.test(draft.pincode.trim())) {
-      return Alert.alert('Invalid pincode', 'Pincode should contain only integers.');
+      return Alert.alert(tx('Invalid pincode'), tx('Pincode should contain only integers.'));
     }
     if (draftTaxHolder.trim() && !/^[A-Za-z ]+$/.test(draftTaxHolder.trim())) {
-      return Alert.alert('Invalid holder name', 'GST / PAN holder name should contain only alphabets and spaces.');
+      return Alert.alert(tx('Invalid holder name'), tx('GST / PAN holder name should contain only alphabets and spaces.'));
     }
 
     const nextProfile: Profile =
@@ -352,7 +354,7 @@ export function ProfileScreen({
       if (source === 'camera') {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
         if (!permission.granted) {
-          Alert.alert('Permission needed', 'Allow camera access to update your profile photo.');
+          Alert.alert(tx('Permission needed'), tx('Allow camera access to update your profile photo.'));
           return;
         }
 
@@ -371,7 +373,7 @@ export function ProfileScreen({
 
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission needed', 'Allow gallery access to update your profile photo.');
+        Alert.alert(tx('Permission needed'), tx('Allow gallery access to update your profile photo.'));
         return;
       }
 
@@ -386,7 +388,7 @@ export function ProfileScreen({
         setPendingDraftImage(result.assets[0].uri);
       }
     } catch {
-      Alert.alert('Unable to update photo', 'Please try again.');
+      Alert.alert(tx('Unable to update photo'), tx('Please try again.'));
     }
   };
 
@@ -538,7 +540,7 @@ export function ProfileScreen({
                     <AppIcon name={item.icon} size={18} color={item.color} />
                   </View>
                   <Text style={[styles.statVal, { color: item.color }]}>{item.val}</Text>
-                  <Text style={[styles.statLbl, { color: theme.textMuted }]}>{item.label}</Text>
+                  <Text style={[styles.statLbl, { color: theme.textMuted }]}>{tx(item.label)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -575,7 +577,7 @@ export function ProfileScreen({
                   key={item.label}
                   style={[styles.detailRow, index < rows.length - 1 ? [styles.detailBorder, { borderBottomColor: theme.border }] : null]}
                 >
-                  <Text style={[styles.detailLbl, { color: theme.textMuted }]}>{item.label}</Text>
+                  <Text style={[styles.detailLbl, { color: theme.textMuted }]}>{tx(item.label)}</Text>
                   <Text style={[styles.detailVal, { color: theme.textPrimary }, isEmpty ? styles.detailEmpty : null]} numberOfLines={1}>
                     {value}
                   </Text>
@@ -597,7 +599,7 @@ export function ProfileScreen({
                 <View style={[styles.menuIcon, { backgroundColor: item.bg }]}>
                   <AppIcon name={item.icon} size={20} color={item.color} />
                 </View>
-                <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{item.label}</Text>
+                <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{tx(item.label)}</Text>
                 <View style={[styles.arrowWrap, { backgroundColor: item.bg, borderColor: `${item.color}22` }]}>
                   <View style={styles.arrowCore}>
                     <AppIcon name="chevronRight" size={15} color={item.color} strokeWidth={2.4} />
@@ -622,7 +624,7 @@ export function ProfileScreen({
                   {item.badge ? <View style={styles.notifDot} /> : null}
                   <AppIcon name={item.icon} size={20} color={item.color} />
                 </View>
-                <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{item.label}</Text>
+                <Text style={[styles.menuLabel, { color: theme.textPrimary }]}>{tx(item.label)}</Text>
                 <View style={[styles.arrowWrap, { backgroundColor: item.bg, borderColor: `${item.color}22` }]}>
                   <View style={styles.arrowCore}>
                     <AppIcon name="chevronRight" size={15} color={item.color} strokeWidth={2.4} />
@@ -678,14 +680,14 @@ export function ProfileScreen({
           <View style={styles.overlay}>
             <View style={[styles.confirmPhotoCard, { backgroundColor: theme.surface }]}>
               {pendingDraftImage ? <Image source={{ uri: pendingDraftImage }} style={styles.confirmPhotoPreview} /> : null}
-              <Text style={[styles.confirmPhotoTitle, { color: theme.textPrimary }]}>Review photo</Text>
-              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>If the crop looks right, tap Done to update your profile photo.</Text>
+              <Text style={[styles.confirmPhotoTitle, { color: theme.textPrimary }]}>{tx('Review photo')}</Text>
+              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>{tx('If the crop looks right, tap Done to update your profile photo.')}</Text>
               <View style={styles.confirmPhotoActions}>
                 <Pressable onPress={cancelDraftPhoto} style={[styles.cancelBtn, { backgroundColor: theme.soft, borderColor: theme.border }]}>
                   <Text style={[styles.cancelTxt, { color: theme.textPrimary }]}>{t('cancel')}</Text>
                 </Pressable>
                 <Pressable onPress={confirmDraftPhoto} style={styles.signOutActionBtn}>
-                  <Text style={styles.signOutActionTxt}>Done</Text>
+                  <Text style={styles.signOutActionTxt}>{tx('Done')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -697,7 +699,7 @@ export function ProfileScreen({
             <View style={[styles.editSheet, { backgroundColor: theme.surface }]}>
               <View style={styles.handle} />
               <View style={styles.editHeader}>
-                <Text style={[styles.editTitle, { color: theme.textPrimary }]}>Edit Profile</Text>
+                <Text style={[styles.editTitle, { color: theme.textPrimary }]}>{tx('Edit Profile')}</Text>
                 <TouchableOpacity onPress={closeEdit} style={[styles.closeBtn, { backgroundColor: theme.soft }]}>
                   <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>x</Text>
                 </TouchableOpacity>
@@ -723,20 +725,20 @@ export function ProfileScreen({
                         </View>
                         <View style={styles.uploadCopy}>
                           <Text style={[styles.uploadTitle, { color: theme.textPrimary }]}>{t('tapToChangePhoto')}</Text>
-                          <Text style={[styles.uploadText, { color: theme.textMuted }]}>Choose from camera or gallery, crop if needed, then finish with Done on the confirmation screen.</Text>
+                          <Text style={[styles.uploadText, { color: theme.textMuted }]}>{tx('Choose from camera or gallery, crop if needed, then finish with Done on the confirmation screen.')}</Text>
                         </View>
                       </View>
                     )}
                   </TouchableOpacity>
-                  <Text style={[styles.photoHint, { color: theme.textMuted }]}>{draftPhotoUri ? t('tapToChangePhoto') : 'After selecting a photo, review it and tap Done to continue.'}</Text>
+                  <Text style={[styles.photoHint, { color: theme.textMuted }]}>{draftPhotoUri ? t('tapToChangePhoto') : tx('After selecting a photo, review it and tap Done to continue.')}</Text>
                 </View>
                 {editRows.map((field) => (
                   <View key={field.key} style={styles.field}>
-                    <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{field.label}</Text>
+                    <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{tx(field.label)}</Text>
                     <TextInput
                       value={draft[field.key]}
                       onChangeText={(value) => updateDraftField(field.key, value)}
-                      placeholder={`Enter ${field.label}`}
+                      placeholder={`${tx('Enter')} ${tx(field.label)}`}
                       placeholderTextColor={theme.textMuted}
                       keyboardType={field.keyboardType ?? 'default'}
                       autoCapitalize={field.key === 'email' ? 'none' : 'words'}
@@ -801,7 +803,7 @@ export function ProfileScreen({
                 <AppIcon name="signOut" size={28} color={C.primary} />
               </View>
               <Text style={[styles.confirmTitle, { color: theme.textPrimary }]}>{`${t('signOut')}?`}</Text>
-              <Text style={[styles.confirmSub, { color: theme.textMuted }]}>{'Are you sure you want to sign out?\nYour data will be saved.'}</Text>
+              <Text style={[styles.confirmSub, { color: theme.textMuted }]}>{tx('Are you sure you want to sign out?\nYour data will be saved.')}</Text>
               <View style={styles.rowActions}>
                 <Pressable style={[styles.cancelBtn, { backgroundColor: theme.soft, borderColor: theme.border }]} onPress={() => setShowSignOut(false)}>
                   <Text style={[styles.cancelTxt, { color: theme.textPrimary }]}>{t('cancel')}</Text>

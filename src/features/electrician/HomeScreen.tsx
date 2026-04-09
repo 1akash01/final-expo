@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { Screen } from '@/shared/types/navigation';
-import { usePreferenceContext } from '@/features/profile/ProfileShared';
+import { formatCountText, usePreferenceContext } from '@/features/profile/ProfileShared';
 import ProfileFlipCard from './ProfileFlipCard';
 import { ElectricianTierIcon, getElectricianTier } from './ElectricianTierScreen';
 
@@ -137,7 +137,7 @@ function FeaturedProductCard({
   onOpenCategory: (category: string) => void;
   onScan: () => void;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const palette = FEATURED_CARD_COLORS[product.category] ?? FEATURED_CARD_COLORS.fanbox;
   const pressScale = useRef(new Animated.Value(1)).current;
   const tilt = useRef(new Animated.Value(0)).current;
@@ -154,7 +154,7 @@ function FeaturedProductCard({
     ]).start();
   };
   const rotateY = tilt.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '4deg'] });
-  const badgeText = product.points >= 25 ? 'Top Pick' : 'Popular';
+  const badgeText = tx(product.points >= 25 ? 'Top Pick' : 'Popular');
   return (
     <Pressable onPress={() => onOpenCategory(product.category)} onPressIn={handlePressIn} onPressOut={handlePressOut}>
       <Animated.View
@@ -188,7 +188,7 @@ function FeaturedProductCard({
             activeOpacity={0.85}
           >
             <ScanIcon color={palette.scanText} size={15} />
-            <Text style={[styles.productScanBtnText, { color: palette.scanText }]}>Scan to Earn</Text>
+            <Text style={[styles.productScanBtnText, { color: palette.scanText }]}>{tx('Scan to Earn')}</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -287,7 +287,7 @@ export function HomeScreen({
   onOpenProductCategory: (category: string) => void;
   profilePhotoUri?: string | null;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx, language } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [slide, setSlide] = useState(0);
   const productFilters = ['All', 'Boxes', 'Fans'] as const;
@@ -378,32 +378,32 @@ export function HomeScreen({
 
   const quickActions = [
     {
-      title: 'Scan & Earn',
-      sub: 'Instant points',
+      title: tx('Scan & Earn'),
+      sub: tx('Instant points'),
       icon: ScanIcon,
       iconColors: ['#E0F2FE', '#BAE6FD'] as const,
       iconTint: '#0369A1',
       onPress: () => onNavigate('scan'),
     },
     {
-      title: 'Wallet',
-      sub: 'Balance & history',
+      title: tx('Wallet'),
+      sub: tx('Balance & history'),
       icon: WalletIcon,
       iconColors: ['#FEF3C7', '#FDE68A'] as const,
       iconTint: '#B45309',
       onPress: () => onNavigate('wallet'),
     },
     {
-      title: 'Gift Store',
-      sub: 'Redeem rewards',
+      title: tx('Gift Store'),
+      sub: tx('Redeem rewards'),
       icon: GiftIcon,
       iconColors: ['#F3E8FF', '#DDD6FE'] as const,
       iconTint: '#7C3AED',
       onPress: () => onNavigate('rewards'),
     },
     {
-      title: 'WhatsApp',
-      sub: 'Premium support',
+      title: tx('WhatsApp'),
+      sub: tx('Premium support'),
       icon: WhatsAppIcon,
       iconColors: ['#DCFCE7', '#BBF7D0'] as const,
       iconTint: '#16A34A',
@@ -441,9 +441,11 @@ export function HomeScreen({
           <Animated.View style={[styles.statCardWrap, darkMode ? styles.statCardWrapDark : null, { transform: [{ scale: statsPulse }] }]}>
             <LinearGradient colors={darkMode ? ['#0F172A', '#132238', '#1E293B'] : ['#E0F2FE', '#DBEAFE', '#EDE9FE']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.statCard, darkMode ? styles.statCardDark : null]}>
               <Animated.View style={[styles.statGlow, styles.statGlowBlue, { opacity: statsPulse }]} />
-              <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Total Points</Text>
+              <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>{tx('Total Points')}</Text>
               <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>4,250</Text>
-              <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>+120 this week</Text>
+              <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
+                {language === 'Hindi' ? '+120 इस सप्ताह' : language === 'Punjabi' ? '+120 ਇਸ ਹਫ਼ਤੇ' : '+120 this week'}
+              </Text>
             </LinearGradient>
           </Animated.View>
           <Animated.View style={[styles.statCardWrap, darkMode ? styles.statCardWrapDark : null, { transform: [{ scale: statsPulse }] }]}>
@@ -453,10 +455,18 @@ export function HomeScreen({
                 <View style={[styles.tierIconChip, { backgroundColor: darkMode ? 'rgba(255,255,255,0.12)' : '#FFFFFFB8' }]}>
                   <ElectricianTierIcon tier={tier.tier} size={20} />
                 </View>
-                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>Member Tier</Text>
+                <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>{tx('Member Tier')}</Text>
                 <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>{tier.tier}</Text>
                 <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
-                  {tier.tier === 'Diamond' ? 'Top reward level unlocked' : `${tier.tier === 'Silver' ? 1001 - totalPoints : tier.tier === 'Gold' ? 5001 - totalPoints : 10001 - totalPoints} to next tier`}
+                  {tier.tier === 'Diamond'
+                    ? tx('Top reward level unlocked')
+                    : formatCountText(
+                        language,
+                        tier.tier === 'Silver' ? 1001 - totalPoints : tier.tier === 'Gold' ? 5001 - totalPoints : 10001 - totalPoints,
+                        'to next tier',
+                        'अगले टियर तक',
+                        'ਅਗਲੇ ਟੀਅਰ ਤੱਕ'
+                      )}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
@@ -505,8 +515,8 @@ export function HomeScreen({
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Top Picks</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Featured products</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Top Picks')}</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Featured products')}</Text>
           </View>
         </View>
 
@@ -522,14 +532,14 @@ export function HomeScreen({
                   activeOpacity={0.86}
                 >
                   {filter === 'All' ? <FilterIcon color={active ? '#FFFFFF' : darkMode ? '#CBD5E1' : '#173E80'} size={15} /> : null}
-                  <Text style={[styles.filterChipText, darkMode ? styles.filterChipTextDark : null, active && styles.filterChipTextActive]}>{filter}</Text>
+                  <Text style={[styles.filterChipText, darkMode ? styles.filterChipTextDark : null, active && styles.filterChipTextActive]}>{tx(filter)}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
           <TouchableOpacity onPress={() => onNavigate('product')} style={styles.inlineAction} activeOpacity={0.85}>
-            <Text style={styles.viewAllText}>View all</Text>
+            <Text style={styles.viewAllText}>{tx('View all')}</Text>
             <ChevronRight color="#E8453C" />
           </TouchableOpacity>
         </View>
@@ -548,11 +558,11 @@ export function HomeScreen({
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Recent Activity</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Latest actions</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Recent Activity')}</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Latest actions')}</Text>
           </View>
           <TouchableOpacity onPress={() => onNavigate('notification')} style={styles.inlineAction} activeOpacity={0.85}>
-            <Text style={styles.viewAllText}>Notifications</Text>
+            <Text style={styles.viewAllText}>{tx('Notifications')}</Text>
             <ChevronRight color="#E8453C" />
           </TouchableOpacity>
         </View>
@@ -564,8 +574,8 @@ export function HomeScreen({
                 <BellIcon color="#24437A" size={18} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{item.title}</Text>
-                <Text style={[styles.activityTime, darkMode ? styles.activityTimeDark : null]}>{item.time}</Text>
+                <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{tx(item.title)}</Text>
+                <Text style={[styles.activityTime, darkMode ? styles.activityTimeDark : null]}>{tx(item.time)}</Text>
               </View>
               <Text style={[styles.activityAmount, { color: item.amountColor }]}>{item.amount}</Text>
             </View>

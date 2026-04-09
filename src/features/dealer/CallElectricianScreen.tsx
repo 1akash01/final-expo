@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import { associatedElectricians } from './dealerData';
 
 function PhoneIcon({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) {
@@ -21,13 +22,15 @@ function WhatsAppIcon({ color = '#FFFFFF', size = 18 }: { color?: string; size?:
 }
 
 export function CallElectricianScreen() {
+  const { tx } = usePreferenceContext();
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#163A76', '#2953A5', '#5F8DE8']} style={styles.hero}>
-        <Text style={styles.heroEyebrow}>Dealer Calling Desk</Text>
-        <Text style={styles.heroTitle}>Reach your electricians instantly</Text>
+        <Text style={styles.heroEyebrow}>{tx('Dealer Calling Desk')}</Text>
+        <Text style={styles.heroTitle}>{tx('Reach your electricians instantly')}</Text>
         <Text style={styles.heroSub}>
-          Use normal phone call or WhatsApp call actions to connect with any associated electrician.
+          {tx('Use normal phone call or WhatsApp call actions to connect with any associated electrician.')}
         </Text>
       </LinearGradient>
 

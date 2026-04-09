@@ -313,7 +313,7 @@ function ProductCard({
   onScan: () => void;
   showScanButton?: boolean;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const pressScale = useRef(new Animated.Value(1)).current;
   const tiltX = useRef(new Animated.Value(0)).current;
 
@@ -357,7 +357,7 @@ function ProductCard({
         >
           {product.badge != null && (
             <View style={[styles.badge, { backgroundColor: catColor.scanText }]}> 
-              <Text style={styles.badgeText}>{product.badge}</Text>
+              <Text style={styles.badgeText}>{tx(product.badge)}</Text>
             </View>
           )}
           <View style={[styles.ptsBadge, { borderColor: catColor.scanText + '44' }]}>
@@ -378,7 +378,7 @@ function ProductCard({
               activeOpacity={0.8}
             >
               <ScanIcon size={15} color={catColor.scanText} />
-              <Text style={[styles.scanBtnText, { color: catColor.scanText }]}>Scan to Earn</Text>
+              <Text style={[styles.scanBtnText, { color: catColor.scanText }]}>{tx('Scan to Earn')}</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -399,7 +399,7 @@ export function ProductScreen({
   showBottomBanner?: boolean;
   showScanButton?: boolean;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState(initialCategory);
   const [search, setSearch] = useState('');
@@ -436,7 +436,7 @@ export function ProductScreen({
 
   return (
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.pageTitle, darkMode ? styles.pageTitleDark : null]}>All Products</Text>
+      <Text style={[styles.pageTitle, darkMode ? styles.pageTitleDark : null]}>{tx('All Products')}</Text>
 
       {/* Search */}
       <View style={[styles.searchWrap, darkMode ? styles.searchWrapDark : null]}>
@@ -444,7 +444,7 @@ export function ProductScreen({
         <TextInput
           value={search}
           onChangeText={setSearch}
-          placeholder="Search all products..."
+          placeholder={tx('Search all products...')}
           placeholderTextColor={Colors.textMuted}
           style={[styles.searchInput, darkMode ? styles.searchInputDark : null]}
         />
@@ -466,11 +466,11 @@ export function ProductScreen({
         <View style={[styles.filterPanel, darkMode ? styles.filterPanelDark : null]}>
           <View style={styles.filterPanelHeader}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.filterPanelTitle, darkMode ? styles.filterPanelTitleDark : null]}>Filter products</Text>
-              <Text style={[styles.filterPanelSub, darkMode ? styles.filterPanelSubDark : null]}>Choose a category to see matching product names and items.</Text>
+              <Text style={[styles.filterPanelTitle, darkMode ? styles.filterPanelTitleDark : null]}>{tx('Filter products')}</Text>
+              <Text style={[styles.filterPanelSub, darkMode ? styles.filterPanelSubDark : null]}>{tx('Choose a category to see matching product names and items.')}</Text>
             </View>
             <TouchableOpacity onPress={() => setShowFilters(false)} activeOpacity={0.8}>
-              <Text style={styles.filterPanelClose}>Close</Text>
+              <Text style={styles.filterPanelClose}>{tx('Close')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -500,7 +500,7 @@ export function ProductScreen({
                     {cat.label}
                   </Text>
                     <Text style={[styles.filterCardMeta, darkMode && !active ? styles.filterCardMetaDark : null, active && styles.filterCardMetaActive]}>
-                    {allProducts.filter((product) => product.category === cat.id).length} products
+                    {allProducts.filter((product) => product.category === cat.id).length} {tx('products')}
                   </Text>
                 </TouchableOpacity>
               );
@@ -542,11 +542,11 @@ export function ProductScreen({
         <View style={[styles.searchResultBanner, darkMode ? styles.searchResultBannerDark : null]}>
           <Text style={[styles.searchResultText, darkMode ? styles.searchResultTextDark : null]}>
             {filtered.length > 0
-              ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${search}"`
-              : `No results for "${search}"`}
+              ? `${filtered.length} ${tx(filtered.length !== 1 ? 'results' : 'result')} "${search}"`
+              : `${tx('No results for')} "${search}"`}
           </Text>
           {filtered.length === 0 && (
-            <Text style={[styles.searchResultSub, darkMode ? styles.searchResultSubDark : null]}>Try searching by product name or size</Text>
+            <Text style={[styles.searchResultSub, darkMode ? styles.searchResultSubDark : null]}>{tx('Try searching by product name or size')}</Text>
           )}
         </View>
       ) : (
@@ -557,7 +557,7 @@ export function ProductScreen({
             </View>
             <View>
               <Text style={styles.catBannerTitle}>{currentCat.label}</Text>
-              <Text style={styles.catBannerSub}>{filtered.length} products available</Text>
+              <Text style={styles.catBannerSub}>{filtered.length} {tx('products')} {tx('available')}</Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => onNavigate('scan')} style={styles.catScanBtn}>
@@ -599,8 +599,8 @@ export function ProductScreen({
         >
           <Text style={{ fontSize: 26 }}>🏭</Text>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bottomBannerTitle}>North India's Largest Manufacturer</Text>
-            <Text style={styles.bottomBannerSub}>SRV Electricals — since 2000. Scan any QR to earn points!</Text>
+            <Text style={styles.bottomBannerTitle}>{tx("North India's Largest Manufacturer")}</Text>
+            <Text style={styles.bottomBannerSub}>{tx('SRV Electricals — since 2000. Scan any QR to earn points!')}</Text>
           </View>
           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18 }}>›</Text>
         </TouchableOpacity>

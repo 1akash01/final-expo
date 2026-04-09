@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -18,6 +18,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import Svg, { Path } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 export type UserRole = 'electrician' | 'dealer';
 type AuthMode = 'login' | 'signup';
@@ -112,9 +113,10 @@ function useReveal() {
 }
 
 function Info({ text, kind }: { text: string; kind: 'error' | 'success' }) {
+  const { tx } = usePreferenceContext();
   return (
     <View style={[s.info, kind === 'error' ? s.infoError : s.infoSuccess]}>
-      <Text style={[s.infoText, kind === 'error' ? s.infoErrorText : s.infoSuccessText]}>{text}</Text>
+      <Text style={[s.infoText, kind === 'error' ? s.infoErrorText : s.infoSuccessText]}>{tx(text)}</Text>
     </View>
   );
 }
@@ -144,6 +146,135 @@ function BackArrowIcon() {
     <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
       <Path d="M15 5L8 12L15 19" stroke="#152238" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
+  );
+}
+
+function TranslateIcon({ color }: { color: string }) {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+      <Path d="M4.75 6.75H14.75" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
+      <Path d="M9.75 6.75V7.35C9.75 10.52 8.18 13.48 5.55 15.25" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M7.25 10.75C8.24 12.51 9.71 14.02 11.48 15.05" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M13.9 18.25L17.9 9.75L21.9 18.25" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M15.2 15.5H20.6" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function LanguageChooser() {
+  const { language, setLanguage, tx } = usePreferenceContext();
+  const [open, setOpen] = useState(false);
+  const dropdownAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(dropdownAnim, {
+      toValue: open ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [dropdownAnim, open]);
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulseAnim]);
+
+  const options: Array<{ value: 'English' | 'Hindi' | 'Punjabi'; title: string; mark: string }> = [
+    { value: 'English', title: tx('english'), mark: 'A' },
+    { value: 'Hindi', title: tx('hindi'), mark: 'अ' },
+    { value: 'Punjabi', title: tx('punjabi'), mark: 'ਅ' },
+  ];
+  const currentOption = options.find((option) => option.value === language) ?? options[0];
+  const dropdownStyle = {
+    opacity: dropdownAnim,
+    transform: [
+      {
+        translateY: dropdownAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-8, 0],
+        }),
+      },
+      {
+        scale: dropdownAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.96, 1],
+        }),
+      },
+    ],
+  };
+  const triggerAnimStyle = {
+    transform: [
+      {
+        translateY: pulseAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -2],
+        }),
+      },
+      {
+        scale: pulseAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.04],
+        }),
+      },
+    ],
+  };
+
+  return (
+    <View style={s.languageWrap}>
+      <Animated.View style={triggerAnimStyle}>
+        <Pressable onPress={() => setOpen((current) => !current)} style={[s.languageTrigger, open ? s.languageTriggerActive : null]}>
+          <LinearGradient
+            colors={open ? ['#2C6BE7', '#5DAAF8'] : ['#F8FBFF', '#E8F1FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={s.languageTriggerFill}
+          >
+            <View style={[s.languageMiniIcon, open ? s.languageMiniIconActive : null]}>
+              <TranslateIcon color={open ? '#FFFFFF' : '#2C6BE7'} />
+            </View>
+            <Text style={[s.languageMiniText, open ? s.languageMiniTextActive : null]}>{currentOption.mark}</Text>
+          </LinearGradient>
+        </Pressable>
+      </Animated.View>
+      {open ? (
+        <Animated.View style={[s.languageMenu, dropdownStyle]}>
+          {options.map((option) => {
+            const active = language === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => {
+                  setLanguage(option.value);
+                  setOpen(false);
+                }}
+                style={[s.languageMenuItem, active ? s.languageMenuItemActive : null]}
+              >
+                <Text style={[s.languageMenuMark, active ? s.languageMenuMarkActive : null]}>{option.mark}</Text>
+                <Text style={[s.languageMenuText, active ? s.languageMenuTextActive : null]}>{option.title}</Text>
+              </Pressable>
+            );
+          })}
+        </Animated.View>
+      ) : null}
+    </View>
   );
 }
 
@@ -188,9 +319,10 @@ function Field({
   editable?: boolean;
   onPressIn?: () => void;
 }) {
+  const { tx } = usePreferenceContext();
   return (
     <View style={s.group}>
-      <Text style={s.label}>{label}</Text>
+      <Text style={s.label}>{tx(label)}</Text>
       <View style={[s.shell, error ? s.shellError : null]}>
         {prefix ? (
           <View style={s.prefixWrap}>
@@ -202,7 +334,7 @@ function Field({
           style={s.input}
           value={value}
           onChangeText={onChangeText}
-          placeholder={placeholder}
+          placeholder={tx(placeholder)}
           placeholderTextColor="#90A0BB"
           keyboardType={keyboardType ?? 'default'}
           secureTextEntry={secureTextEntry}
@@ -226,7 +358,7 @@ function Field({
               actionDisabled ? s.fieldActionDisabled : null,
             ]}
           >
-            {actionContent ?? <Text style={[s.fieldActionText, actionDisabled ? s.fieldActionTextDisabled : null]}>{actionLabel}</Text>}
+            {actionContent ?? <Text style={[s.fieldActionText, actionDisabled ? s.fieldActionTextDisabled : null]}>{actionLabel ? tx(actionLabel) : ''}</Text>}
           </Pressable>
         ) : null}
       </View>
@@ -250,6 +382,7 @@ function Button({
   colors?: [string, string];
   shadowColor?: string;
 }) {
+  const { tx } = usePreferenceContext();
   return (
     <Pressable onPress={onPress} disabled={disabled} style={s.btnOuter}>
       <LinearGradient
@@ -266,13 +399,14 @@ function Button({
         end={{ x: 1, y: 0.5 }}
         style={[s.btn, secondary ? s.btnSecondary : null, shadowColor ? { shadowColor } : null]}
       >
-        <Text style={[s.btnText, secondary ? s.btnTextSecondary : null]}>{label}</Text>
+        <Text style={[s.btnText, secondary ? s.btnTextSecondary : null]}>{tx(label)}</Text>
       </LinearGradient>
     </Pressable>
   );
 }
 
 function Tabs({ mode, role, onChange }: { mode: AuthMode; role: UserRole; onChange: (mode: AuthMode) => void }) {
+  const { tx } = usePreferenceContext();
   return (
     <View style={s.tabs}>
       {(['login', 'signup'] as AuthMode[]).map((item) => (
@@ -284,7 +418,7 @@ function Tabs({ mode, role, onChange }: { mode: AuthMode; role: UserRole; onChan
           ]}
           onPress={() => onChange(item)}
         >
-          <Text style={[s.tabText, mode === item ? s.tabTextActive : null]}>{item === 'login' ? 'Login' : 'Create Account'}</Text>
+          <Text style={[s.tabText, mode === item ? s.tabTextActive : null]}>{item === 'login' ? tx('Login') : tx('Create Account')}</Text>
         </Pressable>
       ))}
     </View>
@@ -292,6 +426,7 @@ function Tabs({ mode, role, onChange }: { mode: AuthMode; role: UserRole; onChan
 }
 
 function RoleCard({ role, selected, onPress }: { role: UserRole; selected: boolean; onPress: () => void }) {
+  const { tx } = usePreferenceContext();
   return (
     <Pressable
       onPress={onPress}
@@ -304,8 +439,8 @@ function RoleCard({ role, selected, onPress }: { role: UserRole; selected: boole
       <View style={s.roleFrame}>
         <Image source={roleImages[role]} style={s.roleImage} resizeMode="contain" />
       </View>
-      <Text style={[s.roleTitle, selected ? s.roleTitleActive : s.roleTitleDefault]}>{roleMeta[role].title}</Text>
-      <Text style={[s.roleSubtitle, selected ? s.roleSubtitleActive : s.roleSubtitleDefault]}>{roleMeta[role].subtitle}</Text>
+      <Text style={[s.roleTitle, selected ? s.roleTitleActive : s.roleTitleDefault]}>{tx(roleMeta[role].title)}</Text>
+      <Text style={[s.roleSubtitle, selected ? s.roleSubtitleActive : s.roleSubtitleDefault]}>{tx(roleMeta[role].subtitle)}</Text>
     </Pressable>
   );
 }
@@ -315,6 +450,7 @@ export function OnboardingScreen({
 }: {
   onGetStarted: (role: UserRole, options?: { passwordConfigured?: boolean; passwordValue?: string }) => void;
 }) {
+  const { tx } = usePreferenceContext();
   const reveal = useReveal();
   const scrollRef = useRef<ScrollView | null>(null);
   const loginPhoneRef = useRef<TextInput | null>(null);
@@ -760,25 +896,25 @@ export function OnboardingScreen({
               {phase === 'auth' ? <Pressable onPress={() => { dismissKeyboard(); resetForm(); setPhase('role'); }} style={s.back}><BackArrowIcon /></Pressable> : null}
             </View>
 
+            <LanguageChooser />
             <View style={s.welcomeBadge}>
               <LinearGradient colors={['rgba(14,165,233,0.12)', 'rgba(139,92,246,0.12)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.welcomeBadgeFill}>
-                <Text style={s.eyebrow}>Welcome to SRV</Text>
+                <Text style={s.eyebrow}>{tx('Welcome to SRV')}</Text>
               </LinearGradient>
             </View>
-            <Text style={[s.bigTitle, role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer]}>{roleMeta[role].title}</Text>
-            <Text style={s.subtext}>{phase === 'role' ? 'Choose your role to start the onboarding journey.' : 'Professional authentication flow aligned with the app design system.'}</Text>
-
+            <Text style={[s.bigTitle, role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer]}>{tx(roleMeta[role].title)}</Text>
+            <Text style={s.subtext}>{tx(phase === 'role' ? 'Choose your role to start the onboarding journey.' : 'Professional authentication flow aligned with the app design system.')}</Text>
             {phase === 'role' ? (
               <View style={[s.card, s.roleSetupCard]}>
-                <Text style={s.sectionEyebrow}>Account Setup</Text>
-                <Text style={s.sectionTitle}>CHOOSE YOUR ROLE</Text>
-                <Text style={s.sectionText}>This keeps rewards, verification and account setup perfectly aligned.</Text>
+                <Text style={s.sectionEyebrow}>{tx('Account Setup')}</Text>
+                <Text style={s.sectionTitle}>{tx('CHOOSE YOUR ROLE')}</Text>
+                <Text style={s.sectionText}>{tx('This keeps rewards, verification and account setup perfectly aligned.')}</Text>
                 <View style={s.roleGrid}>
                   <RoleCard role="electrician" selected={role === 'electrician'} onPress={() => setRole('electrician')} />
                   <RoleCard role="dealer" selected={role === 'dealer'} onPress={() => setRole('dealer')} />
                 </View>
                 <Button
-                  label="Continue"
+                  label={tx('Continue')}
                   onPress={() => {
                     resetForm();
                     setMode('login');
@@ -792,9 +928,9 @@ export function OnboardingScreen({
               </View>
             ) : (
               <View style={s.card}>
-                <Text style={s.sectionEyebrow}>Authentication</Text>
-                <Text style={s.sectionTitle}>{mode === 'login' ? 'Welcome back' : 'Create your account'}</Text>
-                <Text style={s.sectionText}>Smooth inputs, full-screen layout, and no keyboard overlap while typing.</Text>
+                <Text style={s.sectionEyebrow}>{tx('Authentication')}</Text>
+                <Text style={s.sectionTitle}>{mode === 'login' ? tx('Welcome back') : tx('Create your account')}</Text>
+                <Text style={s.sectionText}>{tx('Smooth inputs, full-screen layout, and no keyboard overlap while typing.')}</Text>
                 <Tabs
                   mode={mode}
                   role={role}
@@ -811,7 +947,7 @@ export function OnboardingScreen({
                   <View style={s.form}>
                     {role === 'electrician' ? (
                       <>
-                        <Text style={s.label}>Select Login Method</Text>
+                        <Text style={s.label}>{tx('Select Login Method')}</Text>
                         <View style={s.loginChoiceRow}>
                           <Pressable
                             onPress={() => {
@@ -826,7 +962,7 @@ export function OnboardingScreen({
                             }}
                             style={[s.loginChoiceCard, electricianLoginMethod === 'otp' ? s.loginChoiceCardActive : null]}
                           >
-                            <Text style={[s.loginChoiceText, electricianLoginMethod === 'otp' ? s.loginChoiceTextActive : null]}>Login with OTP</Text>
+                            <Text style={[s.loginChoiceText, electricianLoginMethod === 'otp' ? s.loginChoiceTextActive : null]}>{tx('Login with OTP')}</Text>
                           </Pressable>
                           <Pressable
                             onPress={() => {
@@ -842,30 +978,30 @@ export function OnboardingScreen({
                             }}
                             style={[s.loginChoiceCard, electricianLoginMethod === 'password' ? s.loginChoiceCardActive : null]}
                           >
-                            <Text style={[s.loginChoiceText, electricianLoginMethod === 'password' ? s.loginChoiceTextActive : null]}>Login with Password</Text>
+                            <Text style={[s.loginChoiceText, electricianLoginMethod === 'password' ? s.loginChoiceTextActive : null]}>{tx('Login with Password')}</Text>
                           </Pressable>
                         </View>
                         {errors.loginMode ? <Info text={errors.loginMode} kind="error" /> : null}
                         {electricianLoginMethod ? (
                           <>
-                            <Field label="Mobile Number" value={loginPhone} onChangeText={handlePhone(setLoginPhone)} placeholder="Enter mobile number" keyboardType="phone-pad" prefix="+91" error={errors.loginPhone} onFocus={scrollToForm} inputRef={loginPhoneRef} onSubmitEditing={electricianLoginMethod === 'otp' ? continueLoginPhone : undefined} actionLabel={electricianLoginMethod === 'otp' && loginStep === 'phone' ? 'Verify' : undefined} onActionPress={electricianLoginMethod === 'otp' ? continueLoginPhone : undefined} actionDisabled={electricianLoginMethod === 'otp' ? loginPhone.length !== 10 : undefined} />
-                            {electricianLoginMethod === 'otp' && loginStep !== 'phone' ? <Field label="OTP" value={loginOtp} onChangeText={handleOtp(setLoginOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.loginOtp} onFocus={scrollToForm} inputRef={loginOtpRef} onSubmitEditing={verifyLoginOtp} /> : null}
-                            {electricianLoginMethod === 'otp' && loginStep !== 'phone' && !loginOtpVerified ? <Button label="Verify OTP" onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
-                            {electricianLoginMethod === 'otp' && loginOtpVerified ? <Info text="OTP verified successfully." kind="success" /> : null}
-                            {electricianLoginMethod === 'otp' && loginOtpVerified ? <Button label={loading ? 'Logging In...' : 'Login'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
-                            {electricianLoginMethod === 'password' && loginStep === 'password' ? <Field label="Password" value={loginPass} onChangeText={setLoginPass} placeholder="Enter password" secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                            {electricianLoginMethod === 'password' && loginStep === 'password' ? <Button label={loading ? 'Logging In...' : 'Login'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                            <Field label={tx('Mobile Number')} value={loginPhone} onChangeText={handlePhone(setLoginPhone)} placeholder={tx('Enter mobile number')} keyboardType="phone-pad" prefix="+91" error={errors.loginPhone} onFocus={scrollToForm} inputRef={loginPhoneRef} onSubmitEditing={electricianLoginMethod === 'otp' ? continueLoginPhone : undefined} actionLabel={electricianLoginMethod === 'otp' && loginStep === 'phone' ? tx('Verify') : undefined} onActionPress={electricianLoginMethod === 'otp' ? continueLoginPhone : undefined} actionDisabled={electricianLoginMethod === 'otp' ? loginPhone.length !== 10 : undefined} />
+                            {electricianLoginMethod === 'otp' && loginStep !== 'phone' ? <Field label={tx('OTP')} value={loginOtp} onChangeText={handleOtp(setLoginOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.loginOtp} onFocus={scrollToForm} inputRef={loginOtpRef} onSubmitEditing={verifyLoginOtp} /> : null}
+                            {electricianLoginMethod === 'otp' && loginStep !== 'phone' && !loginOtpVerified ? <Button label={tx('Verify OTP')} onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
+                            {electricianLoginMethod === 'otp' && loginOtpVerified ? <Info text={tx('OTP verified successfully.')} kind="success" /> : null}
+                            {electricianLoginMethod === 'otp' && loginOtpVerified ? <Button label={loading ? tx('Logging In...') : tx('Login')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                            {electricianLoginMethod === 'password' && loginStep === 'password' ? <Field label={tx('Password')} value={loginPass} onChangeText={setLoginPass} placeholder={tx('Enter password')} secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                            {electricianLoginMethod === 'password' && loginStep === 'password' ? <Button label={loading ? tx('Logging In...') : tx('Login')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                           </>
                         ) : null}
                       </>
                     ) : (
                       <>
-                        <Field label="Mobile Number" value={loginPhone} onChangeText={handlePhone(setLoginPhone)} placeholder="Enter mobile number" keyboardType="phone-pad" prefix="+91" error={errors.loginPhone} onFocus={scrollToForm} inputRef={loginPhoneRef} onSubmitEditing={continueLoginPhone} actionLabel={loginStep === 'phone' ? 'Verify' : undefined} onActionPress={continueLoginPhone} actionDisabled={loginPhone.length !== 10} />
-                        {loginStep !== 'phone' ? <Field label="OTP" value={loginOtp} onChangeText={handleOtp(setLoginOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.loginOtp} onFocus={scrollToForm} inputRef={loginOtpRef} onSubmitEditing={verifyLoginOtp} /> : null}
-                        {loginStep !== 'phone' ? <Button label="Verify OTP" onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
-                        {loginStep === 'password' ? <Info text="OTP verification successful." kind="success" /> : null}
-                        {loginStep === 'password' ? <Field label="Password" value={loginPass} onChangeText={setLoginPass} placeholder="Enter password" secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} onSubmitEditing={dismissKeyboard} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {loginStep === 'password' ? <Button label={loading ? 'Opening...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                        <Field label={tx('Mobile Number')} value={loginPhone} onChangeText={handlePhone(setLoginPhone)} placeholder={tx('Enter mobile number')} keyboardType="phone-pad" prefix="+91" error={errors.loginPhone} onFocus={scrollToForm} inputRef={loginPhoneRef} onSubmitEditing={continueLoginPhone} actionLabel={loginStep === 'phone' ? tx('Verify') : undefined} onActionPress={continueLoginPhone} actionDisabled={loginPhone.length !== 10} />
+                        {loginStep !== 'phone' ? <Field label={tx('OTP')} value={loginOtp} onChangeText={handleOtp(setLoginOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.loginOtp} onFocus={scrollToForm} inputRef={loginOtpRef} onSubmitEditing={verifyLoginOtp} /> : null}
+                        {loginStep !== 'phone' ? <Button label={tx('Verify OTP')} onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
+                        {loginStep === 'password' ? <Info text={tx('OTP verification successful.')} kind="success" /> : null}
+                        {loginStep === 'password' ? <Field label={tx('Password')} value={loginPass} onChangeText={setLoginPass} placeholder={tx('Enter password')} secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} onSubmitEditing={dismissKeyboard} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                        {loginStep === 'password' ? <Button label={loading ? tx('Opening...') : tx('Continue')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                       </>
                     )}
                   </View>
@@ -885,99 +1021,99 @@ export function OnboardingScreen({
 
                         {signupStep === 'name' ? (
                           <>
-                            <Field label="Full Name" value={signupName} onChangeText={setSignupName} placeholder="Enter owner or business name" error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label="Email Address" value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label="Business Address" value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? 'Fetching current address...' : 'Enter complete business address'} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? 'Locating' : 'Current Address'} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
+                            <Field label={tx('Full Name')} value={signupName} onChangeText={setSignupName} placeholder={tx('Enter owner or business name')} error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
+                            <Field label={tx('Email Address')} value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
+                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
                             {locationMessage ? <Info text={locationMessage} kind="success" /> : null}
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
+                            <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
                           </>
                         ) : null}
 
                         {signupStep === 'location' ? (
                           <>
-                            <Field label="State" value={signupState} onChangeText={setSignupState} placeholder="State" error={errors.signupState} onFocus={scrollToForm} inputRef={signupStateRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupCityRef.current?.focus()} />
-                            <Field label="City" value={signupCity} onChangeText={setSignupCity} placeholder="City" error={errors.signupCity} onFocus={scrollToForm} inputRef={signupCityRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPincodeRef.current?.focus()} />
-                            <Field label="Pincode" value={signupPincode} onChangeText={(value) => setSignupPincode(value.replace(/\D/g, '').slice(0, 6))} placeholder="Pincode" keyboardType="numeric" error={errors.signupPincode} onFocus={scrollToForm} inputRef={signupPincodeRef} onSubmitEditing={continueSignup} />
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={signupState.trim().length < 2 || signupCity.trim().length < 2 || signupPincode.trim().length < 4} secondary />
+                            <Field label={tx('State')} value={signupState} onChangeText={setSignupState} placeholder={tx('State')} error={errors.signupState} onFocus={scrollToForm} inputRef={signupStateRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupCityRef.current?.focus()} />
+                            <Field label={tx('City')} value={signupCity} onChangeText={setSignupCity} placeholder={tx('City')} error={errors.signupCity} onFocus={scrollToForm} inputRef={signupCityRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPincodeRef.current?.focus()} />
+                            <Field label={tx('Pincode')} value={signupPincode} onChangeText={(value) => setSignupPincode(value.replace(/\D/g, '').slice(0, 6))} placeholder={tx('Pincode')} keyboardType="numeric" error={errors.signupPincode} onFocus={scrollToForm} inputRef={signupPincodeRef} onSubmitEditing={continueSignup} />
+                            <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupState.trim().length < 2 || signupCity.trim().length < 2 || signupPincode.trim().length < 4} secondary />
                           </>
                         ) : null}
 
                         {signupStep === 'identity' ? (
                           <>
-                            <Field label="GST / PAN Number" value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase()); setError('signupGstNumber'); }} placeholder="Enter GST or PAN number" error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
-                            <Field label="GST / PAN Holder Name" value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value); setError('signupGstHolderName'); }} placeholder="Enter holder name" error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
-                            <Button label={dealerSignupContent?.buttonLabel ?? 'Continue'} onPress={continueSignup} disabled={false} secondary />
+                            <Field label={tx('GST / PAN Number')} value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase()); setError('signupGstNumber'); }} placeholder={tx('Enter GST or PAN number')} error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
+                            <Field label={tx('GST / PAN Holder Name')} value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value); setError('signupGstHolderName'); }} placeholder={tx('Enter holder name')} error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
+                            <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={false} secondary />
                             <Pressable style={s.skipBtn} onPress={continueSignup}>
-                              <Text style={s.skipBtnText}>Skip for Now</Text>
+                              <Text style={s.skipBtnText}>{tx('Skip for Now')}</Text>
                             </Pressable>
                           </>
                         ) : null}
 
                         {signupStep === 'holders' ? (
                           <>
-                            <Field label="Mobile Number" value={signupPhone} onChangeText={handleSignupPhone} placeholder="Enter mobile number" keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? 'Resend' : 'Verify') : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} />
-                            {signupOtpSent && !signupOtpVerified ? <Info text={`OTP sent to +91 ${signupPhone}.`} kind="success" /> : null}
-                            {signupOtpSent && !signupOtpVerified ? <Field label="OTP" value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} actionLabel={signupOtp.length > 0 ? 'Verify' : undefined} onActionPress={verifySignupOtp} actionDisabled={signupOtp.length !== 4} /> : null}
+                            <Field label={tx('Mobile Number')} value={signupPhone} onChangeText={handleSignupPhone} placeholder={tx('Enter mobile number')} keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? tx('Resend') : tx('Verify')) : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} />
+                            {signupOtpSent && !signupOtpVerified ? <Info text={`${tx('OTP sent to')} +91 ${signupPhone}.`} kind="success" /> : null}
+                            {signupOtpSent && !signupOtpVerified ? <Field label={tx('OTP')} value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} actionLabel={signupOtp.length > 0 ? tx('Verify') : undefined} onActionPress={verifySignupOtp} actionDisabled={signupOtp.length !== 4} /> : null}
                           </>
                         ) : null}
 
                         {signupStep === 'password' ? (
                           <>
-                            {signupOtpVerified ? <Info text="Phone verification successful." kind="success" /> : null}
-                            <Text style={s.helperText}>Password is optional. Leave both fields blank if you want to skip it.</Text>
-                            <Field label="Password (Optional)" value={signupPass} onChangeText={setSignupPass} placeholder="Create password if you want" secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
-                            <Field label="Confirm Password (Optional)" value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder="Re-enter password" secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
-                            <Text style={s.helperText}>By creating an account, you agree to the Terms & Conditions and Privacy Policy.</Text>
-                            <Button label={loading ? 'Creating Account...' : dealerSignupContent?.buttonLabel ?? 'Create Account'} onPress={submitAuth} disabled={!canContinue || loading} />
+                            {signupOtpVerified ? <Info text={tx('Phone verification successful.')} kind="success" /> : null}
+                            <Text style={s.helperText}>{tx('Password is optional. Leave both fields blank if you want to skip it.')}</Text>
+                            <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={setSignupPass} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
+                            <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
+                            <Text style={s.helperText}>{tx('By creating an account, you agree to the Terms & Conditions and Privacy Policy.')}</Text>
+                            <Button label={loading ? tx('Creating Account...') : dealerSignupContent?.buttonLabel ?? tx('Create Account')} onPress={submitAuth} disabled={!canContinue || loading} />
                           </>
                         ) : null}
                       </>
                     ) : (
                       <>
-                        <Field label="Full Name" value={signupName} onChangeText={setSignupName} placeholder="Enter your full name" error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
-                        {signupStep === 'name' ? <Button label="Continue" onPress={continueSignup} disabled={signupName.trim().length < 3} secondary /> : null}
+                        <Field label={tx('Full Name')} value={signupName} onChangeText={setSignupName} placeholder={tx('Enter your full name')} error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
+                        {signupStep === 'name' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3} secondary /> : null}
 
-                        {signupStep !== 'name' ? <Field label="Dealer Verification Number" value={signupDealerPhone} onChangeText={(value) => { handlePhone(setSignupDealerPhone)(value); setDealerVerified(false); setVerifiedDealerName(''); setError('signupDealerPhone'); }} placeholder="Enter dealer mobile number" keyboardType="phone-pad" error={errors.signupDealerPhone} onFocus={scrollToForm} inputRef={signupDealerRef} onSubmitEditing={verifyDealer} /> : null}
-                        {signupStep === 'dealer' ? <Button label="Verify" onPress={verifyDealer} disabled={signupDealerPhone.length !== 10} secondary /> : null}
-                        {dealerVerified ? <Info text={`${verifiedDealerName} verification successfully done.`} kind="success" /> : null}
-                        {dealerVerified && signupStep === 'dealer' ? <Button label="Continue" onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
+                        {signupStep !== 'name' ? <Field label={tx('Dealer Verification Number')} value={signupDealerPhone} onChangeText={(value) => { handlePhone(setSignupDealerPhone)(value); setDealerVerified(false); setVerifiedDealerName(''); setError('signupDealerPhone'); }} placeholder={tx('Enter dealer mobile number')} keyboardType="phone-pad" error={errors.signupDealerPhone} onFocus={scrollToForm} inputRef={signupDealerRef} onSubmitEditing={verifyDealer} /> : null}
+                        {signupStep === 'dealer' ? <Button label={tx('Verify')} onPress={verifyDealer} disabled={signupDealerPhone.length !== 10} secondary /> : null}
+                        {dealerVerified ? <Info text={`${verifiedDealerName} ${tx('verification successfully done.')}`} kind="success" /> : null}
+                        {dealerVerified && signupStep === 'dealer' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
 
-                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label="Address" value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? 'Fetching current address...' : 'Enter your complete address'} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? 'Locating' : 'Current Address'} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} /> : null}
+                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} /> : null}
                         {signupStep === 'address' && locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                         {['address', 'phone', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
                           <View style={s.locationSummaryCard}>
-                            <Text style={s.locationSummaryTitle}>Detected Location Details</Text>
+                            <Text style={s.locationSummaryTitle}>{tx('Detected Location Details')}</Text>
                             {signupState ? (
                               <View style={s.locationRow}>
-                                <Text style={s.locationKey}>State</Text>
+                                <Text style={s.locationKey}>{tx('State')}</Text>
                                 <Text style={s.locationValue}>{signupState}</Text>
                               </View>
                             ) : null}
                             {signupCity ? (
                               <View style={s.locationRow}>
-                                <Text style={s.locationKey}>City</Text>
+                                <Text style={s.locationKey}>{tx('City')}</Text>
                                 <Text style={s.locationValue}>{signupCity}</Text>
                               </View>
                             ) : null}
                             {signupPincode ? (
                               <View style={s.locationRow}>
-                                <Text style={s.locationKey}>Pincode</Text>
+                                <Text style={s.locationKey}>{tx('Pincode')}</Text>
                                 <Text style={s.locationValue}>{signupPincode}</Text>
                               </View>
                             ) : null}
                           </View>
                         ) : null}
-                        {signupStep === 'address' ? <Button label="Continue" onPress={continueSignup} disabled={signupAddress.trim().length < 5 || locationLoading} secondary /> : null}
+                        {signupStep === 'address' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupAddress.trim().length < 5 || locationLoading} secondary /> : null}
 
-                        {['phone', 'otp', 'password'].includes(signupStep) ? <Field label="Your Phone Number" value={signupPhone} onChangeText={handleSignupPhone} placeholder="Enter your phone number" keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? 'Resend' : 'Verify') : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} /> : null}
-                        {signupOtpSent && !signupOtpVerified ? <Info text={`OTP sent to +91 ${signupPhone}.`} kind="success" /> : null}
-                        {['otp', 'password'].includes(signupStep) ? <Field label="OTP" value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder="Enter 4 digit OTP" keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} /> : null}
-                        {signupStep === 'otp' ? <Button label="Verify OTP" onPress={continueSignup} disabled={signupOtp.length !== 4} secondary /> : null}
-                        {signupStep === 'password' ? <Info text="OTP verification successful." kind="success" /> : null}
-                        {signupStep === 'password' ? <Text style={s.helperText}>Password is optional. Leave both fields blank if you want to skip it.</Text> : null}
-                        {signupStep === 'password' ? <Field label="Password (Optional)" value={signupPass} onChangeText={setSignupPass} placeholder="Create password if you want" secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {signupStep === 'password' ? <Field label="Confirm Password (Optional)" value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder="Re-enter password" secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {signupStep === 'password' ? <Button label={loading ? 'Opening...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                        {['phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Your Phone Number')} value={signupPhone} onChangeText={handleSignupPhone} placeholder={tx('Enter your phone number')} keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? tx('Resend') : tx('Verify')) : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} /> : null}
+                        {signupOtpSent && !signupOtpVerified ? <Info text={`${tx('OTP sent to')} +91 ${signupPhone}.`} kind="success" /> : null}
+                        {['otp', 'password'].includes(signupStep) ? <Field label={tx('OTP')} value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} /> : null}
+                        {signupStep === 'otp' ? <Button label={tx('Verify OTP')} onPress={continueSignup} disabled={signupOtp.length !== 4} secondary /> : null}
+                        {signupStep === 'password' ? <Info text={tx('OTP verification successful.')} kind="success" /> : null}
+                        {signupStep === 'password' ? <Text style={s.helperText}>{tx('Password is optional. Leave both fields blank if you want to skip it.')}</Text> : null}
+                        {signupStep === 'password' ? <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={setSignupPass} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                        {signupStep === 'password' ? <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                        {signupStep === 'password' ? <Button label={loading ? tx('Logging In...') : tx('Continue')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                       </>
                     )}
                   </View>
@@ -1006,6 +1142,51 @@ const s = StyleSheet.create({
   logoWrap: { width: 182, height: 102, alignItems: 'center', justifyContent: 'center' },
   logo: { width: '100%', height: '100%' },
   back: { position: 'absolute', right: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
+  languageWrap: { alignSelf: 'flex-end', marginTop: -14, marginBottom: 6, position: 'relative', zIndex: 20 },
+  languageTrigger: {
+    minWidth: 46,
+    height: 46,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93,170,248,0.24)',
+    overflow: 'hidden',
+    shadowColor: '#2C6BE7',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 5,
+  },
+  languageTriggerActive: { borderColor: '#2C6BE7' },
+  languageTriggerFill: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 1, paddingTop: 4, paddingBottom: 4 },
+  languageMiniIcon: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  languageMiniIconActive: {
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderRadius: 999,
+  },
+  languageMiniText: { color: '#2C6BE7', fontSize: 9.5, fontWeight: '900', letterSpacing: 0.2 },
+  languageMiniTextActive: { color: '#FFFFFF' },
+  languageMenu: {
+    position: 'absolute',
+    top: 62,
+    right: 0,
+    minWidth: 148,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.98)',
+    borderWidth: 1,
+    borderColor: '#D8E2F0',
+    padding: 8,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 22,
+    elevation: 6,
+  },
+  languageMenuItem: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 10 },
+  languageMenuItemActive: { backgroundColor: '#EEF4FF' },
+  languageMenuMark: { width: 24, color: '#2C6BE7', fontSize: 15, fontWeight: '900', textAlign: 'center' },
+  languageMenuMarkActive: { color: '#1D4ED8' },
+  languageMenuText: { color: C.title, fontSize: 13, fontWeight: '800' },
+  languageMenuTextActive: { color: '#1D4ED8' },
   welcomeBadge: { alignSelf: 'flex-start', marginBottom: 8, marginTop: 0 },
   welcomeBadgeFill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(14,165,233,0.12)' },
   eyebrow: { color: C.muted2, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },

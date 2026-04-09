@@ -54,6 +54,7 @@ function ElectricianIcon() {
 }
 
 function CenterButton({ active, onPress }: { active: boolean; onPress: () => void }) {
+  const { tx } = usePreferenceContext();
   const ringScale = useRef(new Animated.Value(1)).current;
   const ringOpacity = useRef(new Animated.Value(0.35)).current;
   const btnScale = useRef(new Animated.Value(1)).current;
@@ -92,7 +93,7 @@ function CenterButton({ active, onPress }: { active: boolean; onPress: () => voi
           <ElectricianIcon />
         </Animated.View>
       </Pressable>
-      <Text style={[centerStyles.label, active && centerStyles.labelActive]}>Electricians</Text>
+      <Text style={[centerStyles.label, active && centerStyles.labelActive]}>{tx('Electricians')}</Text>
     </View>
   );
 }
@@ -190,12 +191,12 @@ export function BottomNav({
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   return (
     <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
       <View style={styles.side}>
         {LEFT.map((item) => (
-          <NavTab key={item.id} id={item.id} label={item.label} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />
+          <NavTab key={item.id} id={item.id} label={tx(item.label)} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />
         ))}
       </View>
 
@@ -203,7 +204,7 @@ export function BottomNav({
 
       <View style={styles.side}>
         {RIGHT.map((item) => (
-          <NavTab key={item.id} id={item.id} label={item.label} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />
+          <NavTab key={item.id} id={item.id} label={tx(item.label)} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />
         ))}
       </View>
     </View>

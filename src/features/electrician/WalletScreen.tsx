@@ -71,7 +71,7 @@ const historyItems = [
 ];
 
 export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenProps) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const isDealer = role === 'dealer';
   const actions = isDealer
     ? [
@@ -126,7 +126,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         <View style={styles.heroHeader}>
           <Pressable onPress={() => onNavigate?.('home')} style={styles.backButton}>
             <BackIcon />
-            <Text style={styles.backLabel}>Home</Text>
+            <Text style={styles.backLabel}>{tx('Home')}</Text>
           </Pressable>
           <Pressable onPress={() => onNavigate?.('rewards')} style={styles.storeButton}>
             <View style={styles.storeIconWrap}>
@@ -135,21 +135,23 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
           </Pressable>
         </View>
 
-        <Text style={styles.eyebrow}>{isDealer ? 'SRV Dealer Wallet' : 'SRV Premium Wallet'}</Text>
+        <Text style={styles.eyebrow}>{tx(isDealer ? 'SRV Dealer Wallet' : 'SRV Premium Wallet')}</Text>
         <Text style={styles.heroTitle}>0 Points</Text>
         <Text style={styles.heroSub}>
-          {isDealer
-            ? 'Dealer wallet for schemes, bank payouts, and dealer bonus tracking.'
-            : 'Luxury rewards dashboard for redemptions, transfers, and loyalty growth.'}
+          {tx(
+            isDealer
+              ? 'Dealer wallet for schemes, bank payouts, and dealer bonus tracking.'
+              : 'Luxury rewards dashboard for redemptions, transfers, and loyalty growth.'
+          )}
         </Text>
 
         <View style={styles.heroStats}>
           <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>{isDealer ? 'Active Electricians' : 'Redeem Product'}</Text>
+            <Text style={styles.heroStatLabel}>{tx(isDealer ? 'Active Electricians' : 'Redeem Product')}</Text>
             <Text style={styles.heroStatValue}>{isDealer ? '34' : '0'}</Text>
           </View>
           <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>{isDealer ? 'Bonus Withdrawals' : 'Lifetime Redeem'}</Text>
+            <Text style={styles.heroStatLabel}>{tx(isDealer ? 'Bonus Withdrawals' : 'Lifetime Redeem')}</Text>
             <Text style={styles.heroStatValue}>{isDealer ? '12' : '0'}</Text>
           </View>
         </View>
@@ -158,8 +160,8 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
       <View style={[styles.card, darkMode ? styles.cardDark : null]}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Quick Actions</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{isDealer ? 'Manage dealer payouts' : 'Move your wallet faster'}</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Quick Actions')}</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx(isDealer ? 'Manage dealer payouts' : 'Move your wallet faster')}</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <SparkIcon />
@@ -178,8 +180,8 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
                 <View style={[styles.actionIconWrap, { backgroundColor: item.tint }]}>
                   <Icon />
                 </View>
-                <Text style={[styles.actionTileText, darkMode ? styles.actionTileTextDark : null]}>{item.label}</Text>
-                <Text style={[styles.actionTileSub, darkMode ? styles.actionTileSubDark : null]}>{item.detail}</Text>
+                <Text style={[styles.actionTileText, darkMode ? styles.actionTileTextDark : null]}>{tx(item.label)}</Text>
+                <Text style={[styles.actionTileSub, darkMode ? styles.actionTileSubDark : null]}>{tx(item.detail)}</Text>
               </TouchableOpacity>
             );
           })}
@@ -189,7 +191,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
       <View style={[styles.card, darkMode ? styles.cardDark : null]}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>Redeem Point History</Text>
+            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Redeem Point History')}</Text>
             <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Elegant activity timeline</Text>
           </View>
           <View style={styles.sectionIconWrap}>
@@ -205,10 +207,10 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
               </View>
               <View style={[styles.timelineCard, darkMode ? styles.timelineCardDark : null]}>
                 <View style={styles.timelineTop}>
-                  <Text style={[styles.timelineTitle, darkMode ? styles.timelineTitleDark : null]}>{item.title}</Text>
+                  <Text style={[styles.timelineTitle, darkMode ? styles.timelineTitleDark : null]}>{tx(item.title)}</Text>
                   <Text style={[styles.timelinePoints, { color: item.accent }]}>{item.points}</Text>
                 </View>
-                <Text style={[styles.timelineTime, darkMode ? styles.timelineTimeDark : null]}>{item.time}</Text>
+                <Text style={[styles.timelineTime, darkMode ? styles.timelineTimeDark : null]}>{tx(item.time)}</Text>
               </View>
             </View>
           ))}
@@ -218,11 +220,13 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
           <View style={styles.emptyIconWrap}>
             <HistoryGlyph />
           </View>
-          <Text style={[styles.emptyTitle, darkMode ? styles.emptyTitleDark : null]}>No detailed records yet</Text>
+          <Text style={[styles.emptyTitle, darkMode ? styles.emptyTitleDark : null]}>{tx('No detailed records yet')}</Text>
           <Text style={[styles.emptySub, darkMode ? styles.emptySubDark : null]}>
-            {isDealer
-              ? 'Jaise hi bank payout ya dealer bonus activity hogi, yahan full wallet history dikh jayegi.'
-              : 'Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.'}
+            {tx(
+              isDealer
+                ? 'Jaise hi bank payout ya dealer bonus activity hogi, yahan full wallet history dikh jayegi.'
+                : 'Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.'
+            )}
           </Text>
         </View>
       </View>

@@ -32,7 +32,7 @@ export function RedemptionPage({
   onOpenTransferPoints: () => void;
   currentRole: UserRole;
 }) {
-  const { t, theme } = usePreferenceContext();
+  const { t, tx, theme } = usePreferenceContext();
   const [activeTab, setActiveTab] = useState<RedemptionTab>('Buy Schemes');
   const [activeFilter, setActiveFilter] = useState<FilterRange>('This Month');
   const tabs: RedemptionTab[] =
@@ -60,18 +60,18 @@ export function RedemptionPage({
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Redeem Product</Text>
+            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{tx('Redeem Product')}</Text>
             <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>02</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Lifetime Redeem</Text>
+            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{tx('Lifetime Redeem')}</Text>
             <Text style={[styles.summaryValue, { color: C.primary }]}>04</Text>
           </View>
         </View>
 
         <View style={[styles.pointsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <Text style={[styles.pointsVal, { color: theme.textPrimary }]}>0 {t('points')}</Text>
-          <Text style={styles.pointsSub}>Redeemable Points</Text>
+          <Text style={styles.pointsSub}>{tx('Redeemable Points')}</Text>
           <View style={styles.tabRow}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab;
@@ -87,7 +87,7 @@ export function RedemptionPage({
                     style={styles.tabAsset}
                     resizeMode="contain"
                   />
-                  <Text style={[styles.tabText, { color: isActive ? C.primary : theme.textSecondary }]}>{tab}</Text>
+                  <Text style={[styles.tabText, { color: isActive ? C.primary : theme.textSecondary }]}>{tx(tab)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -95,7 +95,7 @@ export function RedemptionPage({
         </View>
 
         <View style={[styles.filterWrap, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={[styles.filterLabel, { color: theme.textMuted }]}>Filter</Text>
+          <Text style={[styles.filterLabel, { color: theme.textMuted }]}>{tx('Filter')}</Text>
           <View style={styles.filterRow}>
             {filters.map((filter) => {
               const isActive = activeFilter === filter;
@@ -106,7 +106,7 @@ export function RedemptionPage({
                   onPress={() => setActiveFilter(filter)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.filterChipText, { color: isActive ? '#fff' : theme.textSecondary }]}>{filter}</Text>
+                  <Text style={[styles.filterChipText, { color: isActive ? '#fff' : theme.textSecondary }]}>{tx(filter)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -136,15 +136,15 @@ export function RedemptionPage({
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.historyTitle, { color: theme.textPrimary }]}>{item.title}</Text>
+                <Text style={[styles.historyTitle, { color: theme.textPrimary }]}>{tx(item.title)}</Text>
                 <Text style={[styles.historyDate, { color: theme.textMuted }]}>{item.date}</Text>
               </View>
               <Text style={styles.pointsText}>{item.points}</Text>
             </View>
             <View style={[styles.statusRow, { backgroundColor: theme.soft }]}>
-              <Text style={[styles.statusText, { color: theme.textSecondary }]}>{item.type}</Text>
+              <Text style={[styles.statusText, { color: theme.textSecondary }]}>{tx(item.type)}</Text>
               <Text style={[styles.dot, { color: theme.textMuted }]}>|</Text>
-              <Text style={[styles.statusText, { color: theme.textSecondary }]}>{item.status}</Text>
+              <Text style={[styles.statusText, { color: theme.textSecondary }]}>{tx(item.status)}</Text>
             </View>
           </View>
         )) : (

@@ -107,6 +107,7 @@ function ScanQRIcon() {
 // ── Scan Button ───────────────────────────────────────────────────────
 
 function ScanButton({ isActive, onPress }: { isActive: boolean; onPress: () => void }) {
+  const { tx } = usePreferenceContext();
   const ring1Scale = useRef(new Animated.Value(1)).current;
   const ring1Opacity = useRef(new Animated.Value(0.5)).current;
   const ring2Scale = useRef(new Animated.Value(1)).current;
@@ -180,7 +181,7 @@ function ScanButton({ isActive, onPress }: { isActive: boolean; onPress: () => v
       </Pressable>
 
       <Text style={[scanStyles.label, isActive && scanStyles.labelActive]}>
-        SCAN
+        {tx('SCAN')}
       </Text>
     </View>
   );
@@ -297,7 +298,7 @@ export function BottomNav({
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
 }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   return (
     <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
       <View style={styles.side}>
@@ -305,7 +306,7 @@ export function BottomNav({
           <NavTab
             key={item.id}
             id={item.id}
-            label={item.label}
+            label={tx(item.label)}
             active={currentScreen === item.id}
             onPress={() => onNavigate(item.id)}
           />
@@ -322,7 +323,7 @@ export function BottomNav({
           <NavTab
             key={item.id}
             id={item.id}
-            label={item.label}
+            label={tx(item.label)}
             active={currentScreen === item.id}
             onPress={() => onNavigate(item.id)}
           />

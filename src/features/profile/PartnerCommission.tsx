@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
@@ -19,7 +19,7 @@ const commissionActivity = [
 ];
 
 export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
-  const { theme } = usePreferenceContext();
+  const { theme, tx } = usePreferenceContext();
   const glow = useRef(new Animated.Value(0)).current;
   const floatY = useRef(new Animated.Value(0)).current;
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -56,14 +56,14 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
     const amount = Number(withdrawAmount);
 
     if (!withdrawAmount.trim() || Number.isNaN(amount) || amount <= 0) {
-      return Alert.alert('Enter amount', 'Please enter a valid withdrawal amount.');
+      return Alert.alert(tx('Enter amount'), tx('Please enter a valid withdrawal amount.'));
     }
 
     if (amount > availableBalance) {
-      return Alert.alert('Insufficient balance', 'Withdrawal amount cannot be more than your available dealer bonus.');
+      return Alert.alert(tx('Insufficient balance'), tx('Withdrawal amount cannot be more than your available dealer bonus.'));
     }
 
-    Alert.alert('Request submitted', `Rs. ${amount.toFixed(0)} will be transferred to your bank account after approval.`);
+    Alert.alert(tx('Request submitted'), tx(`Rs. ${amount.toFixed(0)} will be transferred to your bank account after approval.`));
     setWithdrawAmount('');
   };
 
@@ -74,7 +74,7 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
-      <PageHeader title="Dealer Bonus" onBack={onBack} />
+      <PageHeader title={tx('Dealer Bonus')} onBack={onBack} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Animated.View
           style={[
@@ -89,22 +89,22 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
           <View style={styles.heroTop}>
             <View style={styles.heroBadge}>
               <AppIcon name="transfer" size={18} color="#93C5FD" />
-              <Text style={styles.heroBadgeText}>5% Auto Bonus</Text>
+              <Text style={styles.heroBadgeText}>{tx('5% Auto Bonus')}</Text>
             </View>
-            <Text style={styles.heroTitle}>GET YOUR BONUS</Text>
+            <Text style={styles.heroTitle}>{tx('GET YOUR BONUS')}</Text>
             <Text style={styles.heroSub}>
-              5% of the points redeemed by any electrician will be credited to your dealer wallet. 1 point = 1 INR, and you can withdraw it directly to your bank account.
+              {tx('5% of the points redeemed by any electrician will be credited to your dealer wallet. 1 point = 1 INR, and you can withdraw it directly to your bank account.')}
             </Text>
           </View>
 
           <View style={styles.heroFooter}>
             <View>
-              <Text style={styles.heroAmountLabel}>Available to withdraw</Text>
+              <Text style={styles.heroAmountLabel}>{tx('Available to withdraw')}</Text>
               <Text style={styles.heroAmount}>Rs. {availableBalance}</Text>
             </View>
             <View style={styles.heroRateChip}>
               
-              <Text style={styles.heroRateText}>1 Point = 1 INR</Text>
+              <Text style={styles.heroRateText}>{tx('1 Point = 1 INR')}</Text>
               <View style={styles.flagBadge}>
                 <View style={[styles.flagStripe, { backgroundColor: '#FF9933' }]} />
                 <View style={[styles.flagStripe, styles.flagWhite]}>
@@ -122,57 +122,57 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
               <AppIcon name="refer" size={18} color={C.blue} />
             </View>
             <Text style={[styles.statValue, { color: theme.textPrimary }]}>{totalElectricians}</Text>
-            <Text style={[styles.statLabel, { color: theme.textMuted }]}>Active electricians</Text>
+            <Text style={[styles.statLabel, { color: theme.textMuted }]}>{tx('Active electricians')}</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={[styles.statIcon, { backgroundColor: '#FEF3C7' }]}>
               <AppIcon name="gift" size={18} color={C.gold} />
             </View>
             <Text style={[styles.statValue, { color: theme.textPrimary }]}>{monthRedeemed}</Text>
-            <Text style={[styles.statLabel, { color: theme.textMuted }]}>Monthly redeemed pts</Text>
+            <Text style={[styles.statLabel, { color: theme.textMuted }]}>{tx('Monthly redeemed pts')}</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={[styles.statIcon, { backgroundColor: '#DCFCE7' }]}>
               <AppIcon name="bank" size={18} color={C.success} />
             </View>
             <Text style={[styles.statValue, { color: theme.textPrimary }]}>{monthBonus}</Text>
-            <Text style={[styles.statLabel, { color: theme.textMuted }]}>This month bonus</Text>
+            <Text style={[styles.statLabel, { color: theme.textMuted }]}>{tx('This month bonus')}</Text>
           </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>How it works</Text>
+          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{tx('How it works')}</Text>
           <View style={styles.stepRow}>
             <View style={[styles.stepBadge, { backgroundColor: '#DBEAFE' }]}>
               <Text style={[styles.stepBadgeText, { color: C.blue }]}>1</Text>
             </View>
-            <Text style={[styles.stepText, { color: theme.textSecondary }]}>Electrician points redeem hote hi 5% dealer bonus auto-credit ho jata hai.</Text>
+            <Text style={[styles.stepText, { color: theme.textSecondary }]}>{tx('Electrician points redeem hote hi 5% dealer bonus auto-credit ho jata hai.')}</Text>
           </View>
           <View style={styles.stepRow}>
             <View style={[styles.stepBadge, { backgroundColor: '#FEF3C7' }]}>
               <Text style={[styles.stepBadgeText, { color: C.gold }]}>2</Text>
             </View>
-            <Text style={[styles.stepText, { color: theme.textSecondary }]}>Bonus balance update hota rahega and 1 point ki value 1 INR rahegi.</Text>
+            <Text style={[styles.stepText, { color: theme.textSecondary }]}>{tx('Bonus balance update hota rahega and 1 point ki value 1 INR rahegi.')}</Text>
           </View>
           <View style={styles.stepRow}>
             <View style={[styles.stepBadge, { backgroundColor: '#DCFCE7' }]}>
               <Text style={[styles.stepBadgeText, { color: C.success }]}>3</Text>
             </View>
-            <Text style={[styles.stepText, { color: theme.textSecondary }]}>Aap bank transfer request karke amount withdraw kar sakte hain.</Text>
+            <Text style={[styles.stepText, { color: theme.textSecondary }]}>{tx('Aap bank transfer request karke amount withdraw kar sakte hain.')}</Text>
           </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.withdrawHeader}>
             <View>
-              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Withdraw to bank</Text>
-              <Text style={[styles.withdrawSub, { color: theme.textMuted }]}>Transfer to ICICI Bank ending 2048</Text>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{tx('Withdraw to bank')}</Text>
+              <Text style={[styles.withdrawSub, { color: theme.textMuted }]}>{tx('Transfer to ICICI Bank ending 2048')}</Text>
             </View>
           </View>
           <TextInput
             value={withdrawAmount}
             onChangeText={(value) => setWithdrawAmount(value.replace(/\D/g, ''))}
-            placeholder="Enter amount in rupees"
+            placeholder={tx('Enter amount in rupees')}
             placeholderTextColor={theme.textMuted}
             keyboardType="number-pad"
             style={[styles.input, { backgroundColor: theme.bg, borderColor: theme.border, color: theme.textPrimary }]}
@@ -190,12 +190,12 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
             ))}
           </View>
           <TouchableOpacity style={styles.withdrawButton} activeOpacity={0.85} onPress={handleWithdraw}>
-            <Text style={styles.withdrawButtonText}>Request bank transfer</Text>
+            <Text style={styles.withdrawButtonText}>{tx('Request bank transfer')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Recent bonus activity</Text>
+          <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{tx('Recent bonus activity')}</Text>
           {commissionActivity.map((item, index) => (
             <View
               key={`${item.electrician}-${item.when}`}
@@ -207,7 +207,7 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
               <View style={{ flex: 1 }}>
                 <Text style={[styles.activityTitle, { color: theme.textPrimary }]}>{item.electrician}</Text>
                 <Text style={[styles.activityMeta, { color: theme.textMuted }]}>
-                  Redeemed {item.redeemed} pts • {item.when}
+                  {tx('Redeemed')} {item.redeemed} {tx('pts')} • {item.when}
                 </Text>
               </View>
               <Text style={styles.activityBonus}>+Rs. {item.bonus}</Text>
@@ -300,3 +300,4 @@ const styles = StyleSheet.create({
   activityMeta: { fontSize: 12, marginTop: 4, lineHeight: 18 },
   activityBonus: { fontSize: 14, fontWeight: '900', color: C.success },
 });
+

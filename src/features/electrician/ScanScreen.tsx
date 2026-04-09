@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {
   Alert,
@@ -67,9 +67,9 @@ function BackArrowIcon({ size = 20, color = Colors.textDark }: { size?: number; 
   );
 }
 
-// ── Real QR Code — fetched from quickchart.io free API ───────────────
+// â”€â”€ Real QR Code â€” fetched from quickchart.io free API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // URL: https://quickchart.io/qr?text=SRV-MCB-32A&size=400&margin=2&dark=000000&light=ffffff
-// Returns a real PNG QR image — black dots on white, proper finder patterns
+// Returns a real PNG QR image â€” black dots on white, proper finder patterns
 function RealQRCode({ size = 200 }: { size?: number }) {
   const px = Math.round(size * 2); // 2x for crisp rendering on high-DPI
   const uri = `https://quickchart.io/qr?text=SRV-MCB-32A-2024&size=${px}&margin=2&dark=000000&light=ffffff`;
@@ -86,7 +86,7 @@ function RealQRCode({ size = 200 }: { size?: number }) {
 }
 
 export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -213,7 +213,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Camera access allow karo taaki aap QR scan kar sako.');
+      Alert.alert(tx('Permission needed'), tx('Camera access allow karo taaki aap QR scan kar sako.'));
       return;
     }
 
@@ -240,7 +240,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Gallery access allow karo taaki aap QR image select kar sako.');
+      Alert.alert(tx('Permission needed'), tx('Gallery access allow karo taaki aap QR image select kar sako.'));
       return;
     }
 
@@ -277,14 +277,12 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         <Pressable onPress={() => onNavigate('home')} style={[styles.backBtn, darkMode ? styles.backBtnDark : null]}>
           <BackArrowIcon color={darkMode ? '#F8FAFC' : Colors.textDark} />
         </Pressable>
-        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Scan QR Code</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>{tx('Scan QR Code')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.subtitle, darkMode ? styles.subtitleDark : null]}>
-          Point camera at the QR sticker{'\n'}on any SRV product box
-        </Text>
+        <Text style={[styles.subtitle, darkMode ? styles.subtitleDark : null]}>{tx('Point camera at the QR sticker\non any SRV product box')}</Text>
 
         <View style={styles.frameWrap}>
           <Animated.View
@@ -311,8 +309,8 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
             {scanned && (
               <Animated.View style={[styles.successOverlay, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
-                <Text style={styles.checkmark}>✅</Text>
-                <Text style={styles.verifiedText}>Verified!</Text>
+                <Text style={styles.checkmark}>âœ…</Text>
+                <Text style={styles.verifiedText}>{tx('Verify')}</Text>
               </Animated.View>
             )}
 
@@ -328,16 +326,16 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
           </Animated.View>
 
           <View style={styles.statusRow}>
-            {scanning && (<><View style={styles.statusDot} /><Text style={styles.statusActive}>Scanning...</Text></>)}
-            {!scanning && !scanned && <Text style={[styles.statusIdle, darkMode ? styles.statusIdleDark : null]}>Align QR code within the frame</Text>}
-            {scanned && <Text style={styles.statusSuccess}>✓ QR Code detected</Text>}
+            {scanning && (<><View style={styles.statusDot} /><Text style={styles.statusActive}>{tx('Scanning...')}</Text></>)}
+            {!scanning && !scanned && <Text style={[styles.statusIdle, darkMode ? styles.statusIdleDark : null]}>{tx('Align QR code within the frame')}</Text>}
+            {scanned && <Text style={styles.statusSuccess}>{"\u2713"} {tx('QR Code detected')}</Text>}
           </View>
         </View>
 
         {scanned && (
           <Animated.View style={[styles.successBox, darkMode ? styles.successBoxDark : null, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
-            <Text style={styles.successTitle}>✅ SRV MCB 32A detected</Text>
-            <Text style={[styles.successSub, darkMode ? styles.successSubDark : null]}>You earned +80 reward points.</Text>
+            <Text style={styles.successTitle}>{"\u2705"} {tx('SRV MCB 32A detected')}</Text>
+            <Text style={[styles.successSub, darkMode ? styles.successSubDark : null]}>{tx('You earned +80 reward points.')}</Text>
           </Animated.View>
         )}
 
@@ -349,23 +347,23 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         >
           {!scanned ? <CameraIcon size={20} color="#FFFFFF" /> : null}
           <Text style={styles.primaryBtnText}>
-            {scanned ? 'Claim Points & Continue' : scanning ? 'Scanning...' : 'Start Scanning'}
+            {scanned ? tx('Claim Points & Continue') : scanning ? tx('Scanning...') : tx('Start Scanning')}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.actionRow}>
           <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]}>
             <FlashlightIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
-            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>Flashlight</Text>
+            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>{tx('Flashlight')}</Text>
           </Pressable>
           <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]} onPress={handlePickFromGallery}>
             <GalleryIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
-            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>Gallery</Text>
+            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>{tx('Gallery')}</Text>
           </Pressable>
         </View>
 
         <View style={[styles.howCard, darkMode ? styles.howCardDark : null]}>
-          <Text style={[styles.howTitle, darkMode ? styles.howTitleDark : null]}>How to Scan</Text>
+          <Text style={[styles.howTitle, darkMode ? styles.howTitleDark : null]}>{tx('How to Scan')}</Text>
           {[
             { step: '1', text: 'Look for the QR code sticker on your SRV product box.' },
             { step: '2', text: 'Place the code inside the frame and keep the phone steady.' },
@@ -373,7 +371,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
           ].map((item) => (
             <View key={item.step} style={styles.howRow}>
               <View style={styles.howIndex}><Text style={styles.howIndexText}>{item.step}</Text></View>
-              <Text style={[styles.howText, darkMode ? styles.howTextDark : null]}>{item.text}</Text>
+              <Text style={[styles.howText, darkMode ? styles.howTextDark : null]}>{tx(item.text)}</Text>
             </View>
           ))}
         </View>
@@ -462,5 +460,6 @@ const styles = StyleSheet.create({
   howText: { flex: 1, fontSize: 13, lineHeight: 20, color: Colors.textMuted },
   howTextDark: { color: '#94A3B8' },
 });
+
 
 

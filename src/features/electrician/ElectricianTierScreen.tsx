@@ -110,7 +110,7 @@ export function getElectricianTier(points: number): TierInfo {
 }
 
 export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
-  const { darkMode } = usePreferenceContext();
+  const { darkMode, tx } = usePreferenceContext();
   const points = 4250;
   const currentTier = useMemo(() => getElectricianTier(points), [points]);
   const pulse = useRef(new Animated.Value(0)).current;
@@ -148,7 +148,7 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
         <TouchableOpacity style={[styles.backBtn, darkMode ? styles.backBtnDark : null]} onPress={onBack} activeOpacity={0.85}>
           <BackIcon color={darkMode ? '#F8FAFC' : '#173E80'} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>Member Tier</Text>
+        <Text style={[styles.headerTitle, darkMode ? styles.headerTitleDark : null]}>{tx('Member Tier')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -159,26 +159,26 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
             <View style={styles.heroIconWrap}>
               <ElectricianTierIcon tier={currentTier.tier} size={36} />
             </View>
-            <Text style={[styles.heroEyebrow, { color: currentTier.accent }]}>Current Reward Level</Text>
-            <Text style={styles.heroTitle}>{currentTier.tier}</Text>
+            <Text style={[styles.heroEyebrow, { color: currentTier.accent }]}>{tx('Current Reward Level')}</Text>
+            <Text style={styles.heroTitle}>{tx(currentTier.tier)}</Text>
             <Text style={styles.heroSub}>
-              Your electrician grading is based on total reward points earned through scans and redemptions.
+              {tx('Your electrician grading is based on total reward points earned through scans and redemptions.')}
             </Text>
             <View style={styles.heroStatsRow}>
               <View style={styles.heroStatBox}>
                 <Text style={styles.heroStatValue}>{points}</Text>
-                <Text style={styles.heroStatLabel}>Current points</Text>
+                <Text style={styles.heroStatLabel}>{tx('Current points')}</Text>
               </View>
               <View style={styles.heroStatBox}>
-                <Text style={styles.heroStatValue}>{currentTier.range}</Text>
-                <Text style={styles.heroStatLabel}>Tier range</Text>
+                <Text style={styles.heroStatValue}>{tx(currentTier.range)}</Text>
+                <Text style={styles.heroStatLabel}>{tx('Tier range')}</Text>
               </View>
             </View>
           </LinearGradient>
         </Animated.View>
 
         <View style={[styles.sectionCard, darkMode ? styles.sectionCardDark : null]}>
-          <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Points grading system</Text>
+          <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Points grading system')}</Text>
           {tierLevels.map((level) => {
             const active = level.tier === currentTier.tier;
             return (
@@ -194,11 +194,11 @@ export function ElectricianTierScreen({ onBack }: { onBack: () => void }) {
                 </View>
                 <View style={styles.tierCopy}>
                   <View style={styles.tierTitleRow}>
-                    <Text style={[styles.tierName, { color: active ? level.accent : '#17324D' }]}>{level.tier} Member</Text>
-                    {active ? <Text style={[styles.currentChip, { color: level.accent, backgroundColor: level.soft }]}>Current</Text> : null}
+                    <Text style={[styles.tierName, { color: active ? level.accent : '#17324D' }]}>{tx(level.tier)} {tx('Member')}</Text>
+                    {active ? <Text style={[styles.currentChip, { color: level.accent, backgroundColor: level.soft }]}>{tx('Current')}</Text> : null}
                   </View>
-                  <Text style={[styles.tierRange, darkMode ? styles.tierRangeDark : null]}>{level.range}</Text>
-                  <Text style={[styles.tierDetail, darkMode ? styles.tierDetailDark : null]}>{level.detail}</Text>
+                  <Text style={[styles.tierRange, darkMode ? styles.tierRangeDark : null]}>{tx(level.range)}</Text>
+                  <Text style={[styles.tierDetail, darkMode ? styles.tierDetailDark : null]}>{tx(level.detail)}</Text>
                 </View>
               </LinearGradient>
             );

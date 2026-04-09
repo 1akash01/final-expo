@@ -11,15 +11,15 @@ const knownUsers: Record<string, string> = {
 };
 
 export function TransferPointsPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (screen: Screen) => void }) {
-  const { t, theme } = usePreferenceContext();
+  const { t, tx, theme } = usePreferenceContext();
   const [mobile, setMobile] = useState('');
   const [searchResult, setSearchResult] = useState('');
 
   const handleSearch = () => {
     if (mobile.trim().length !== 10) {
-      return Alert.alert('Invalid number', 'Please enter a valid 10-digit mobile number.');
+      return Alert.alert(tx('Invalid number'), tx('Please enter a valid 10-digit mobile number.'));
     }
-    const name = knownUsers[mobile] || 'User Found';
+    const name = knownUsers[mobile] || tx('User Found');
     setSearchResult(`${mobile} (${name})`);
   };
 
@@ -35,7 +35,7 @@ export function TransferPointsPage({ onBack, onNavigate }: { onBack: () => void;
           <View style={styles.searchRow}>
             <TextInput
               style={[styles.searchInput, { backgroundColor: theme.bg, borderColor: theme.border, color: theme.textPrimary }]}
-              placeholder="Enter Mobile Number"
+              placeholder={tx('Enter Mobile Number')}
               placeholderTextColor={theme.textMuted}
               value={mobile}
               onChangeText={setMobile}
@@ -54,16 +54,16 @@ export function TransferPointsPage({ onBack, onNavigate }: { onBack: () => void;
         </View>
 
         <View style={[styles.scannerCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={[styles.scannerTitle, { color: theme.textPrimary }]}>Scan QR</Text>
-          <Text style={[styles.scannerSub, { color: theme.textMuted }]}>Open the main scan page to scan the QR code from the middle bottom navigation.</Text>
+          <Text style={[styles.scannerTitle, { color: theme.textPrimary }]}>{tx('Scan QR')}</Text>
+          <Text style={[styles.scannerSub, { color: theme.textMuted }]}>{tx('Open the main scan page to scan the QR code from the middle bottom navigation.')}</Text>
 
           <TouchableOpacity style={[styles.scanQrBtn, { backgroundColor: C.blueLight, borderColor: theme.border }]} onPress={() => onNavigate('scan')} activeOpacity={0.85}>
             <View style={styles.scanQrIcon}>
               <AppIcon name="scan" size={22} color={C.blue} />
             </View>
             <View style={styles.scanQrContent}>
-              <Text style={styles.scanQrTitle}>Open Scan Page</Text>
-              <Text style={[styles.scanQrSub, { color: theme.textMuted }]}>Go to the center QR scanner page</Text>
+              <Text style={styles.scanQrTitle}>{tx('Open Scan Page')}</Text>
+              <Text style={[styles.scanQrSub, { color: theme.textMuted }]}>{tx('Go to the center QR scanner page')}</Text>
             </View>
             <AppIcon name="chevronRight" size={18} color={C.blue} />
           </TouchableOpacity>
