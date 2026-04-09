@@ -57,7 +57,7 @@ function BoltIcon({ color = '#194A9C', size = 18 }: { color?: string; size?: num
   );
 }
 
-function PlusIcon({ color = '#FFFFFF', size = 18 }: { color?: string; size?: number }) {
+function PlusIcon({ color = '#17438E', size = 18 }: { color?: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M12 5V19M5 12H19" stroke={color} strokeWidth={2.1} strokeLinecap="round" />
@@ -332,6 +332,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
 
       <Modal visible={showAddModal} animationType="slide" transparent onRequestClose={() => setShowAddModal(false)}>
         <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdropTapArea} onPress={() => setShowAddModal(false)} />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 18 : 0}
@@ -584,6 +585,7 @@ const styles = StyleSheet.create({
   memberCity: { marginTop: 12, color: '#263A56', fontSize: 13, fontWeight: '700' },
   memberJoined: { marginTop: 4, color: '#8597AC', fontSize: 12 },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(12,26,49,0.38)' },
+  modalBackdropTapArea: { flex: 1, width: '100%' },
   modalKeyboard: { width: '100%' },
   modalCard: {
     backgroundColor: '#FFFFFF',

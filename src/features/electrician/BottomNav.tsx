@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import { colors } from '@/shared/theme/colors';
 import type { Screen } from '@/shared/types/navigation';
@@ -299,8 +300,15 @@ export function BottomNav({
   onNavigate: (screen: Screen) => void;
 }) {
   const { darkMode, tx } = usePreferenceContext();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
+    <View
+      style={[
+        styles.wrap,
+        darkMode ? styles.wrapDark : null,
+        { marginBottom: -insets.bottom, paddingBottom: 14 + insets.bottom },
+      ]}
+    >
       <View style={styles.side}>
         {LEFT.map((item) => (
           <NavTab

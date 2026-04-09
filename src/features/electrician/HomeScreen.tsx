@@ -14,6 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { Screen } from '@/shared/types/navigation';
 import { formatCountText, usePreferenceContext } from '@/features/profile/ProfileShared';
@@ -284,6 +285,7 @@ export function HomeScreen({
 }) {
   const { darkMode, tx, language } = usePreferenceContext();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [slide, setSlide] = useState(0);
   const productFilters = ['All', 'Boxes', 'Fans'] as const;
   const [selectedFilter, setSelectedFilter] = useState<(typeof productFilters)[number]>('All');
@@ -429,7 +431,12 @@ export function HomeScreen({
 
   return (
     <ScrollView style={[styles.container, darkMode ? styles.containerDark : null]} showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={darkMode ? ['#0B1220', '#101A2F', '#18263E'] : ['#EAF3FF', '#DDEEFF', '#F6EEFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
+      <LinearGradient
+        colors={darkMode ? ['#0B1220', '#101A2F', '#18263E'] : ['#EAF3FF', '#DDEEFF', '#F6EEFF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.heroShell, { marginTop: -insets.top, paddingTop: 26 + insets.top }]}
+      >
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
         <View style={styles.heroGlowThree} />
@@ -586,7 +593,7 @@ export function HomeScreen({
           darkMode={darkMode}
         />
 
-        <View style={{ height: 30 }} />
+        <View style={{ height: Math.max(30, insets.bottom + 18) }} />
       </View>
     </ScrollView>
   );

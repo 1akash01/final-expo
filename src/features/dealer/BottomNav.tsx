@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 
@@ -192,8 +193,15 @@ export function BottomNav({
   onNavigate: (screen: Screen) => void;
 }) {
   const { darkMode, tx } = usePreferenceContext();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.wrap, darkMode ? styles.wrapDark : null]}>
+    <View
+      style={[
+        styles.wrap,
+        darkMode ? styles.wrapDark : null,
+        { marginBottom: -insets.bottom, paddingBottom: 14 + insets.bottom },
+      ]}
+    >
       <View style={styles.side}>
         {LEFT.map((item) => (
           <NavTab key={item.id} id={item.id} label={tx(item.label)} active={currentScreen === item.id} onPress={() => onNavigate(item.id)} />

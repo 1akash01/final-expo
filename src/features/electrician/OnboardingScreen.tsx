@@ -15,6 +15,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import Svg, { Path } from 'react-native-svg';
@@ -475,6 +476,7 @@ export function OnboardingScreen({
 }: {
   onGetStarted: (role: UserRole, options?: { passwordConfigured?: boolean; passwordValue?: string }) => void;
 }) {
+  const insets = useSafeAreaInsets();
   const { language, setLanguage, tx } = usePreferenceContext();
   const reveal = useReveal();
   const scrollRef = useRef<ScrollView | null>(null);
@@ -918,7 +920,11 @@ export function OnboardingScreen({
   };
 
   return (
-    <KeyboardAvoidingView style={s.root} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}>
+    <KeyboardAvoidingView
+      style={[s.root, { marginTop: -insets.top, marginBottom: -insets.bottom }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+    >
       <StatusBar hidden />
       <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
         <LinearGradient colors={[C.heroA, C.heroB, C.heroC]} style={s.bg}>

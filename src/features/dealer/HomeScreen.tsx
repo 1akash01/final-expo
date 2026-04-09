@@ -14,6 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { featuredProducts } from '@/shared/data/mock';
 import { TestimonialShowcase, type TestimonialItem } from '@/shared/components/TestimonialShowcase';
@@ -46,7 +47,7 @@ function UserPlusIcon({ color = '#0F4BA8', size = 24 }: { color?: string; size?:
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Circle cx="10" cy="8" r="3.2" stroke={color} strokeWidth={1.8} />
       <Path d="M4.6 18.5c1.1-2.3 3-3.6 5.4-3.6 2.3 0 4.2 1.2 5.4 3.6" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-      <Path d="M18 8v6M15 11h6" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Path d="M16.8 7.2v5.6M14 10h5.6" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -262,6 +263,7 @@ export function HomeScreen({
 }) {
   const { darkMode, tx, language } = usePreferenceContext();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const statPulse = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -408,7 +410,12 @@ export function HomeScreen({
 
   return (
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} showsVerticalScrollIndicator={false}>
-      <LinearGradient colors={darkMode ? ['#0B1220', '#101A2F', '#18263E'] : ['#EDF4FF', '#E3EEFF', '#F8F4FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroShell}>
+      <LinearGradient
+        colors={darkMode ? ['#0B1220', '#101A2F', '#18263E'] : ['#EDF4FF', '#E3EEFF', '#F8F4FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.heroShell, { marginTop: -insets.top, paddingTop: 26 + insets.top }]}
+      >
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
 
@@ -576,7 +583,7 @@ export function HomeScreen({
           </Text>
         </View>
 
-        <View style={{ height: 30 }} />
+        <View style={{ height: Math.max(30, insets.bottom + 18) }} />
       </View>
     </ScrollView>
   );
