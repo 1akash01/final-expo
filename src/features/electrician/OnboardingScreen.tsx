@@ -956,7 +956,16 @@ export function OnboardingScreen({
               </View>
               {phase !== 'language' ? <View style={s.welcomeLanguageWrap}><LanguageChooser /></View> : null}
             </View>
-            <Text style={[s.bigTitle, phase === 'auth' ? (role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer) : s.bigTitleNeutral]}>{screenTitle}</Text>
+            <Text
+              style={[
+                s.bigTitle,
+                phase === 'language' ? s.bigTitleLanguage : null,
+                phase === 'auth' ? (role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer) : s.bigTitleNeutral,
+              ]}
+              numberOfLines={1}
+            >
+              {screenTitle}
+            </Text>
             <Text style={s.subtext}>{screenSubtitle}</Text>
             {phase === 'language' ? (
               <View style={[s.card, s.languageCard]}>
@@ -1284,6 +1293,7 @@ const s = StyleSheet.create({
   welcomeBadgeFill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(14,165,233,0.12)' },
   eyebrow: { color: C.muted2, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },
   bigTitle: { fontSize: 32, fontWeight: '900', marginBottom: 8, letterSpacing: -0.4 },
+  bigTitleLanguage: { fontSize: 27, letterSpacing: -0.3 },
   bigTitleNeutral: { color: C.title },
   bigTitleElectrician: { color: 'rgba(21,154,111,0.84)' },
   bigTitleDealer: { color: 'rgba(44,107,231,0.84)' },
