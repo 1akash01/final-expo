@@ -7,6 +7,12 @@
     "plugins": [
       "expo-router",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SRV Electricals to access your camera so you can scan QR codes and capture product images."
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "Allow SRV Electricals to access your location so we can fill your current address during dealer signup."

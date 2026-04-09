@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { Camera, CameraView, scanFromURLAsync } from 'expo-camera';
 import {
   Alert,
   Animated,
@@ -67,24 +68,15 @@ function BackArrowIcon({ size = 20, color = Colors.textDark }: { size?: number; 
   );
 }
 
-function RealQRCode({ size = 200 }: { size?: number }) {
-  const px = Math.round(size * 2);
-  const uri = `https://quickchart.io/qr?text=SRV-MCB-32A-2024&size=${px}&margin=2&dark=000000&light=ffffff`;
-
-  return (
-    <View style={{ width: size, height: size, backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden', padding: 4 }}>
-      <Image source={{ uri }} style={{ width: size - 8, height: size - 8 }} resizeMode="contain" />
-    </View>
-  );
-}
-
 export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
   const { darkMode, tx } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [flashlightOn, setFlashlightOn] = useState(false);
+  const [cameraGranted, setCameraGranted] = useState<boolean | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [detectedLabel, setDetectedLabel] = useState('SRV MCB 32A detected');
   const frameSize = Math.min(width - 64, 260);
 
   const laserY = useRef(new Animated.Value(0)).current;
@@ -94,6 +86,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
   const frameGlow = useRef(new Animated.Value(0)).current;
   const successScale = useRef(new Animated.Value(0)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
+  const scanLockedRef = useRef(false);
 
   const laserLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const cornerLoopRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -148,6 +141,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
   useEffect(() => {
     startLaser(false);
     startCornerIdle();
+    void requestCameraAccess();
     return () => {
       laserLoopRef.current?.stop();
       cornerLoopRef.current?.stop();
@@ -175,7 +169,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
       glowLoopRef.current?.stop();
       frameGlow.setValue(0);
     }
-  }, [scanning, scanned, laserOpacity, cornerOpacity, cornerScale, frameGlow, laserY]);
+  }, [scanning, scanned, cornerOpacity, cornerScale, frameGlow, laserOpacity, laserY]);
 
   useEffect(() => {
     if (scanned) {
@@ -196,41 +190,46 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     }
   }, [scanned, frameGlow, laserOpacity, successOpacity, successScale]);
 
-  const startScan = () => {
-    setSelectedImage(null);
-    setScanned(false);
-    setScanning(true);
-    setTimeout(() => {
+  const requestCameraAccess = async () => {
+    const permission = await Camera.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      setCameraGranted(false);
       setScanning(false);
-      setScanned(true);
-    }, 3000);
+      Alert.alert(tx('Permission needed'), tx('Camera access allow karo taaki aap QR scan kar sako.'));
+      return false;
+    }
+    setCameraGranted(true);
+    if (!scanLockedRef.current) {
+      setScanning(true);
+    }
+    return true;
+  };
+
+  const resetScanner = async () => {
+    scanLockedRef.current = false;
+    setScanned(false);
+    setPreviewImage(null);
+    setDetectedLabel('SRV MCB 32A detected');
+    if (cameraGranted === true || (await requestCameraAccess())) {
+      setScanning(true);
+    }
+  };
+
+  const completeScan = (data?: string) => {
+    if (scanLockedRef.current) return;
+    scanLockedRef.current = true;
+    setScanning(false);
+    setScanned(true);
+    if (data?.trim()) {
+      setDetectedLabel(`${data.trim()} detected`);
+    } else {
+      setDetectedLabel('SRV MCB 32A detected');
+    }
   };
 
   const handleOpenCamera = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert(tx('Permission needed'), tx('Camera access allow karo taaki aap QR scan kar sako.'));
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: false,
-      quality: 1,
-    });
-
-    if (result.canceled || !result.assets?.length) {
-      return;
-    }
-
-    setSelectedImage(result.assets[0].uri);
-    setScanned(false);
-    setScanning(true);
-    setTimeout(() => {
-      setScanning(false);
-      setScanned(true);
-    }, 1800);
+    setPreviewImage(null);
+    await resetScanner();
   };
 
   const handlePickFromGallery = async () => {
@@ -242,7 +241,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       quality: 1,
     });
@@ -251,13 +250,29 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
       return;
     }
 
-    setSelectedImage(result.assets[0].uri);
-    setScanned(false);
+    const imageUri = result.assets[0].uri;
+    setPreviewImage(imageUri);
     setScanning(true);
-    setTimeout(() => {
+    setScanned(false);
+    scanLockedRef.current = false;
+
+    try {
+      const matches = await scanFromURLAsync(imageUri, ['qr']);
+      if (matches.length) {
+        completeScan(matches[0]?.data);
+        return;
+      }
       setScanning(false);
-      setScanned(true);
-    }, 1800);
+      Alert.alert(tx('Scan QR Code'), tx('Align QR code within the frame'));
+    } catch {
+      setScanning(false);
+      Alert.alert(tx('Scan QR Code'), tx('Align QR code within the frame'));
+    }
+  };
+
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    if (!scanning || scanLockedRef.current) return;
+    completeScan(data);
   };
 
   const laserTranslate = laserY.interpolate({ inputRange: [0, 1], outputRange: [0, frameSize - 10] });
@@ -265,8 +280,6 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
     inputRange: [0, 1],
     outputRange: ['rgba(232,69,60,0.3)', 'rgba(232,69,60,0.9)'],
   });
-
-  const qrSize = frameSize - 32;
 
   return (
     <View style={[styles.root, darkMode ? styles.rootDark : null]}>
@@ -286,22 +299,33 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
             style={[
               styles.frame,
               darkMode ? styles.frameDark : null,
-              flashlightOn ? styles.frameFlashlight : null,
               { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 },
             ]}
           >
-            <View style={[StyleSheet.absoluteFill, styles.frameInner, darkMode ? styles.frameInnerDark : null]} />
-            {flashlightOn ? <View style={styles.flashlightGlow} pointerEvents="none" /> : null}
-
-            {!scanned && (
-              <View style={styles.qrCenter}>
-                {selectedImage ? (
-                  <Image source={{ uri: selectedImage }} style={{ width: qrSize, height: qrSize, borderRadius: 12 }} resizeMode="cover" />
-                ) : (
-                  <RealQRCode size={qrSize} />
-                )}
+            {cameraGranted ? (
+              <CameraView
+                style={StyleSheet.absoluteFillObject}
+                facing="back"
+                enableTorch={flashlightOn}
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+              />
+            ) : (
+              <View style={[StyleSheet.absoluteFillObject, styles.cameraFallback, darkMode ? styles.cameraFallbackDark : null]}>
+                <CameraIcon size={34} color={darkMode ? '#F8FAFC' : Colors.primary} />
+                <Text style={[styles.cameraFallbackText, darkMode ? styles.cameraFallbackTextDark : null]}>
+                  {tx('Start Scanning')}
+                </Text>
               </View>
             )}
+
+            {previewImage ? (
+              <View style={styles.previewImageWrap}>
+                <Image source={{ uri: previewImage }} style={styles.previewImage} resizeMode="cover" />
+              </View>
+            ) : null}
+
+            <View style={[StyleSheet.absoluteFillObject, styles.frameShade]} pointerEvents="none" />
 
             <Animated.View
               style={[styles.laser, { width: frameSize - 28, opacity: laserOpacity, transform: [{ translateY: laserTranslate }] }]}
@@ -342,20 +366,20 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
         {scanned ? (
           <Animated.View style={[styles.successBox, darkMode ? styles.successBoxDark : null, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
-            <Text style={styles.successTitle}>{"\u2705"} {tx('SRV MCB 32A detected')}</Text>
+            <Text style={styles.successTitle}>{"\u2705"} {detectedLabel}</Text>
             <Text style={[styles.successSub, darkMode ? styles.successSubDark : null]}>{tx('You earned +80 reward points.')}</Text>
           </Animated.View>
         ) : null}
 
         <TouchableOpacity
           onPress={scanned ? () => onNavigate('home') : handleOpenCamera}
-          disabled={scanning}
-          style={[styles.primaryBtn, scanning && styles.primaryBtnDisabled]}
+          disabled={scanning && !scanned}
+          style={[styles.primaryBtn, scanning && !scanned ? styles.primaryBtnDisabled : null]}
           activeOpacity={0.85}
         >
           {!scanned ? <CameraIcon size={20} color="#FFFFFF" /> : null}
           <Text style={styles.primaryBtnText}>
-            {scanned ? tx('Claim Points & Continue') : scanning ? tx('Scanning...') : tx('Start Scanning')}
+            {scanned ? tx('Claim Points & Continue') : cameraGranted ? tx('Start Scanning') : tx('Start Scanning')}
           </Text>
         </TouchableOpacity>
 
@@ -429,16 +453,22 @@ const styles = StyleSheet.create({
   subtitleDark: { color: '#94A3B8' },
   frameWrap: { alignItems: 'center', gap: 14, marginTop: 4 },
   frame: { borderRadius: 24, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' },
-  frameInner: { backgroundColor: '#FFFFFF', borderRadius: 24 },
   frameDark: { backgroundColor: '#111827' },
-  frameInnerDark: { backgroundColor: '#111827' },
-  frameFlashlight: { backgroundColor: '#FFF8DA' },
-  flashlightGlow: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,239,153,0.24)',
-    borderRadius: 24,
+  frameShade: { backgroundColor: 'rgba(7,10,18,0.1)' },
+  cameraFallback: { alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#FFF7F5' },
+  cameraFallbackDark: { backgroundColor: '#111827' },
+  cameraFallbackText: { fontSize: 14, fontWeight: '700', color: Colors.primary },
+  cameraFallbackTextDark: { color: '#F8FAFC' },
+  previewImageWrap: {
+    position: 'absolute',
+    top: 24,
+    left: 24,
+    right: 24,
+    bottom: 24,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
-  qrCenter: { alignItems: 'center', justifyContent: 'center' },
+  previewImage: { width: '100%', height: '100%' },
   laser: {
     position: 'absolute', top: CORNER_OFFSET, left: CORNER_OFFSET, height: 3, borderRadius: 3,
     backgroundColor: Colors.primary, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 0 },
@@ -451,7 +481,7 @@ const styles = StyleSheet.create({
   cBL: { bottom: CORNER_OFFSET, left: CORNER_OFFSET, borderBottomWidth: CORNER_THICK, borderLeftWidth: CORNER_THICK, borderColor: Colors.primary, borderBottomLeftRadius: CORNER_RADIUS },
   cBR: { bottom: CORNER_OFFSET, right: CORNER_OFFSET, borderBottomWidth: CORNER_THICK, borderRightWidth: CORNER_THICK, borderColor: Colors.primary, borderBottomRightRadius: CORNER_RADIUS },
   successOverlay: { position: 'absolute', alignItems: 'center', justifyContent: 'center', gap: 8, zIndex: 10 },
-  checkmark: { fontSize: 52 },
+  checkmark: { fontSize: 52, color: '#FFFFFF' },
   verifiedText: { fontSize: 18, fontWeight: '800', color: Colors.success },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 22 },
   statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
