@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 6 },
   iconWrap: { width: 56, height: 56, borderRadius: 18, backgroundColor: C.tealLight, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 17, fontWeight: '900' },
-  sub: { fontSize: 13, marginTop: 2 },
+  sub: { fontSize: 11, marginTop: 2 },
   label: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   input: { height: 52, borderRadius: 16, borderWidth: 1.5, paddingHorizontal: 16, fontSize: 14, fontWeight: '500' },
   dropdownTrigger: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
