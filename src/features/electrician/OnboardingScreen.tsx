@@ -865,7 +865,7 @@ export function OnboardingScreen({
                         {loginStep !== 'phone' ? <Button label="Verify OTP" onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
                         {loginStep === 'password' ? <Info text="OTP verification successful." kind="success" /> : null}
                         {loginStep === 'password' ? <Field label="Password" value={loginPass} onChangeText={setLoginPass} placeholder="Enter password" secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} onSubmitEditing={dismissKeyboard} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {loginStep === 'password' ? <Button label={loading ? 'Opening...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                        {loginStep === 'password' ? <Button label={loading ? 'login...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                       </>
                     )}
                   </View>
@@ -977,7 +977,7 @@ export function OnboardingScreen({
                         {signupStep === 'password' ? <Text style={s.helperText}>Password is optional. Leave both fields blank if you want to skip it.</Text> : null}
                         {signupStep === 'password' ? <Field label="Password (Optional)" value={signupPass} onChangeText={setSignupPass} placeholder="Create password if you want" secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
                         {signupStep === 'password' ? <Field label="Confirm Password (Optional)" value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder="Re-enter password" secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {signupStep === 'password' ? <Button label={loading ? 'Opening...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                        {signupStep === 'password' ? <Button label={loading ? 'login...' : 'Continue'} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                       </>
                     )}
                   </View>
