@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import {
   Alert,
@@ -13,7 +13,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 const Colors = {
@@ -67,20 +67,13 @@ function BackArrowIcon({ size = 20, color = Colors.textDark }: { size?: number; 
   );
 }
 
-// â”€â”€ Real QR Code â€” fetched from quickchart.io free API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// URL: https://quickchart.io/qr?text=SRV-MCB-32A&size=400&margin=2&dark=000000&light=ffffff
-// Returns a real PNG QR image â€” black dots on white, proper finder patterns
 function RealQRCode({ size = 200 }: { size?: number }) {
-  const px = Math.round(size * 2); // 2x for crisp rendering on high-DPI
+  const px = Math.round(size * 2);
   const uri = `https://quickchart.io/qr?text=SRV-MCB-32A-2024&size=${px}&margin=2&dark=000000&light=ffffff`;
 
   return (
     <View style={{ width: size, height: size, backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden', padding: 4 }}>
-      <Image
-        source={{ uri }}
-        style={{ width: size - 8, height: size - 8 }}
-        resizeMode="contain"
-      />
+      <Image source={{ uri }} style={{ width: size - 8, height: size - 8 }} resizeMode="contain" />
     </View>
   );
 }
@@ -91,6 +84,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
   const [scanned, setScanned] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [flashlightOn, setFlashlightOn] = useState(false);
   const frameSize = Math.min(width - 64, 260);
 
   const laserY = useRef(new Animated.Value(0)).current;
@@ -181,7 +175,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
       glowLoopRef.current?.stop();
       frameGlow.setValue(0);
     }
-  }, [scanning]);
+  }, [scanning, scanned, laserOpacity, cornerOpacity, cornerScale, frameGlow, laserY]);
 
   useEffect(() => {
     if (scanned) {
@@ -200,13 +194,16 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
       successScale.setValue(0);
       successOpacity.setValue(0);
     }
-  }, [scanned]);
+  }, [scanned, frameGlow, laserOpacity, successOpacity, successScale]);
 
   const startScan = () => {
     setSelectedImage(null);
     setScanned(false);
     setScanning(true);
-    setTimeout(() => { setScanning(false); setScanned(true); }, 3000);
+    setTimeout(() => {
+      setScanning(false);
+      setScanned(true);
+    }, 3000);
   };
 
   const handleOpenCamera = async () => {
@@ -286,9 +283,15 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
         <View style={styles.frameWrap}>
           <Animated.View
-            style={[styles.frame, darkMode ? styles.frameDark : null, { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 }]}
+            style={[
+              styles.frame,
+              darkMode ? styles.frameDark : null,
+              flashlightOn ? styles.frameFlashlight : null,
+              { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 },
+            ]}
           >
             <View style={[StyleSheet.absoluteFill, styles.frameInner, darkMode ? styles.frameInnerDark : null]} />
+            {flashlightOn ? <View style={styles.flashlightGlow} pointerEvents="none" /> : null}
 
             {!scanned && (
               <View style={styles.qrCenter}>
@@ -307,12 +310,12 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
               style={[styles.laserGlow, { width: frameSize - 28, opacity: laserOpacity, transform: [{ translateY: laserTranslate }] }]}
             />
 
-            {scanned && (
+            {scanned ? (
               <Animated.View style={[styles.successOverlay, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
-                <Text style={styles.checkmark}>âœ…</Text>
+                <Text style={styles.checkmark}>{"\u2714"}</Text>
                 <Text style={styles.verifiedText}>{tx('Verify')}</Text>
               </Animated.View>
-            )}
+            ) : null}
 
             <Animated.View
               style={[StyleSheet.absoluteFill, { opacity: cornerOpacity, transform: [{ scale: cornerScale }] }]}
@@ -326,18 +329,23 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
           </Animated.View>
 
           <View style={styles.statusRow}>
-            {scanning && (<><View style={styles.statusDot} /><Text style={styles.statusActive}>{tx('Scanning...')}</Text></>)}
-            {!scanning && !scanned && <Text style={[styles.statusIdle, darkMode ? styles.statusIdleDark : null]}>{tx('Align QR code within the frame')}</Text>}
-            {scanned && <Text style={styles.statusSuccess}>{"\u2713"} {tx('QR Code detected')}</Text>}
+            {scanning ? (
+              <>
+                <View style={styles.statusDot} />
+                <Text style={styles.statusActive}>{tx('Scanning...')}</Text>
+              </>
+            ) : null}
+            {!scanning && !scanned ? <Text style={[styles.statusIdle, darkMode ? styles.statusIdleDark : null]}>{tx('Align QR code within the frame')}</Text> : null}
+            {scanned ? <Text style={styles.statusSuccess}>{"\u2713"} {tx('QR Code detected')}</Text> : null}
           </View>
         </View>
 
-        {scanned && (
+        {scanned ? (
           <Animated.View style={[styles.successBox, darkMode ? styles.successBoxDark : null, { transform: [{ scale: successScale }], opacity: successOpacity }]}>
             <Text style={styles.successTitle}>{"\u2705"} {tx('SRV MCB 32A detected')}</Text>
             <Text style={[styles.successSub, darkMode ? styles.successSubDark : null]}>{tx('You earned +80 reward points.')}</Text>
           </Animated.View>
-        )}
+        ) : null}
 
         <TouchableOpacity
           onPress={scanned ? () => onNavigate('home') : handleOpenCamera}
@@ -352,9 +360,24 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         </TouchableOpacity>
 
         <View style={styles.actionRow}>
-          <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]}>
-            <FlashlightIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
-            <Text style={[styles.secondaryActionText, darkMode ? styles.secondaryActionTextDark : null]}>{tx('Flashlight')}</Text>
+          <Pressable
+            style={[
+              styles.secondaryAction,
+              darkMode ? styles.secondaryActionDark : null,
+              flashlightOn ? styles.secondaryActionActive : null,
+            ]}
+            onPress={() => setFlashlightOn((current) => !current)}
+          >
+            <FlashlightIcon size={20} color={flashlightOn ? '#FFFFFF' : darkMode ? '#F8FAFC' : Colors.textDark} />
+            <Text
+              style={[
+                styles.secondaryActionText,
+                darkMode ? styles.secondaryActionTextDark : null,
+                flashlightOn ? styles.secondaryActionTextActive : null,
+              ]}
+            >
+              {flashlightOn ? tx('Flashlight On') : tx('Flashlight')}
+            </Text>
           </Pressable>
           <Pressable style={[styles.secondaryAction, darkMode ? styles.secondaryActionDark : null]} onPress={handlePickFromGallery}>
             <GalleryIcon size={20} color={darkMode ? '#F8FAFC' : Colors.textDark} />
@@ -409,6 +432,12 @@ const styles = StyleSheet.create({
   frameInner: { backgroundColor: '#FFFFFF', borderRadius: 24 },
   frameDark: { backgroundColor: '#111827' },
   frameInnerDark: { backgroundColor: '#111827' },
+  frameFlashlight: { backgroundColor: '#FFF8DA' },
+  flashlightGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,239,153,0.24)',
+    borderRadius: 24,
+  },
   qrCenter: { alignItems: 'center', justifyContent: 'center' },
   laser: {
     position: 'absolute', top: CORNER_OFFSET, left: CORNER_OFFSET, height: 3, borderRadius: 3,
@@ -450,6 +479,8 @@ const styles = StyleSheet.create({
   secondaryActionText: { color: Colors.textDark, fontSize: 13, fontWeight: '700' },
   secondaryActionDark: { backgroundColor: '#111827', borderColor: '#243043', shadowOpacity: 0 },
   secondaryActionTextDark: { color: '#F8FAFC' },
+  secondaryActionActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  secondaryActionTextActive: { color: '#FFFFFF' },
   howCard: { width: '100%', backgroundColor: Colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: Colors.border },
   howCardDark: { backgroundColor: '#111827', borderColor: '#243043' },
   howTitle: { fontSize: 17, fontWeight: '800', color: Colors.textDark, marginBottom: 4 },
@@ -460,6 +491,3 @@ const styles = StyleSheet.create({
   howText: { flex: 1, fontSize: 13, lineHeight: 20, color: Colors.textMuted },
   howTextDark: { color: '#94A3B8' },
 });
-
-
-
