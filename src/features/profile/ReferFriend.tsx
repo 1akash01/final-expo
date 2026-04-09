@@ -63,12 +63,12 @@ export function ReferFriendPage({ onBack }: { onBack: () => void }) {
           ))}
         </View>
 
-        <View style={[styles.stepsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        {/* <View style={[styles.stepsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <Text style={[styles.howTitle, { color: theme.textPrimary }]}>How It Works?</Text>
           <Text style={[styles.howText, { color: theme.textPrimary }]}>1. Invite Your Friends</Text>
           <Text style={[styles.howText, { color: theme.textPrimary }]}>2. They Hit The Road With 20% off</Text>
           <Text style={[styles.howText, { color: theme.textPrimary }]}>3. You Make Saving!</Text>
-        </View>
+        </View> */}
       </ScrollView>
     </View>
   );
