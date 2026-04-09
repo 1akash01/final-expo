@@ -21,6 +21,7 @@ import Svg, { Path } from 'react-native-svg';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
 
 export type UserRole = 'electrician' | 'dealer';
+type IntroStep = 'language' | 'role' | 'auth';
 type AuthMode = 'login' | 'signup';
 type LoginStep = 'phone' | 'otp' | 'password';
 type SignupStep = 'name' | 'email' | 'dealer' | 'address' | 'location' | 'identity' | 'holders' | 'terms' | 'phone' | 'otp' | 'password';
@@ -65,6 +66,30 @@ const roleImages = {
   electrician: require('../../../assets/electrician-role.png'),
   dealer: require('../../../assets/dealer-role.png'),
 } as const;
+
+const languageOptions = [
+  {
+    value: 'English',
+    title: 'English',
+    nativeTitle: 'English',
+    mark: 'A',
+    description: 'For onboarding and rewards.',
+  },
+  {
+    value: 'Hindi',
+    title: 'Hindi',
+    nativeTitle: 'हिंदी',
+    mark: 'अ',
+    description: 'ऑनबोर्डिंग और रिवॉर्ड्स के लिए।',
+  },
+  {
+    value: 'Punjabi',
+    title: 'Punjabi',
+    nativeTitle: 'ਪੰਜਾਬੀ',
+    mark: 'ਅ',
+    description: 'ਆਨਬੋਰਡਿੰਗ ਅਤੇ ਰਿਵਾਰਡ ਲਈ।',
+  },
+] as const;
 
 const isValidEmail = (value: string) => {
   const trimmed = value.trim();
@@ -151,12 +176,12 @@ function BackArrowIcon() {
 
 function TranslateIcon({ color }: { color: string }) {
   return (
-    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-      <Path d="M4.75 6.75H14.75" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
-      <Path d="M9.75 6.75V7.35C9.75 10.52 8.18 13.48 5.55 15.25" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M7.25 10.75C8.24 12.51 9.71 14.02 11.48 15.05" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M13.9 18.25L17.9 9.75L21.9 18.25" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M15.2 15.5H20.6" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
+    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 7H12" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
+      <Path d="M8 7C8 11.1 6.44 14.39 4 16" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M5.5 11C6.7 12.91 8.38 14.53 10.35 15.72" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M14.5 17L17.5 9L20.5 17" stroke={color} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M15.55 14.25H19.45" stroke={color} strokeWidth={1.9} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -197,11 +222,11 @@ function LanguageChooser() {
     return () => loop.stop();
   }, [pulseAnim]);
 
-  const options: Array<{ value: 'English' | 'Hindi' | 'Punjabi'; title: string; mark: string }> = [
-    { value: 'English', title: tx('english'), mark: 'A' },
-    { value: 'Hindi', title: tx('hindi'), mark: 'अ' },
-    { value: 'Punjabi', title: tx('punjabi'), mark: 'ਅ' },
-  ];
+  const options: Array<{ value: 'English' | 'Hindi' | 'Punjabi'; title: string; mark: string }> = languageOptions.map((option) => ({
+    value: option.value,
+    title: option.value === 'English' ? tx('english') : option.value === 'Hindi' ? tx('hindi') : tx('punjabi'),
+    mark: option.mark,
+  }));
   const currentOption = options.find((option) => option.value === language) ?? options[0];
   const dropdownStyle = {
     opacity: dropdownAnim,
@@ -450,7 +475,7 @@ export function OnboardingScreen({
 }: {
   onGetStarted: (role: UserRole, options?: { passwordConfigured?: boolean; passwordValue?: string }) => void;
 }) {
-  const { tx } = usePreferenceContext();
+  const { language, setLanguage, tx } = usePreferenceContext();
   const reveal = useReveal();
   const scrollRef = useRef<ScrollView | null>(null);
   const loginPhoneRef = useRef<TextInput | null>(null);
@@ -470,7 +495,7 @@ export function OnboardingScreen({
   const signupPassRef = useRef<TextInput | null>(null);
   const signupConfirmPassRef = useRef<TextInput | null>(null);
 
-  const [phase, setPhase] = useState<'role' | 'auth'>('role');
+  const [phase, setPhase] = useState<IntroStep>('language');
   const [mode, setMode] = useState<AuthMode>('login');
   const [role, setRole] = useState<UserRole>('electrician');
   const [authSelectionOpen, setAuthSelectionOpen] = useState(false);
@@ -507,6 +532,19 @@ export function OnboardingScreen({
   const [verifiedDealerName, setVerifiedDealerName] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
+
+  const screenTitle =
+    phase === 'language'
+      ? tx('Choose your language')
+      : phase === 'role'
+        ? tx('Choose your role')
+        : tx(roleMeta[role].title);
+  const screenSubtitle =
+    phase === 'language'
+      ? tx('Pick your preferred language first, then continue to the onboarding screen.')
+      : phase === 'role'
+        ? tx('Choose your role to start the onboarding journey.')
+        : tx('Professional authentication flow aligned with the app design system.');
 
   useEffect(() => {
     if (loginStep === 'otp') {
@@ -887,24 +925,76 @@ export function OnboardingScreen({
           <View style={s.glow1} />
           <View style={s.glow2} />
           <View style={s.glow3} />
-          <ScrollView ref={scrollRef} contentContainerStyle={[s.content, phase === 'role' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase !== 'role'}>
-            <Animated.View style={[reveal, phase === 'role' ? s.revealRole : null]}>
+          <ScrollView ref={scrollRef} contentContainerStyle={[s.content, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'}>
+            <Animated.View style={[reveal, phase !== 'auth' ? s.revealRole : null]}>
             <View style={s.topRow}>
-              <View style={s.brandBlock}>
+              <View style={[s.brandRow, s.brandRowCentered]}>
                 <View style={s.logoWrap}><Image source={require('../../../assets/srv-login-logo.png')} style={s.logo} resizeMode="contain" /></View>
               </View>
-              {phase === 'auth' ? <Pressable onPress={() => { dismissKeyboard(); resetForm(); setPhase('role'); }} style={s.back}><BackArrowIcon /></Pressable> : null}
+              {phase !== 'language' ? (
+                <Pressable
+                  onPress={() => {
+                    dismissKeyboard();
+                    if (phase === 'auth') {
+                      resetForm();
+                      setPhase('role');
+                      return;
+                    }
+                    setPhase('language');
+                  }}
+                  style={s.back}
+                >
+                  <BackArrowIcon />
+                </Pressable>
+              ) : null}
             </View>
-
-            <LanguageChooser />
-            <View style={s.welcomeBadge}>
-              <LinearGradient colors={['rgba(14,165,233,0.12)', 'rgba(139,92,246,0.12)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.welcomeBadgeFill}>
-                <Text style={s.eyebrow}>{tx('Welcome to SRV')}</Text>
-              </LinearGradient>
+            <View style={s.welcomeRow}>
+              <View style={s.welcomeBadge}>
+                <LinearGradient colors={['rgba(14,165,233,0.12)', 'rgba(139,92,246,0.12)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.welcomeBadgeFill}>
+                  <Text style={s.eyebrow}>{phase === 'language' ? tx('Language Setup') : tx('Welcome to SRV')}</Text>
+                </LinearGradient>
+              </View>
+              {phase !== 'language' ? <View style={s.welcomeLanguageWrap}><LanguageChooser /></View> : null}
             </View>
-            <Text style={[s.bigTitle, role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer]}>{tx(roleMeta[role].title)}</Text>
-            <Text style={s.subtext}>{tx(phase === 'role' ? 'Choose your role to start the onboarding journey.' : 'Professional authentication flow aligned with the app design system.')}</Text>
-            {phase === 'role' ? (
+            <Text style={[s.bigTitle, phase === 'auth' ? (role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer) : s.bigTitleNeutral]}>{screenTitle}</Text>
+            <Text style={s.subtext}>{screenSubtitle}</Text>
+            {phase === 'language' ? (
+              <View style={[s.card, s.languageCard]}>
+                <Text style={s.sectionEyebrow}>{tx('App Preferences')}</Text>
+                <Text style={s.sectionTitle}>{tx('CHOOSE YOUR LANGUAGE')}</Text>
+                <Text style={s.sectionText}>{tx('Use the same language across the complete SRV app experience.')}</Text>
+                <View style={s.languageOptionList}>
+                  {languageOptions.map((option) => {
+                    const active = language === option.value;
+                    return (
+                      <Pressable
+                        key={option.value}
+                        onPress={() => setLanguage(option.value)}
+                        style={[s.languageOptionCard, active ? s.languageOptionCardActive : null]}
+                      >
+                        <View style={[s.languageOptionBadge, active ? s.languageOptionBadgeActive : null]}>
+                          <Text style={[s.languageOptionBadgeText, active ? s.languageOptionBadgeTextActive : null]}>{option.mark}</Text>
+                        </View>
+                        <View style={s.languageOptionCopy}>
+                          <Text style={[s.languageOptionTitle, active ? s.languageOptionTitleActive : null]}>
+                            {option.value === 'English' ? tx('English') : option.value === 'Hindi' ? tx('Hindi') : tx('Punjabi')}
+                          </Text>
+                          <Text style={[s.languageOptionNative, active ? s.languageOptionNativeActive : null]}>{option.nativeTitle}</Text>
+                          <Text style={s.languageOptionDescription}>{tx(option.description)}</Text>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Button
+                  label={tx('Continue')}
+                  onPress={() => setPhase('role')}
+                  disabled={false}
+                  colors={['#2C6BE7', '#5DAAF8']}
+                  shadowColor="#2C6BE7"
+                />
+              </View>
+            ) : phase === 'role' ? (
               <View style={[s.card, s.roleSetupCard]}>
                 <Text style={s.sectionEyebrow}>{tx('Account Setup')}</Text>
                 <Text style={s.sectionTitle}>{tx('CHOOSE YOUR ROLE')}</Text>
@@ -1137,40 +1227,43 @@ const s = StyleSheet.create({
   content: { flexGrow: 1, paddingHorizontal: 14, paddingTop: 22, paddingBottom: 24 },
   contentRole: { flexGrow: 1 },
   revealRole: { flex: 1 },
-  topRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 16, position: 'relative', minHeight: 100 },
-  brandBlock: { width: '100%', alignItems: 'center', justifyContent: 'center' },
+  topRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', marginBottom: 16, position: 'relative', minHeight: 100 },
+  brandRow: { width: '100%', alignItems: 'center', justifyContent: 'center' },
+  brandRowCentered: { flexDirection: 'row' },
   logoWrap: { width: 182, height: 102, alignItems: 'center', justifyContent: 'center' },
   logo: { width: '100%', height: '100%' },
   back: { position: 'absolute', right: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
-  languageWrap: { alignSelf: 'flex-end', marginTop: -14, marginBottom: 6, position: 'relative', zIndex: 20 },
+  welcomeRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 8 },
+  welcomeLanguageWrap: { marginLeft: 'auto', alignItems: 'flex-end' },
+  languageWrap: { position: 'relative', zIndex: 20 },
   languageTrigger: {
-    minWidth: 46,
-    height: 46,
-    borderRadius: 16,
+    minWidth: 52,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1,
-    borderColor: 'rgba(93,170,248,0.24)',
+    borderColor: 'rgba(125,145,179,0.22)',
     overflow: 'hidden',
-    shadowColor: '#2C6BE7',
+    shadowColor: '#163B72',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 5,
+    shadowOpacity: 0.1,
+    shadowRadius: 14,
+    elevation: 4,
   },
-  languageTriggerActive: { borderColor: '#2C6BE7' },
-  languageTriggerFill: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 1, paddingTop: 4, paddingBottom: 4 },
-  languageMiniIcon: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  languageTriggerActive: { borderColor: '#1D4ED8' },
+  languageTriggerFill: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingHorizontal: 10 },
+  languageMiniIcon: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.78)' },
   languageMiniIconActive: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 9,
   },
-  languageMiniText: { color: '#2C6BE7', fontSize: 9.5, fontWeight: '900', letterSpacing: 0.2 },
+  languageMiniText: { color: '#1D4ED8', fontSize: 11, fontWeight: '900', letterSpacing: 0.2 },
   languageMiniTextActive: { color: '#FFFFFF' },
   languageMenu: {
     position: 'absolute',
-    top: 62,
-    right: 0,
-    minWidth: 148,
-    borderRadius: 18,
+    top: 42,
+    right: -6,
+    minWidth: 156,
+    borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.98)',
     borderWidth: 1,
     borderColor: '#D8E2F0',
@@ -1187,18 +1280,33 @@ const s = StyleSheet.create({
   languageMenuMarkActive: { color: '#1D4ED8' },
   languageMenuText: { color: C.title, fontSize: 13, fontWeight: '800' },
   languageMenuTextActive: { color: '#1D4ED8' },
-  welcomeBadge: { alignSelf: 'flex-start', marginBottom: 8, marginTop: 0 },
+  welcomeBadge: { marginTop: 0 },
   welcomeBadgeFill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(14,165,233,0.12)' },
   eyebrow: { color: C.muted2, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },
   bigTitle: { fontSize: 32, fontWeight: '900', marginBottom: 8, letterSpacing: -0.4 },
+  bigTitleNeutral: { color: C.title },
   bigTitleElectrician: { color: 'rgba(21,154,111,0.84)' },
   bigTitleDealer: { color: 'rgba(44,107,231,0.84)' },
   subtext: { color: C.muted, fontSize: 13.5, lineHeight: 20, marginBottom: 16, maxWidth: '96%' },
   card: { backgroundColor: C.white, borderRadius: 28, padding: 18, borderWidth: 1, borderColor: C.line, shadowColor: '#0F172A', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 6 },
+  languageCard: { marginTop: 2, paddingTop: 14, paddingBottom: 12, paddingHorizontal: 14 },
   roleSetupCard: { marginTop: 6, flex: 1, justifyContent: 'space-between', paddingTop: 16, paddingBottom: 14 },
   sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 5 },
   sectionTitle: { color: C.title, fontSize: 13, fontWeight: '900', marginBottom: 6 },
   sectionText: { color: C.muted, fontSize: 12.5, lineHeight: 18 },
+  languageOptionList: { gap: 8, marginTop: 12, marginBottom: 12 },
+  languageOptionCard: { flexDirection: 'row', gap: 10, borderRadius: 18, borderWidth: 1.5, borderColor: '#D8E2F0', backgroundColor: '#F8FBFF', paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' },
+  languageOptionCardActive: { borderColor: '#69B8FF', backgroundColor: '#EAF3FF', shadowColor: '#4D9FFF', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.14, shadowRadius: 14, elevation: 4 },
+  languageOptionBadge: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
+  languageOptionBadgeActive: { backgroundColor: '#2C6BE7' },
+  languageOptionBadgeText: { color: '#2C6BE7', fontSize: 20, fontWeight: '900' },
+  languageOptionBadgeTextActive: { color: '#FFFFFF' },
+  languageOptionCopy: { flex: 1, gap: 1 },
+  languageOptionTitle: { color: C.title, fontSize: 14, fontWeight: '900' },
+  languageOptionTitleActive: { color: '#1D4ED8' },
+  languageOptionNative: { color: C.text, fontSize: 12.5, fontWeight: '700' },
+  languageOptionNativeActive: { color: '#1D4ED8' },
+  languageOptionDescription: { color: C.muted, fontSize: 11.5, lineHeight: 15, marginTop: 1 },
   roleGrid: { flexDirection: 'row', gap: 12, marginTop: 14, marginBottom: 14 },
   roleCard: { flex: 1, borderRadius: 22, padding: 12, borderWidth: 1.5, borderColor: '#243554' },
   roleCardElectrician: { backgroundColor: '#F1FBF7', borderColor: '#B9E7D4' },
