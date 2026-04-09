@@ -17,6 +17,7 @@ import {
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { Screen } from '@/shared/types/navigation';
 import { formatCountText, usePreferenceContext } from '@/features/profile/ProfileShared';
+import { TestimonialShowcase, type TestimonialItem } from '@/shared/components/TestimonialShowcase';
 import ProfileFlipCard from './ProfileFlipCard';
 import { ElectricianTierIcon, getElectricianTier } from './ElectricianTierScreen';
 
@@ -68,12 +69,6 @@ const PRODUCTS = [
     points: 45,
     colors: ['#ECFEFF', '#BAE6FD', '#0EA5E9'] as const,
   },
-];
-
-const RECENT_ACTIVITY = [
-  { title: 'QR scanned successfully', time: 'Today, 10:23 AM', amount: '+50', amountColor: '#22C55E' },
-  { title: 'Reward redeemed', time: 'Yesterday', amount: '-200', amountColor: '#E8453C' },
-  { title: 'Referral bonus added', time: '2 days ago', amount: '+100', amountColor: '#22C55E' },
 ];
 
 const DUMMY_PROFILE = {
@@ -314,6 +309,27 @@ export function HomeScreen({
     }
     return PRODUCTS;
   }, [selectedFilter]);
+  const electricianTestimonials = useMemo<TestimonialItem[]>(() => {
+    if (language === 'Hindi') {
+      return [
+        { initials: 'GS', name: 'Gurpreet Singh', location: 'अमृतसर', tier: 'Diamond', yearsWithUs: '4 साल से जुड़े', quote: 'बड़ा काम हो या साइट विजिट, एसआरवी ऐप और प्रोडक्ट दोनों भरोसेमंद रहते हैं।', highlight: 'साइट पर भरोसेमंद परफॉर्मेंस', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
+        { initials: 'AV', name: 'Amit Verma', location: 'पंचकूला', tier: 'Platinum', yearsWithUs: '3 साल से जुड़े', quote: 'स्कैन से पॉइंट्स जल्दी जुड़ते हैं और रिवॉर्ड्स ट्रैक करना अब बहुत आसान हो गया है।', highlight: 'फास्ट स्कैन और साफ रिवॉर्ड ट्रैकिंग', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
+        { initials: 'HK', name: 'Harpal Kaur', location: 'जालंधर', tier: 'Platinum', yearsWithUs: '2 साल से जुड़े', quote: 'डीलर सपोर्ट 24/7 जैसा लगता है और ऐप का पूरा फ्लो फील्ड में बहुत स्मूद चलता है।', highlight: 'फील्ड वर्क के लिए स्मूद एक्सपीरियंस', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
+      ];
+    }
+    if (language === 'Punjabi') {
+      return [
+        { initials: 'GS', name: 'Gurpreet Singh', location: 'ਅੰਮ੍ਰਿਤਸਰ', tier: 'Diamond', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'ਵੱਡਾ ਕੰਮ ਹੋਵੇ ਜਾਂ site visit, SRV app ਤੇ product ਦੋਵੇਂ ਬਹੁਤ reliable ਲੱਗਦੇ ਹਨ।', highlight: 'ਸਾਈਟ ਉੱਤੇ ਭਰੋਸੇਯੋਗ performance', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
+        { initials: 'AV', name: 'Amit Verma', location: 'ਪੰਚਕੂਲਾ', tier: 'Platinum', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'Scan ਨਾਲ points ਜਲਦੀ ਆਉਂਦੇ ਹਨ ਤੇ rewards track ਕਰਨਾ ਹੁਣ ਬਹੁਤ easy ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਫਾਸਟ scan ਅਤੇ ਸਾਫ reward tracking', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
+        { initials: 'HK', name: 'Harpal Kaur', location: 'ਜਲੰਧਰ', tier: 'Platinum', yearsWithUs: '2 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'Dealer support 24/7 ਵਰਗਾ ਲੱਗਦਾ ਹੈ ਤੇ app ਦਾ flow field ਵਿੱਚ ਬਹੁਤ smooth ਚੱਲਦਾ ਹੈ।', highlight: 'field work ਲਈ smooth experience', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
+      ];
+    }
+    return [
+      { initials: 'GS', name: 'Gurpreet Singh', location: 'Amritsar', tier: 'Diamond', yearsWithUs: 'Connected for 4 years', quote: 'Whether it is a big installation or a quick site visit, SRV feels dependable both in product quality and app flow.', highlight: 'Reliable performance on real job sites', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
+      { initials: 'AV', name: 'Amit Verma', location: 'Panchkula', tier: 'Platinum', yearsWithUs: 'Connected for 3 years', quote: 'Points get added fast after scanning, and reward tracking is much cleaner than before.', highlight: 'Fast scan flow with clear rewards', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
+      { initials: 'HK', name: 'Harpal Kaur', location: 'Jalandhar', tier: 'Platinum', yearsWithUs: 'Connected for 2 years', quote: 'Dealer support feels available whenever needed, and the whole experience stays smooth while working in the field.', highlight: 'Built for day-to-day field work', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
+    ];
+  }, [language]);
 
   const goToSlide = (next: number) => {
     Animated.sequence([
@@ -556,31 +572,19 @@ export function HomeScreen({
           ))}
         </View>
 
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Recent Activity')}</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Latest actions')}</Text>
-          </View>
-          <TouchableOpacity onPress={() => onNavigate('notification')} style={styles.inlineAction} activeOpacity={0.85}>
-            <Text style={styles.viewAllText}>{tx('Notifications')}</Text>
-            <ChevronRight color="#E8453C" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.activityCard, darkMode ? styles.activityCardDark : null]}>
-          {RECENT_ACTIVITY.map((item, index) => (
-            <View key={item.title} style={[styles.activityRow, index < RECENT_ACTIVITY.length - 1 && styles.activityDivider]}>
-              <View style={styles.activityIconWrap}>
-                <BellIcon color="#24437A" size={18} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{tx(item.title)}</Text>
-                <Text style={[styles.activityTime, darkMode ? styles.activityTimeDark : null]}>{tx(item.time)}</Text>
-              </View>
-              <Text style={[styles.activityAmount, { color: item.amountColor }]}>{item.amount}</Text>
-            </View>
-          ))}
-        </View>
+        <TestimonialShowcase
+          eyebrow={language === 'Hindi' ? 'इलेक्ट्रीशियन की राय' : language === 'Punjabi' ? 'ਇਲੈਕਟ੍ਰੀਸ਼ੀਅਨ ਦੀ ਰਾਇ' : 'Electrician Testimonials'}
+          title={language === 'Hindi' ? 'हमारे पार्टनर्स क्या कहते हैं' : language === 'Punjabi' ? 'ਸਾਡੇ ਪਾਰਟਨਰ ਕੀ ਕਹਿੰਦੇ ਹਨ' : 'What Electricians Say'}
+          subtitle={
+            language === 'Hindi'
+              ? 'रियल फील्ड अनुभव, तेज स्कैन फ्लो और एसआरवी सपोर्ट पर बना भरोसा।'
+              : language === 'Punjabi'
+                ? 'ਅਸਲ field experience, fast scan flow ਤੇ SRV support ਉੱਤੇ ਭਰੋਸਾ।'
+                : 'Real field feedback focused on scan speed, support, and daily site work.'
+          }
+          items={electricianTestimonials}
+          darkMode={darkMode}
+        />
 
         <View style={{ height: 30 }} />
       </View>
@@ -878,36 +882,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   productScanBtnText: { fontSize: 11.5, fontWeight: '800' },
-  activityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    marginBottom: 12,
-    overflow: 'hidden',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
-    shadowRadius: 18,
-    elevation: 4,
-  },
-  activityCardDark: {
-    backgroundColor: '#111827',
-    shadowColor: '#020617',
-  },
-  activityRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  activityDivider: { borderBottomWidth: 1, borderBottomColor: '#EEF2F7' },
-  activityIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: '#EDF4FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activityTitle: { color: '#152238', fontSize: 13, fontWeight: '700' },
-  activityTitleDark: { color: '#F8FAFC' },
-  activityTime: { color: '#7E8BA5', fontSize: 11, marginTop: 3 },
-  activityTimeDark: { color: '#94A3B8' },
-  activityAmount: { fontSize: 14, fontWeight: '900' },
 });
 
 

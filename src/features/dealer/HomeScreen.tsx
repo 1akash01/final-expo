@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { featuredProducts } from '@/shared/data/mock';
+import { TestimonialShowcase, type TestimonialItem } from '@/shared/components/TestimonialShowcase';
 import ProfileFlipCard from '@/features/electrician/ProfileFlipCard';
 import { formatCountText, usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
@@ -288,6 +289,27 @@ export function HomeScreen({
     }
     return items;
   }, [selectedFilter]);
+  const dealerTestimonials = useMemo<TestimonialItem[]>(() => {
+    if (language === 'Hindi') {
+      return [
+        { initials: 'RS', name: 'Rajesh Sharma', location: 'चंडीगढ़', tier: 'Gold Dealer', yearsWithUs: '4 साल से जुड़े', quote: 'एसआरवी के प्रोडक्ट समय पर मिलते हैं और नेटवर्क मैनेजमेंट पहले से कहीं ज्यादा आसान हो गया है।', highlight: 'समय पर डिलीवरी और मजबूत सपोर्ट', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
+        { initials: 'MS', name: 'Mandeep Singh', location: 'लुधियाना', tier: 'Growth Partner', yearsWithUs: '3 साल से जुड़े', quote: 'व्हाट्सऐप सपोर्ट तेज है, ऑर्डर स्टेटस साफ दिखता है और बिजनेस फ्लो बहुत स्मूद हो गया है।', highlight: 'फास्ट सपोर्ट और स्मूद ऑपरेशन', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
+        { initials: 'DM', name: 'Deepak Malhotra', location: 'जालंधर', tier: 'Diamond Dealer', yearsWithUs: '5 साल से जुड़े', quote: 'बड़े इलेक्ट्रीशियन नेटवर्क के साथ भी ऐप तेज चलता है और टीम मैनेजमेंट भरोसेमंद लगता है।', highlight: 'बड़े नेटवर्क के लिए भरोसेमंद', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
+      ];
+    }
+    if (language === 'Punjabi') {
+      return [
+        { initials: 'RS', name: 'Rajesh Sharma', location: 'ਚੰਡੀਗੜ੍ਹ', tier: 'Gold Dealer', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'SRV ਦੇ ਪ੍ਰੋਡਕਟ ਸਮੇਂ ਨਾਲ ਮਿਲਦੇ ਹਨ ਅਤੇ network management ਹੁਣ ਕਾਫੀ ਸੌਖਾ ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਸਮੇਂ ਤੇ delivery ਤੇ strong support', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
+        { initials: 'MS', name: 'Mandeep Singh', location: 'ਲੁਧਿਆਣਾ', tier: 'Growth Partner', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'WhatsApp support ਤੇਜ਼ ਹੈ, order status ਸਾਫ ਦਿਖਦੀ ਹੈ ਤੇ business flow ਹੋਰ smooth ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਤੇਜ਼ support, smooth operations', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
+        { initials: 'DM', name: 'Deepak Malhotra', location: 'ਜਲੰਧਰ', tier: 'Diamond Dealer', yearsWithUs: '5 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'ਵੱਡੇ electrician network ਨਾਲ ਵੀ app fast ਰਹਿੰਦੀ ਹੈ ਅਤੇ team management ਬਿਲਕੁਲ reliable ਹੈ।', highlight: 'ਵੱਡੇ dealer network ਲਈ perfect', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
+      ];
+    }
+    return [
+      { initials: 'RS', name: 'Rajesh Sharma', location: 'Chandigarh', tier: 'Gold Dealer', yearsWithUs: 'Connected for 4 years', quote: 'Products arrive on time, and dealer-side network management now feels much more premium and effortless.', highlight: 'Reliable delivery and strong support', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
+      { initials: 'MS', name: 'Mandeep Singh', location: 'Ludhiana', tier: 'Growth Partner', yearsWithUs: 'Connected for 3 years', quote: 'WhatsApp support is quick, order status is crystal clear, and the entire business flow feels smoother now.', highlight: 'Fast support with smoother operations', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
+      { initials: 'DM', name: 'Deepak Malhotra', location: 'Jalandhar', tier: 'Diamond Dealer', yearsWithUs: 'Connected for 5 years', quote: 'Even with a large electrician base, the app stays fast and gives us confidence while managing our network.', highlight: 'Built for scaling dealer teams', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
+    ];
+  }, [language]);
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -528,6 +550,20 @@ export function HomeScreen({
             />
           ))}
         </View>
+
+        <TestimonialShowcase
+          eyebrow={language === 'Hindi' ? 'डीलर की राय' : language === 'Punjabi' ? 'ਡੀਲਰ ਦੀ ਰਾਇ' : 'Dealer Testimonials'}
+          title={language === 'Hindi' ? 'हमारे डीलर क्या कहते हैं' : language === 'Punjabi' ? 'ਸਾਡੇ ਡੀਲਰ ਕੀ ਕਹਿੰਦੇ ਹਨ' : 'What Dealers Say'}
+          subtitle={
+            language === 'Hindi'
+              ? 'रियल नेटवर्क पार्टनर्स की राय, जिन्होंने एसआरवी के साथ बिजनेस को और मजबूत बनाया।'
+              : language === 'Punjabi'
+                ? 'ਅਸਲ network partners ਦੀ ਰਾਇ, ਜਿਨ੍ਹਾਂ ਨੇ SRV ਨਾਲ ਆਪਣਾ business ਹੋਰ ਮਜ਼ਬੂਤ ਕੀਤਾ।'
+                : 'Real partner feedback from dealers who are growing faster with SRV.'
+          }
+          items={dealerTestimonials}
+          darkMode={darkMode}
+        />
 
         <View style={[styles.activityCard, darkMode ? styles.activityCardDark : null]}>
           <Text style={[styles.activityTitle, darkMode ? styles.activityTitleDark : null]}>{tx('Dealer Growth')}</Text>
@@ -774,6 +810,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     padding: 18,
     marginBottom: 12,
+    display: 'none',
   },
   activityCardDark: {
     backgroundColor: '#111827',
