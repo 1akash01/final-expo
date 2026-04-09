@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { usePreferenceContext } from '@/features/profile/ProfileShared';
 import type { Screen } from '@/shared/types/navigation';
 
 type ElectricianStatus = 'Active' | 'Pending';
@@ -110,6 +111,7 @@ function StatCard({
 }
 
 export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Screen) => void }) {
+  const { tx } = usePreferenceContext();
   const [electricians, setElectricians] = useState<Electrician[]>(seedElectricians);
   const [query, setQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -182,7 +184,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
   const handleVerifyOtp = () => {
     if (!canVerifyOtp) return;
     if (otp !== DEMO_OTP) {
-      Alert.alert('Invalid OTP', 'Please enter the correct 4-digit OTP to verify the phone number.');
+      Alert.alert(tx('Invalid OTP'), tx('Please enter the correct 4-digit OTP to verify the phone number.'));
       return;
     }
     setPhoneVerified(true);
@@ -251,10 +253,10 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
               <TeamIcon size={28} />
             </Animated.View>
           </View>
-          <Text style={styles.heroEyebrow}>Dealer Network</Text>
-          <Text style={styles.heroTitle}>Connected electricians</Text>
+          <Text style={styles.heroEyebrow}>{tx('Dealer Network')}</Text>
+          <Text style={styles.heroTitle}>{tx('Connected electricians')}</Text>
           <Text style={styles.heroSub}>
-            Dealers can review every connected electrician here and add new electricians to their network from the same page.
+            {tx('Dealers can review every connected electrician here and add new electricians to their network from the same page.')}
           </Text>
           <TouchableOpacity
             style={styles.heroButton}
@@ -265,14 +267,14 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
             activeOpacity={0.9}
           >
             <PlusIcon />
-            <Text style={styles.heroButtonText}>Add Electrician</Text>
+            <Text style={styles.heroButtonText}>{tx('Add Electrician')}</Text>
           </TouchableOpacity>
         </LinearGradient>
 
         <View style={styles.statsRow}>
-          <StatCard label="Active" value={`${activeCount}`} accent={['#E8F1FF', '#D4E4FF', '#C4DBFF']} />
-          <StatCard label="Pending" value={`${pendingCount}`} accent={['#FFF4E6', '#FFE8C7', '#FFD89C']} />
-          <StatCard label="Total Points" value={totalPoints.toLocaleString()} accent={['#EEFDF3', '#D7FAE3', '#B8F1CD']} />
+          <StatCard label={tx('Active')} value={`${activeCount}`} accent={['#E8F1FF', '#D4E4FF', '#C4DBFF']} />
+          <StatCard label={tx('Pending')} value={`${pendingCount}`} accent={['#FFF4E6', '#FFE8C7', '#FFD89C']} />
+          <StatCard label={tx('Total Points')} value={totalPoints.toLocaleString()} accent={['#EEFDF3', '#D7FAE3', '#B8F1CD']} />
         </View>
 
         <View style={styles.searchBox}>
@@ -280,15 +282,15 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search by name, phone, or city"
+            placeholder={tx('Search by name, phone, or city')}
             placeholderTextColor="#97A4B3"
             style={styles.searchInput}
           />
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Electrician directory</Text>
-          <Text style={styles.sectionSub}>{filtered.length} records</Text>
+          <Text style={styles.sectionTitle}>{tx('Electrician directory')}</Text>
+          <Text style={styles.sectionSub}>{filtered.length} {tx('records')}</Text>
         </View>
 
         <View style={styles.listWrap}>
@@ -304,7 +306,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
                 </View>
                 <View style={[styles.statusPill, item.status === 'Active' ? styles.statusActive : styles.statusPending]}>
                   <Text style={[styles.statusText, item.status === 'Active' ? styles.statusTextActive : styles.statusTextPending]}>
-                    {item.status}
+                    {tx(item.status)}
                   </Text>
                 </View>
               </View>
@@ -324,7 +326,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
               </View>
 
               <Text style={styles.memberCity}>{item.city}</Text>
-              <Text style={styles.memberJoined}>{item.joinedAt}</Text>
+              <Text style={styles.memberJoined}>{tx(item.joinedAt)}</Text>
             </View>
           ))}
         </View>
@@ -341,31 +343,31 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
             <View style={styles.modalCard}>
               <View style={styles.sheetHandle} />
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Add electrician</Text>
+                <Text style={styles.modalTitle}>{tx('Add electrician')}</Text>
                 <Text style={styles.modalSub}>
-                  Verify the number first, then complete the remaining details.
+                  {tx('Verify the number first, then complete the remaining details.')}
                 </Text>
               </View>
               <View style={styles.modalBody}>
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Electrician name</Text>
+                  <Text style={styles.fieldLabel}>{tx('Electrician name')}</Text>
                   <TextInput
                     value={newName}
                     onChangeText={setNewName}
-                    placeholder="Enter full name"
+                    placeholder={tx('Enter full name')}
                     placeholderTextColor="#9A9FB1"
                     style={styles.fieldInput}
                   />
                 </View>
 
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>Electrician number</Text>
+                  <Text style={styles.fieldLabel}>{tx('Electrician number')}</Text>
                   <View style={styles.phoneRow}>
                     <TextInput
                       value={newPhone}
                       onChangeText={handlePhoneChange}
                       keyboardType="phone-pad"
-                      placeholder="10-digit mobile number"
+                      placeholder={tx('10-digit mobile number')}
                       placeholderTextColor="#9A9FB1"
                       style={[styles.fieldInput, styles.phoneInput]}
                     />
@@ -375,7 +377,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
                       style={[styles.inlineButton, !canRequestOtp && styles.inlineButtonDisabled]}
                     >
                       <Text style={[styles.inlineButtonText, !canRequestOtp && styles.inlineButtonTextDisabled]}>
-                        Verify
+                        {tx('Verify')}
                       </Text>
                     </Pressable>
                   </View>
@@ -384,15 +386,15 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
                 {otpRequested ? (
                   <View style={styles.otpCard}>
                     <Text style={styles.otpInfo}>
-                      OTP sent to +91 {cleanPhone}
+                      {tx('OTP sent to +91')} {cleanPhone}
                     </Text>
-                    <Text style={styles.otpHint}>Demo OTP: {DEMO_OTP}</Text>
+                    <Text style={styles.otpHint}>{tx('Demo OTP')}: {DEMO_OTP}</Text>
                     <View style={styles.fieldGroup}>
                       <TextInput
                         value={otp}
                         onChangeText={(value) => setOtp(value.replace(/\D/g, '').slice(0, 4))}
                         keyboardType="numeric"
-                        placeholder="Enter OTP"
+                        placeholder={tx('Enter OTP')}
                         placeholderTextColor="#9A9FB1"
                         style={styles.fieldInput}
                       />
@@ -402,7 +404,7 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
                         style={[styles.blockButton, !canVerifyOtp && styles.inlineButtonDisabled]}
                       >
                         <Text style={[styles.inlineButtonText, !canVerifyOtp && styles.inlineButtonTextDisabled]}>
-                          Confirm
+                          {tx('Confirm')}
                         </Text>
                       </Pressable>
                     </View>
@@ -412,16 +414,16 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
                 {phoneVerified ? (
                   <View style={styles.verifiedRow}>
                     <ShieldIcon />
-                    <Text style={styles.verifiedText}>Phone number verified successfully</Text>
+                    <Text style={styles.verifiedText}>{tx('Phone number verified successfully')}</Text>
                   </View>
                 ) : null}
 
                 <View style={styles.fieldGroup}>
-                  <Text style={styles.fieldLabel}>City</Text>
+                  <Text style={styles.fieldLabel}>{tx('City')}</Text>
                   <TextInput
                     value={newCity}
                     onChangeText={setNewCity}
-                    placeholder="City or district"
+                    placeholder={tx('City or district')}
                     placeholderTextColor="#9A9FB1"
                     style={styles.fieldInput}
                   />
@@ -429,14 +431,14 @@ export function ElectriciansScreen({ onNavigate }: { onNavigate?: (screen: Scree
 
                 <View style={styles.modalActions}>
                   <Pressable onPress={() => setShowAddModal(false)} style={styles.secondaryButton}>
-                    <Text style={styles.secondaryButtonText}>Cancel</Text>
+                    <Text style={styles.secondaryButtonText}>{tx('Cancel')}</Text>
                   </Pressable>
                   <Pressable
                     onPress={handleAddElectrician}
                     disabled={!canAddElectrician}
                     style={[styles.primaryButton, !canAddElectrician && styles.primaryButtonDisabled]}
                   >
-                    <Text style={styles.primaryButtonText}>Add Electrician</Text>
+                    <Text style={styles.primaryButtonText}>{tx('Add Electrician')}</Text>
                   </Pressable>
                 </View>
               </View>

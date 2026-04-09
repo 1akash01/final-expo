@@ -294,16 +294,16 @@ export function HomeScreen({
   const dealerTestimonials = useMemo<TestimonialItem[]>(() => {
     if (language === 'Hindi') {
       return [
-        { initials: 'RS', name: 'Rajesh Sharma', location: 'चंडीगढ़', tier: 'Gold Dealer', yearsWithUs: '4 साल से जुड़े', quote: 'एसआरवी के प्रोडक्ट समय पर मिलते हैं और नेटवर्क मैनेजमेंट पहले से कहीं ज्यादा आसान हो गया है।', highlight: 'समय पर डिलीवरी और मजबूत सपोर्ट', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
-        { initials: 'MS', name: 'Mandeep Singh', location: 'लुधियाना', tier: 'Growth Partner', yearsWithUs: '3 साल से जुड़े', quote: 'व्हाट्सऐप सपोर्ट तेज है, ऑर्डर स्टेटस साफ दिखता है और बिजनेस फ्लो बहुत स्मूद हो गया है।', highlight: 'फास्ट सपोर्ट और स्मूद ऑपरेशन', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
-        { initials: 'DM', name: 'Deepak Malhotra', location: 'जालंधर', tier: 'Diamond Dealer', yearsWithUs: '5 साल से जुड़े', quote: 'बड़े इलेक्ट्रीशियन नेटवर्क के साथ भी ऐप तेज चलता है और टीम मैनेजमेंट भरोसेमंद लगता है।', highlight: 'बड़े नेटवर्क के लिए भरोसेमंद', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
+        { initials: 'RS', name: 'Rajesh Sharma', location: 'चंडीगढ़', tier: 'गोल्ड डीलर', yearsWithUs: '4 साल से जुड़े', quote: 'एसआरवी के प्रोडक्ट समय पर मिलते हैं और नेटवर्क मैनेजमेंट पहले से कहीं ज्यादा आसान हो गया है।', highlight: 'समय पर डिलीवरी और मजबूत सपोर्ट', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
+        { initials: 'MS', name: 'Mandeep Singh', location: 'लुधियाना', tier: 'ग्रोथ पार्टनर', yearsWithUs: '3 साल से जुड़े', quote: 'व्हाट्सऐप सपोर्ट तेज है, ऑर्डर स्टेटस साफ दिखता है और बिजनेस फ्लो बहुत स्मूद हो गया है।', highlight: 'फास्ट सपोर्ट और स्मूद ऑपरेशन', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
+        { initials: 'DM', name: 'Deepak Malhotra', location: 'जालंधर', tier: 'डायमंड डीलर', yearsWithUs: '5 साल से जुड़े', quote: 'बड़े इलेक्ट्रीशियन नेटवर्क के साथ भी ऐप तेज चलता है और टीम मैनेजमेंट भरोसेमंद लगता है।', highlight: 'बड़े नेटवर्क के लिए भरोसेमंद', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
       ];
     }
     if (language === 'Punjabi') {
       return [
-        { initials: 'RS', name: 'Rajesh Sharma', location: 'ਚੰਡੀਗੜ੍ਹ', tier: 'Gold Dealer', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'SRV ਦੇ ਪ੍ਰੋਡਕਟ ਸਮੇਂ ਨਾਲ ਮਿਲਦੇ ਹਨ ਅਤੇ network management ਹੁਣ ਕਾਫੀ ਸੌਖਾ ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਸਮੇਂ ਤੇ delivery ਤੇ strong support', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
-        { initials: 'MS', name: 'Mandeep Singh', location: 'ਲੁਧਿਆਣਾ', tier: 'Growth Partner', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'WhatsApp support ਤੇਜ਼ ਹੈ, order status ਸਾਫ ਦਿਖਦੀ ਹੈ ਤੇ business flow ਹੋਰ smooth ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਤੇਜ਼ support, smooth operations', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
-        { initials: 'DM', name: 'Deepak Malhotra', location: 'ਜਲੰਧਰ', tier: 'Diamond Dealer', yearsWithUs: '5 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'ਵੱਡੇ electrician network ਨਾਲ ਵੀ app fast ਰਹਿੰਦੀ ਹੈ ਅਤੇ team management ਬਿਲਕੁਲ reliable ਹੈ।', highlight: 'ਵੱਡੇ dealer network ਲਈ perfect', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
+        { initials: 'RS', name: 'Rajesh Sharma', location: 'ਚੰਡੀਗੜ੍ਹ', tier: 'ਗੋਲਡ ਡੀਲਰ', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'SRV ਦੇ ਪ੍ਰੋਡਕਟ ਸਮੇਂ ਤੇ ਮਿਲਦੇ ਹਨ ਅਤੇ ਨੈੱਟਵਰਕ ਮੈਨੇਜਮੈਂਟ ਹੁਣ ਕਾਫੀ ਆਸਾਨ ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਸਮੇਂ ਤੇ ਡਿਲਿਵਰੀ ਅਤੇ ਮਜ਼ਬੂਤ ਸਹਾਇਤਾ', colors: ['#FFF7E6', '#FDE6B4', '#F6C96E'], ring: '#D97706', glow: '#FFE7BA' },
+        { initials: 'MS', name: 'Mandeep Singh', location: 'ਲੁਧਿਆਣਾ', tier: 'ਗ੍ਰੋਥ ਪਾਰਟਨਰ', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'ਵਟਸਐਪ ਸਹਾਇਤਾ ਤੇਜ਼ ਹੈ, ਆਰਡਰ ਸਥਿਤੀ ਸਾਫ ਦਿਖਦੀ ਹੈ ਅਤੇ ਕਾਰੋਬਾਰ ਦਾ ਫਲੋ ਹੁਣ ਹੋਰ ਸਮੂਥ ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਤੇਜ਼ ਸਹਾਇਤਾ ਅਤੇ ਸਮੂਥ ਓਪਰੇਸ਼ਨ', colors: ['#FFF1EC', '#FFD8CC', '#F6B9A4'], ring: '#C2410C', glow: '#FFD8CC' },
+        { initials: 'DM', name: 'Deepak Malhotra', location: 'ਜਲੰਧਰ', tier: 'ਡਾਇਮੰਡ ਡੀਲਰ', yearsWithUs: '5 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'ਵੱਡੇ ਇਲੈਕਟ੍ਰੀਸ਼ੀਅਨ ਨੈੱਟਵਰਕ ਨਾਲ ਵੀ ਐਪ ਤੇਜ਼ ਚੱਲਦੀ ਹੈ ਅਤੇ ਟੀਮ ਮੈਨੇਜਮੈਂਟ ਪੂਰੀ ਤਰ੍ਹਾਂ ਭਰੋਸੇਯੋਗ ਲੱਗਦੀ ਹੈ।', highlight: 'ਵੱਡੇ ਨੈੱਟਵਰਕ ਲਈ ਭਰੋਸੇਯੋਗ', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#6366F1', glow: '#DDD6FE' },
       ];
     }
     return [

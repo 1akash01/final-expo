@@ -314,16 +314,16 @@ export function HomeScreen({
   const electricianTestimonials = useMemo<TestimonialItem[]>(() => {
     if (language === 'Hindi') {
       return [
-        { initials: 'GS', name: 'Gurpreet Singh', location: 'अमृतसर', tier: 'Diamond', yearsWithUs: '4 साल से जुड़े', quote: 'बड़ा काम हो या साइट विजिट, एसआरवी ऐप और प्रोडक्ट दोनों भरोसेमंद रहते हैं।', highlight: 'साइट पर भरोसेमंद परफॉर्मेंस', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
-        { initials: 'AV', name: 'Amit Verma', location: 'पंचकूला', tier: 'Platinum', yearsWithUs: '3 साल से जुड़े', quote: 'स्कैन से पॉइंट्स जल्दी जुड़ते हैं और रिवॉर्ड्स ट्रैक करना अब बहुत आसान हो गया है।', highlight: 'फास्ट स्कैन और साफ रिवॉर्ड ट्रैकिंग', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
-        { initials: 'HK', name: 'Harpal Kaur', location: 'जालंधर', tier: 'Platinum', yearsWithUs: '2 साल से जुड़े', quote: 'डीलर सपोर्ट 24/7 जैसा लगता है और ऐप का पूरा फ्लो फील्ड में बहुत स्मूद चलता है।', highlight: 'फील्ड वर्क के लिए स्मूद एक्सपीरियंस', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
+        { initials: 'GS', name: 'Gurpreet Singh', location: 'अमृतसर', tier: 'डायमंड', yearsWithUs: '4 साल से जुड़े', quote: 'बड़ा काम हो या साइट विजिट, एसआरवी ऐप और प्रोडक्ट दोनों भरोसेमंद रहते हैं।', highlight: 'साइट पर भरोसेमंद परफॉर्मेंस', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
+        { initials: 'AV', name: 'Amit Verma', location: 'पंचकूला', tier: 'प्लैटिनम', yearsWithUs: '3 साल से जुड़े', quote: 'स्कैन से पॉइंट्स जल्दी जुड़ते हैं और रिवॉर्ड्स ट्रैक करना अब बहुत आसान हो गया है।', highlight: 'फास्ट स्कैन और साफ रिवॉर्ड ट्रैकिंग', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
+        { initials: 'HK', name: 'Harpal Kaur', location: 'जालंधर', tier: 'प्लैटिनम', yearsWithUs: '2 साल से जुड़े', quote: 'डीलर सपोर्ट 24/7 जैसा लगता है और ऐप का पूरा फ्लो फील्ड में बहुत स्मूद चलता है।', highlight: 'फील्ड वर्क के लिए स्मूद एक्सपीरियंस', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
       ];
     }
     if (language === 'Punjabi') {
       return [
-        { initials: 'GS', name: 'Gurpreet Singh', location: 'ਅੰਮ੍ਰਿਤਸਰ', tier: 'Diamond', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'ਵੱਡਾ ਕੰਮ ਹੋਵੇ ਜਾਂ site visit, SRV app ਤੇ product ਦੋਵੇਂ ਬਹੁਤ reliable ਲੱਗਦੇ ਹਨ।', highlight: 'ਸਾਈਟ ਉੱਤੇ ਭਰੋਸੇਯੋਗ performance', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
-        { initials: 'AV', name: 'Amit Verma', location: 'ਪੰਚਕੂਲਾ', tier: 'Platinum', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'Scan ਨਾਲ points ਜਲਦੀ ਆਉਂਦੇ ਹਨ ਤੇ rewards track ਕਰਨਾ ਹੁਣ ਬਹੁਤ easy ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਫਾਸਟ scan ਅਤੇ ਸਾਫ reward tracking', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
-        { initials: 'HK', name: 'Harpal Kaur', location: 'ਜਲੰਧਰ', tier: 'Platinum', yearsWithUs: '2 ਸਾਲ ਤੋਂ ਨਾਲ', quote: 'Dealer support 24/7 ਵਰਗਾ ਲੱਗਦਾ ਹੈ ਤੇ app ਦਾ flow field ਵਿੱਚ ਬਹੁਤ smooth ਚੱਲਦਾ ਹੈ।', highlight: 'field work ਲਈ smooth experience', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
+        { initials: 'GS', name: 'Gurpreet Singh', location: 'ਅੰਮ੍ਰਿਤਸਰ', tier: 'ਡਾਇਮੰਡ', yearsWithUs: '4 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'ਵੱਡਾ ਕੰਮ ਹੋਵੇ ਜਾਂ ਸਾਈਟ ਵਿਜ਼ਿਟ, SRV ਐਪ ਅਤੇ ਪ੍ਰੋਡਕਟ ਦੋਵੇਂ ਬਹੁਤ ਭਰੋਸੇਯੋਗ ਲੱਗਦੇ ਹਨ।', highlight: 'ਸਾਈਟ ਉੱਤੇ ਭਰੋਸੇਯੋਗ ਕੰਮਕਾਜ', colors: ['#EEF2FF', '#D9D6FE', '#C4B5FD'], ring: '#7C3AED', glow: '#DDD6FE' },
+        { initials: 'AV', name: 'Amit Verma', location: 'ਪੰਚਕੂਲਾ', tier: 'ਪਲੈਟਿਨਮ', yearsWithUs: '3 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'ਸਕੈਨ ਨਾਲ ਪੁਆਇੰਟ ਜਲਦੀ ਆ ਜਾਂਦੇ ਹਨ ਅਤੇ ਰਿਵਾਰਡ ਟ੍ਰੈਕ ਕਰਨਾ ਹੁਣ ਬਹੁਤ ਆਸਾਨ ਹੋ ਗਿਆ ਹੈ।', highlight: 'ਤੇਜ਼ ਸਕੈਨ ਅਤੇ ਸਾਫ ਰਿਵਾਰਡ ਟ੍ਰੈਕਿੰਗ', colors: ['#ECFEFF', '#CFFAFE', '#A5F3FC'], ring: '#0F766E', glow: '#CCFBF1' },
+        { initials: 'HK', name: 'Harpal Kaur', location: 'ਜਲੰਧਰ', tier: 'ਪਲੈਟਿਨਮ', yearsWithUs: '2 ਸਾਲ ਤੋਂ ਜੁੜੇ', quote: 'ਡੀਲਰ ਸਹਾਇਤਾ 24/7 ਵਰਗੀ ਲੱਗਦੀ ਹੈ ਅਤੇ ਐਪ ਦਾ ਪੂਰਾ ਫਲੋ ਫੀਲਡ ਵਿੱਚ ਬਹੁਤ ਸਮੂਥ ਚੱਲਦਾ ਹੈ।', highlight: 'ਫੀਲਡ ਵਰਕ ਲਈ ਸਮੂਥ ਅਨੁਭਵ', colors: ['#F7FEE7', '#DCFCE7', '#BEF264'], ring: '#65A30D', glow: '#ECFCCB' },
       ];
     }
     return [
@@ -467,7 +467,7 @@ export function HomeScreen({
               <Text style={[styles.statLabel, darkMode ? styles.statLabelDark : null]}>{tx('Total Points')}</Text>
               <Text style={[styles.statValue, darkMode ? styles.statValueDark : null]}>4,250</Text>
               <Text style={[styles.statHint, darkMode ? styles.statHintDark : null]}>
-                {language === 'Hindi' ? '+120 इस सप्ताह' : language === 'Punjabi' ? '+120 ਇਸ ਹਫ਼ਤੇ' : '+120 this week'}
+                {tx('+120 this week')}
               </Text>
             </LinearGradient>
           </Animated.View>
