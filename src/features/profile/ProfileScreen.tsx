@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
@@ -695,105 +697,115 @@ export function ProfileScreen({
         </Modal>
 
         <Modal visible={showEdit} animationType="slide" transparent onRequestClose={closeEdit}>
-          <View style={styles.editOverlay}>
-            <View style={[styles.editSheet, { backgroundColor: theme.surface }]}>
-              <View style={styles.handle} />
-              <View style={styles.editHeader}>
-                <Text style={[styles.editTitle, { color: theme.textPrimary }]}>{tx('Edit Profile')}</Text>
-                <TouchableOpacity onPress={closeEdit} style={[styles.closeBtn, { backgroundColor: theme.soft }]}>
-                  <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>x</Text>
-                </TouchableOpacity>
-              </View>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.avatarSection}>
-                  <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Profile Photo</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowImgPicker(true)}
-                    activeOpacity={0.8}
-                    style={[
-                      styles.uploadBox,
-                      draftPhotoUri ? styles.uploadBoxFilled : null,
-                      { backgroundColor: theme.soft, borderColor: theme.border },
-                    ]}
-                  >
-                    {draftPhotoUri ? (
-                      <Image source={{ uri: draftPhotoUri }} style={styles.previewImage} />
-                    ) : (
-                      <View style={styles.uploadInner}>
-                        <View style={[styles.uploadIconWrap, { backgroundColor: roleSoft }]}>
-                          <AppIcon name="gallery" size={20} color={roleColor} />
-                        </View>
-                        <View style={styles.uploadCopy}>
-                          <Text style={[styles.uploadTitle, { color: theme.textPrimary }]}>{t('tapToChangePhoto')}</Text>
-                          <Text style={[styles.uploadText, { color: theme.textMuted }]}>{tx('Choose from camera or gallery, then finish with Done on the confirmation screen.')}</Text>
-                        </View>
-                      </View>
-                    )}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.editOverlay}
+          >
+            <TouchableOpacity style={styles.editBackdrop} activeOpacity={1} onPress={Keyboard.dismiss}>
+              <TouchableOpacity activeOpacity={1} style={[styles.editSheet, { backgroundColor: theme.surface }]}>
+                <View style={styles.handle} />
+                <View style={styles.editHeader}>
+                  <Text style={[styles.editTitle, { color: theme.textPrimary }]}>{tx('Edit Profile')}</Text>
+                  <TouchableOpacity onPress={closeEdit} style={[styles.closeBtn, { backgroundColor: theme.soft }]}>
+                    <Text style={[styles.closeTxt, { color: theme.textSecondary }]}>x</Text>
                   </TouchableOpacity>
-                  <Text style={[styles.photoHint, { color: theme.textMuted }]}>{draftPhotoUri ? t('tapToChangePhoto') : tx('After selecting a photo, review it and tap Done to continue.')}</Text>
                 </View>
-                {editRows.map((field) => (
-                  <View key={field.key} style={styles.field}>
-                    <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{tx(field.label)}</Text>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="interactive"
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                >
+                  <View style={styles.avatarSection}>
+                    <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Profile Photo</Text>
+                    <TouchableOpacity
+                      onPress={() => setShowImgPicker(true)}
+                      activeOpacity={0.8}
+                      style={[
+                        styles.uploadBox,
+                        draftPhotoUri ? styles.uploadBoxFilled : null,
+                        { backgroundColor: theme.soft, borderColor: theme.border },
+                      ]}
+                    >
+                      {draftPhotoUri ? (
+                        <Image source={{ uri: draftPhotoUri }} style={styles.previewImage} />
+                      ) : (
+                        <View style={styles.uploadInner}>
+                          <View style={[styles.uploadIconWrap, { backgroundColor: roleSoft }]}>
+                            <AppIcon name="gallery" size={20} color={roleColor} />
+                          </View>
+                          <View style={styles.uploadCopy}>
+                            <Text style={[styles.uploadTitle, { color: theme.textPrimary }]}>{t('tapToChangePhoto')}</Text>
+                            <Text style={[styles.uploadText, { color: theme.textMuted }]}>{tx('Choose from camera or gallery, then finish with Done on the confirmation screen.')}</Text>
+                          </View>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                    <Text style={[styles.photoHint, { color: theme.textMuted }]}>{draftPhotoUri ? t('tapToChangePhoto') : tx('After selecting a photo, review it and tap Done to continue.')}</Text>
+                  </View>
+                  {editRows.map((field) => (
+                    <View key={field.key} style={styles.field}>
+                      <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>{tx(field.label)}</Text>
+                      <TextInput
+                        value={draft[field.key]}
+                        onChangeText={(value) => updateDraftField(field.key, value)}
+                        placeholder={`${tx('Enter')} ${tx(field.label)}`}
+                        placeholderTextColor={theme.textMuted}
+                        keyboardType={field.keyboardType ?? 'default'}
+                        autoCapitalize={field.key === 'email' ? 'none' : 'words'}
+                        style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
+                      />
+                    </View>
+                  ))}
+                  {currentRole === 'dealer' ? (
+                    <>
+                      <View style={styles.field}>
+                        <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>GST Number / PAN Number</Text>
+                        <TextInput
+                          value={draftTaxIdentity}
+                          onChangeText={(value) => setDraftTaxIdentity(value.toUpperCase().replace(/\s/g, ''))}
+                          placeholder="Enter GST or PAN number"
+                          placeholderTextColor={theme.textMuted}
+                          autoCapitalize="characters"
+                          style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
+                        />
+                      </View>
+                      <View style={styles.field}>
+                        <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>GST Holder / PAN Holder Name</Text>
+                        <TextInput
+                          value={draftTaxHolder}
+                          onChangeText={(value) => setDraftTaxHolder(value.replace(/[^A-Za-z ]/g, ''))}
+                          placeholder="Enter holder name"
+                          placeholderTextColor={theme.textMuted}
+                          autoCapitalize="words"
+                          style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
+                        />
+                      </View>
+                    </>
+                  ) : null}
+                  <View style={styles.field}>
+                    <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Dealer Code</Text>
                     <TextInput
-                      value={draft[field.key]}
-                      onChangeText={(value) => updateDraftField(field.key, value)}
-                      placeholder={`${tx('Enter')} ${tx(field.label)}`}
+                      value={draft.dealerCode}
+                      onChangeText={(value) => updateDraftField('dealerCode', value)}
+                      placeholder="Enter dealer code"
                       placeholderTextColor={theme.textMuted}
-                      keyboardType={field.keyboardType ?? 'default'}
-                      autoCapitalize={field.key === 'email' ? 'none' : 'words'}
+                      autoCapitalize="characters"
                       style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
                     />
                   </View>
-                ))}
-                {currentRole === 'dealer' ? (
-                  <>
-                    <View style={styles.field}>
-                      <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>GST Number / PAN Number</Text>
-                      <TextInput
-                        value={draftTaxIdentity}
-                        onChangeText={(value) => setDraftTaxIdentity(value.toUpperCase().replace(/\s/g, ''))}
-                        placeholder="Enter GST or PAN number"
-                        placeholderTextColor={theme.textMuted}
-                        autoCapitalize="characters"
-                        style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
-                      />
-                    </View>
-                    <View style={styles.field}>
-                      <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>GST Holder / PAN Holder Name</Text>
-                      <TextInput
-                        value={draftTaxHolder}
-                        onChangeText={(value) => setDraftTaxHolder(value.replace(/[^A-Za-z ]/g, ''))}
-                        placeholder="Enter holder name"
-                        placeholderTextColor={theme.textMuted}
-                        autoCapitalize="words"
-                        style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
-                      />
-                    </View>
-                  </>
-                ) : null}
-                <View style={styles.field}>
-                  <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>Dealer Code</Text>
-                  <TextInput
-                    value={draft.dealerCode}
-                    onChangeText={(value) => updateDraftField('dealerCode', value)}
-                    placeholder="Enter dealer code"
-                    placeholderTextColor={theme.textMuted}
-                    autoCapitalize="characters"
-                    style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
-                  />
+                </ScrollView>
+                <View style={styles.editActions}>
+                  <Pressable onPress={closeEdit} style={[styles.discardBtn, { backgroundColor: theme.soft, borderColor: theme.border }]}>
+                    <Text style={[styles.discardTxt, { color: theme.textSecondary }]}>{t('discard')}</Text>
+                  </Pressable>
+                  <Pressable onPress={saveProfile} style={styles.saveBtn}>
+                    <Text style={styles.saveTxt}>{t('saveChanges')}</Text>
+                  </Pressable>
                 </View>
-              </ScrollView>
-              <View style={styles.editActions}>
-                <Pressable onPress={closeEdit} style={[styles.discardBtn, { backgroundColor: theme.soft, borderColor: theme.border }]}>
-                  <Text style={[styles.discardTxt, { color: theme.textSecondary }]}>{t('discard')}</Text>
-                </Pressable>
-                <Pressable onPress={saveProfile} style={styles.saveBtn}>
-                  <Text style={styles.saveTxt}>{t('saveChanges')}</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </KeyboardAvoidingView>
         </Modal>
 
         <Modal visible={showSignOut} animationType="fade" transparent onRequestClose={() => setShowSignOut(false)}>
@@ -921,6 +933,7 @@ const styles = StyleSheet.create({
   pickerCancel: { marginTop: 16, height: 52, borderRadius: 18, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' },
   pickerCancelTxt: { fontSize: 15, fontWeight: '700', color: C.mid },
   editOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(15,17,32,0.45)' },
+  editBackdrop: { flex: 1, justifyContent: 'flex-end' },
   editSheet: { maxHeight: '92%', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 20, paddingBottom: Platform.OS === 'ios' ? 36 : 24 },
   editHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   editTitle: { fontSize: 20, fontWeight: '900' },
