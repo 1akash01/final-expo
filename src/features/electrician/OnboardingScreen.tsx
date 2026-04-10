@@ -995,9 +995,9 @@ export function OnboardingScreen({
             <Text style={[s.subtext, isCompactPhone ? s.subtextCompact : null]}>{screenSubtitle}</Text>
             {phase === 'language' ? (
               <View style={[s.card, s.languageCard, isCompactPhone ? s.introCardCompact : null]}>
-                <Text style={s.sectionEyebrow} numberOfLines={1}>{tx('App Preferences')}</Text>
-                <Text style={s.sectionTitle} numberOfLines={1}>{tx('CHOOSE YOUR LANGUAGE')}</Text>
-                <Text style={s.sectionText} numberOfLines={1}>{tx('Use the same language across the complete SRV app experience.')}</Text>
+                <Text style={s.sectionEyebrow}>{tx('App Preferences')}</Text>
+                <Text style={s.sectionTitle}>{tx('CHOOSE YOUR LANGUAGE')}</Text>
+                <Text style={s.sectionText}>{tx('Use the same language across the complete SRV app experience.')}</Text>
                 <View style={s.languageOptionList}>
                   {languageOptions.map((option) => {
                     const active = language === option.value;
@@ -1334,25 +1334,25 @@ const s = StyleSheet.create({
   subtextCompact: { fontSize: 12.5, lineHeight: 18, marginTop: 4, marginBottom: 16 },
   card: { backgroundColor: C.white, borderRadius: 28, padding: 18, borderWidth: 1, borderColor: C.line, shadowColor: '#0F172A', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 6 },
   introCardCompact: { borderRadius: 24, paddingTop: 12, paddingBottom: 10, paddingHorizontal: 12 },
-  languageCard: { marginTop: 12, paddingTop: 14, paddingBottom: 12, paddingHorizontal: 14 },
+  languageCard: { marginTop: 12, paddingTop: 12, paddingBottom: 4, paddingHorizontal: 14 },
   roleSetupCard: { marginTop: 34, flex: 1, justifyContent: 'space-between', paddingTop: 16, paddingBottom: 14 },
   roleSetupCardCompact: { marginTop: 28, flexGrow: 0, paddingTop: 12, paddingBottom: 12 },
-  sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 2, height: 14 },
-  sectionTitle: { color: C.title, fontSize: 13, fontWeight: '900', marginBottom: 2, height: 16 },
-  sectionText: { color: C.muted, fontSize: 12.5, lineHeight: 16, height: 16 },
-  languageOptionList: { gap: 8, marginTop: 12, marginBottom: 12 },
-  languageOptionCard: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, borderColor: '#D8E2F0', backgroundColor: '#F8FBFF', paddingHorizontal: 12, height: 62, alignItems: 'center', justifyContent: 'center' },
+  sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
+  sectionTitle: { color: C.title, fontSize: 13, fontWeight: '900' },
+  sectionText: { color: C.muted, fontSize: 12 },
+  languageOptionList: { marginTop: 10, marginBottom: 10 },
+  languageOptionCard: { flexDirection: 'row', borderRadius: 18, borderWidth: 1.5, borderColor: '#D8E2F0', backgroundColor: '#F8FBFF', paddingHorizontal: 12, height: 62, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
   languageOptionCardActive: { borderColor: '#69B8FF', backgroundColor: '#EAF3FF' },
   languageOptionBadge: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
   languageOptionBadgeActive: { backgroundColor: '#2C6BE7' },
   languageOptionBadgeText: { color: '#2C6BE7', fontSize: 17, fontWeight: '900' },
   languageOptionBadgeTextActive: { color: '#FFFFFF' },
-  languageOptionCopy: { flex: 1, marginLeft: 10, justifyContent: 'center', height: 44 },
-  languageOptionTitle: { color: C.title, fontSize: 13, fontWeight: '900', height: 16 },
+  languageOptionCopy: { flex: 1, marginLeft: 10 },
+  languageOptionTitle: { color: C.title, fontSize: 13, fontWeight: '900' },
   languageOptionTitleActive: { color: '#1D4ED8' },
-  languageOptionNative: { color: C.text, fontSize: 12, fontWeight: '700', height: 14 },
+  languageOptionNative: { color: C.text, fontSize: 12, fontWeight: '700' },
   languageOptionNativeActive: { color: '#1D4ED8' },
-  languageOptionDescription: { color: C.muted, fontSize: 10, height: 12 },
+  languageOptionDescription: { color: C.muted, fontSize: 10 },
   roleGrid: { flexDirection: 'row', gap: 12, marginTop: 14, marginBottom: 14 },
   roleGridCompact: { gap: 10, marginTop: 12, marginBottom: 12 },
   roleCard: { flex: 1, borderRadius: 22, padding: 12, borderWidth: 1.5, borderColor: '#243554' },
@@ -1415,8 +1415,8 @@ const s = StyleSheet.create({
   fieldActionDisabled: { backgroundColor: '#E3E9F2' },
   fieldActionText: { color: C.accentA, fontSize: 11, fontWeight: '800' },
   fieldActionTextDisabled: { color: '#97A6BE' },
-  btnOuter: { marginTop: 2 },
-  btn: { minHeight: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, shadowColor: '#F97316', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16, elevation: 4 },
+  btnOuter: { marginTop: 4 },
+  btn: { height: 46, borderRadius: 16, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, shadowColor: '#F97316', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16, elevation: 4 },
   btnSecondary: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', shadowColor: '#0EA5E9', shadowOpacity: 0.14, backgroundColor: '#FFFFFF' },
   btnText: { color: C.white, fontSize: 15, fontWeight: '900', letterSpacing: 0.2 },
   btnTextSecondary: { color: C.white },
