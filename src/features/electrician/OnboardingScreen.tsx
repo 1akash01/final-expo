@@ -266,6 +266,9 @@ function LanguageChooser() {
 
   return (
     <View style={s.languageWrap}>
+      {open && (
+        <Pressable style={s.languageBackdropFull} onPress={() => setOpen(false)} />
+      )}
       <Animated.View style={triggerAnimStyle}>
         <Pressable onPress={() => setOpen((current) => !current)} style={[s.languageTrigger, open ? s.languageTriggerActive : null]}>
           <LinearGradient
@@ -281,9 +284,6 @@ function LanguageChooser() {
           </LinearGradient>
         </Pressable>
       </Animated.View>
-      {open && (
-        <Pressable style={StyleSheet.absoluteFill} onPress={() => setOpen(false)} />
-      )}
       {open ? (
         <Animated.View style={[s.languageMenu, dropdownStyle]} pointerEvents="box-none">
           {options.map((option) => {
@@ -1289,6 +1289,7 @@ const s = StyleSheet.create({
   welcomeLanguageWrap: { marginLeft: 'auto', alignItems: 'flex-end' },
   welcomeLanguageWrapFloating: { position: 'absolute', right: 0, top: 0, alignItems: 'flex-end' },
   languageWrap: { position: 'relative', zIndex: 20 },
+  languageBackdropFull: { position: 'absolute', top: -1000, left: -1000, right: -1000, bottom: -1000, zIndex: 10 },
   languageTrigger: {
     minWidth: 52,
     height: 34,
