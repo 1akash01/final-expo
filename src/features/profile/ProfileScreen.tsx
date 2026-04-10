@@ -655,8 +655,8 @@ export function ProfileScreen({
               <Text style={styles.pickerTitle}>{t('updateProfilePhoto')}</Text>
               <Text style={styles.pickerHelper}>Choose a photo source or remove the current photo. Your initials will appear again if no photo is selected.</Text>
               {[
-                { icon: 'camera' as IconName, label: t('takePhoto'), sub: 'Capture a photo, crop it if needed, then confirm it on the next screen', fn: () => pickDraftPhoto('camera') },
-                { icon: 'gallery' as IconName, label: t('chooseGallery'), sub: 'Select a photo, crop it if needed, then confirm it on the next screen', fn: () => pickDraftPhoto('gallery') },
+                { icon: 'camera' as IconName, label: t('takePhoto'), sub: tx('Capture a photo, then tap Done on the confirmation screen'), fn: () => pickDraftPhoto('camera') },
+                { icon: 'gallery' as IconName, label: t('chooseGallery'), sub: tx('Select a photo, then tap Done on the confirmation screen'), fn: () => pickDraftPhoto('gallery') },
                 { icon: 'eyeOff' as IconName, label: 'Remove Photo', sub: 'Remove the profile photo and show initials again', fn: removeProfilePhoto },
               ].map((option) => (
                 <TouchableOpacity key={option.label} style={styles.pickerOption} onPress={option.fn} activeOpacity={0.8}>
@@ -681,7 +681,7 @@ export function ProfileScreen({
             <View style={[styles.confirmPhotoCard, { backgroundColor: theme.surface }]}>
               {pendingDraftImage ? <Image source={{ uri: pendingDraftImage }} style={styles.confirmPhotoPreview} /> : null}
               <Text style={[styles.confirmPhotoTitle, { color: theme.textPrimary }]}>{tx('Review photo')}</Text>
-              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>{tx('If the crop looks right, tap Done to update your profile photo.')}</Text>
+              <Text style={[styles.confirmPhotoHelp, { color: theme.textMuted }]}>{tx('If the photo looks right, tap Done to update your profile photo.')}</Text>
               <View style={styles.confirmPhotoActions}>
                 <Pressable onPress={cancelDraftPhoto} style={[styles.cancelBtn, { backgroundColor: theme.soft, borderColor: theme.border }]}>
                   <Text style={[styles.cancelTxt, { color: theme.textPrimary }]}>{t('cancel')}</Text>
@@ -725,7 +725,7 @@ export function ProfileScreen({
                         </View>
                         <View style={styles.uploadCopy}>
                           <Text style={[styles.uploadTitle, { color: theme.textPrimary }]}>{t('tapToChangePhoto')}</Text>
-                          <Text style={[styles.uploadText, { color: theme.textMuted }]}>{tx('Choose from camera or gallery, crop if needed, then finish with Done on the confirmation screen.')}</Text>
+                          <Text style={[styles.uploadText, { color: theme.textMuted }]}>{tx('Choose from camera or gallery, then finish with Done on the confirmation screen.')}</Text>
                         </View>
                       </View>
                     )}
