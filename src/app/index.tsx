@@ -238,7 +238,7 @@ export default function Index() {
 
   if (showOnboarding) {
     return (
-      <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={styles.root}>
         <ExpoStatusBar style={statusBarStyle} />
         <PreferenceContext.Provider value={preferenceValue}>
           <OnboardingScreen

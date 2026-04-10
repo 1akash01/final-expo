@@ -13,6 +13,7 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -346,6 +347,8 @@ function Field({
   onPressIn?: () => void;
 }) {
   const { tx } = usePreferenceContext();
+  const hasAction = Boolean(actionLabel || actionContent);
+  const isWideAction = actionLabel === 'Current Address';
   return (
     <View style={s.group}>
       <Text style={s.label}>{tx(label)}</Text>
@@ -355,24 +358,26 @@ function Field({
             <Text style={s.prefix}>{prefix}</Text>
           </View>
         ) : null}
-        <TextInput
-          ref={inputRef}
-          style={s.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={tx(placeholder)}
-          placeholderTextColor="#90A0BB"
-          keyboardType={keyboardType ?? 'default'}
-          secureTextEntry={secureTextEntry}
-          autoCapitalize="none"
-          autoCorrect={false}
-          onFocus={onFocus}
-          onSubmitEditing={onSubmitEditing}
-          returnKeyType={returnKeyType ?? 'done'}
-          blurOnSubmit={blurOnSubmit ?? returnKeyType !== 'next'}
-          editable={editable ?? true}
-          onPressIn={onPressIn}
-        />
+        <View style={[s.inputWrap, hasAction ? s.inputWrapWithAction : null]}>
+          <TextInput
+            ref={inputRef}
+            style={[s.input, hasAction ? s.inputWithAction : null, isWideAction ? s.inputWithWideAction : null]}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={tx(placeholder)}
+            placeholderTextColor="#90A0BB"
+            keyboardType={keyboardType ?? 'default'}
+            secureTextEntry={secureTextEntry}
+            autoCapitalize="none"
+            autoCorrect={false}
+            onFocus={onFocus}
+            onSubmitEditing={onSubmitEditing}
+            returnKeyType={returnKeyType ?? 'done'}
+            blurOnSubmit={blurOnSubmit ?? returnKeyType !== 'next'}
+            editable={editable ?? true}
+            onPressIn={onPressIn}
+          />
+        </View>
         {actionLabel || actionContent ? (
           <Pressable
             onPress={onActionPress}
@@ -451,22 +456,33 @@ function Tabs({ mode, role, onChange }: { mode: AuthMode; role: UserRole; onChan
   );
 }
 
-function RoleCard({ role, selected, onPress }: { role: UserRole; selected: boolean; onPress: () => void }) {
+function RoleCard({
+  role,
+  selected,
+  onPress,
+  compact,
+}: {
+  role: UserRole;
+  selected: boolean;
+  onPress: () => void;
+  compact?: boolean;
+}) {
   const { tx } = usePreferenceContext();
   return (
     <Pressable
       onPress={onPress}
       style={[
         s.roleCard,
+        compact ? s.roleCardCompact : null,
         role === 'electrician' ? s.roleCardElectrician : s.roleCardDealer,
         selected ? (role === 'electrician' ? s.roleCardElectricianActive : s.roleCardDealerActive) : null,
       ]}
     >
-      <View style={s.roleFrame}>
+      <View style={[s.roleFrame, compact ? s.roleFrameCompact : null]}>
         <Image source={roleImages[role]} style={s.roleImage} resizeMode="contain" />
       </View>
-      <Text style={[s.roleTitle, selected ? s.roleTitleActive : s.roleTitleDefault]}>{tx(roleMeta[role].title)}</Text>
-      <Text style={[s.roleSubtitle, selected ? s.roleSubtitleActive : s.roleSubtitleDefault]}>{tx(roleMeta[role].subtitle)}</Text>
+      <Text style={[s.roleTitle, compact ? s.roleTitleCompact : null, selected ? s.roleTitleActive : s.roleTitleDefault]}>{tx(roleMeta[role].title)}</Text>
+      <Text style={[s.roleSubtitle, compact ? s.roleSubtitleCompact : null, selected ? s.roleSubtitleActive : s.roleSubtitleDefault]}>{tx(roleMeta[role].subtitle)}</Text>
     </Pressable>
   );
 }
@@ -477,6 +493,7 @@ export function OnboardingScreen({
   onGetStarted: (role: UserRole, options?: { passwordConfigured?: boolean; passwordValue?: string }) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const { language, setLanguage, tx } = usePreferenceContext();
   const reveal = useReveal();
   const scrollRef = useRef<ScrollView | null>(null);
@@ -534,6 +551,7 @@ export function OnboardingScreen({
   const [verifiedDealerName, setVerifiedDealerName] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
+  const isCompactPhone = width <= 360 || height <= 760;
 
   const screenTitle =
     phase === 'language'
@@ -921,7 +939,7 @@ export function OnboardingScreen({
 
   return (
     <KeyboardAvoidingView
-      style={[s.root, { marginTop: -insets.top, marginBottom: -insets.bottom }]}
+      style={s.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
     >
@@ -931,11 +949,11 @@ export function OnboardingScreen({
           <View style={s.glow1} />
           <View style={s.glow2} />
           <View style={s.glow3} />
-          <ScrollView ref={scrollRef} contentContainerStyle={[s.content, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'}>
+          <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 24 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
             <Animated.View style={[reveal, phase !== 'auth' ? s.revealRole : null]}>
-            <View style={s.topRow}>
+            <View style={[s.topRow, isCompactPhone ? s.topRowCompact : null]}>
               <View style={[s.brandRow, s.brandRowCentered]}>
-                <View style={s.logoWrap}><Image source={require('../../../assets/srv-login-logo.png')} style={s.logo} resizeMode="contain" /></View>
+                <View style={[s.logoWrap, isCompactPhone ? s.logoWrapCompact : null]}><Image source={require('../../../assets/srv-login-logo.png')} style={s.logo} resizeMode="contain" /></View>
               </View>
               {phase !== 'language' ? (
                 <Pressable
@@ -954,17 +972,18 @@ export function OnboardingScreen({
                 </Pressable>
               ) : null}
             </View>
-            <View style={s.welcomeRow}>
+            <View style={[s.welcomeRow, phase !== 'auth' ? s.welcomeRowCentered : null]}>
               <View style={s.welcomeBadge}>
                 <LinearGradient colors={['rgba(14,165,233,0.12)', 'rgba(139,92,246,0.12)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.welcomeBadgeFill}>
-                  <Text style={s.eyebrow}>{phase === 'language' ? tx('Language Setup') : tx('Welcome to SRV')}</Text>
+                  <Text style={s.eyebrow}>{tx('Welcome to SRV')}</Text>
                 </LinearGradient>
               </View>
-              {phase !== 'language' ? <View style={s.welcomeLanguageWrap}><LanguageChooser /></View> : null}
+              {phase !== 'language' ? <View style={s.welcomeLanguageWrapFloating}><LanguageChooser /></View> : null}
             </View>
             <Text
               style={[
                 s.bigTitle,
+                isCompactPhone ? s.bigTitleCompact : null,
                 phase === 'language' ? s.bigTitleLanguage : null,
                 phase === 'auth' ? (role === 'electrician' ? s.bigTitleElectrician : s.bigTitleDealer) : s.bigTitleNeutral,
               ]}
@@ -972,9 +991,9 @@ export function OnboardingScreen({
             >
               {screenTitle}
             </Text>
-            <Text style={s.subtext}>{screenSubtitle}</Text>
+            <Text style={[s.subtext, isCompactPhone ? s.subtextCompact : null]}>{screenSubtitle}</Text>
             {phase === 'language' ? (
-              <View style={[s.card, s.languageCard]}>
+              <View style={[s.card, s.languageCard, isCompactPhone ? s.introCardCompact : null]}>
                 <Text style={s.sectionEyebrow}>{tx('App Preferences')}</Text>
                 <Text style={s.sectionTitle}>{tx('CHOOSE YOUR LANGUAGE')}</Text>
                 <Text style={s.sectionText}>{tx('Use the same language across the complete SRV app experience.')}</Text>
@@ -1010,13 +1029,13 @@ export function OnboardingScreen({
                 />
               </View>
             ) : phase === 'role' ? (
-              <View style={[s.card, s.roleSetupCard]}>
+              <View style={[s.card, s.roleSetupCard, isCompactPhone ? s.roleSetupCardCompact : null]}>
                 <Text style={s.sectionEyebrow}>{tx('Account Setup')}</Text>
                 <Text style={s.sectionTitle}>{tx('CHOOSE YOUR ROLE')}</Text>
                 <Text style={s.sectionText}>{tx('This keeps rewards, verification and account setup perfectly aligned.')}</Text>
-                <View style={s.roleGrid}>
-                  <RoleCard role="electrician" selected={role === 'electrician'} onPress={() => setRole('electrician')} />
-                  <RoleCard role="dealer" selected={role === 'dealer'} onPress={() => setRole('dealer')} />
+                <View style={[s.roleGrid, isCompactPhone ? s.roleGridCompact : null]}>
+                  <RoleCard role="electrician" selected={role === 'electrician'} onPress={() => setRole('electrician')} compact={isCompactPhone} />
+                  <RoleCard role="dealer" selected={role === 'dealer'} onPress={() => setRole('dealer')} compact={isCompactPhone} />
                 </View>
                 <Button
                   label={tx('Continue')}
@@ -1234,22 +1253,26 @@ export function OnboardingScreen({
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  bg: { flex: 1, overflow: 'hidden' },
+  root: { flex: 1, backgroundColor: C.heroA },
+  bg: { flex: 1, overflow: 'hidden', backgroundColor: C.heroA },
   glow1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(59,130,246,0.18)', top: -60, right: -35 },
   glow2: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(236,72,153,0.14)', bottom: 120, left: -28 },
   glow3: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(34,197,94,0.1)', top: 90, left: '34%' },
-  content: { flexGrow: 1, paddingHorizontal: 14, paddingTop: 22, paddingBottom: 24 },
+  content: { flexGrow: 1, paddingHorizontal: 14, paddingTop: 34, paddingBottom: 24 },
   contentRole: { flexGrow: 1 },
   revealRole: { flex: 1 },
-  topRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', marginBottom: 16, position: 'relative', minHeight: 100 },
+  topRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', marginBottom: 12, position: 'relative', minHeight: 112, paddingTop: 18 },
+  topRowCompact: { marginBottom: 8, minHeight: 96, paddingTop: 18 },
   brandRow: { width: '100%', alignItems: 'center', justifyContent: 'center' },
   brandRowCentered: { flexDirection: 'row' },
-  logoWrap: { width: 182, height: 102, alignItems: 'center', justifyContent: 'center' },
+  logoWrap: { width: 156, height: 88, alignItems: 'center', justifyContent: 'center' },
+  logoWrapCompact: { width: 134, height: 76 },
   logo: { width: '100%', height: '100%' },
   back: { position: 'absolute', right: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
-  welcomeRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 8 },
+  welcomeRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 10, marginBottom: 14, minHeight: 22 },
+  welcomeRowCentered: { justifyContent: 'center' },
   welcomeLanguageWrap: { marginLeft: 'auto', alignItems: 'flex-end' },
+  welcomeLanguageWrapFloating: { position: 'absolute', right: 0, top: 0, alignItems: 'flex-end' },
   languageWrap: { position: 'relative', zIndex: 20 },
   languageTrigger: {
     minWidth: 52,
@@ -1298,15 +1321,19 @@ const s = StyleSheet.create({
   welcomeBadge: { marginTop: 0 },
   welcomeBadgeFill: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(14,165,233,0.12)' },
   eyebrow: { color: C.muted2, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },
-  bigTitle: { fontSize: 32, fontWeight: '900', marginBottom: 8, letterSpacing: -0.4 },
+  bigTitle: { fontSize: 32, fontWeight: '900', marginTop: 8, marginBottom: 8, letterSpacing: -0.4 },
+  bigTitleCompact: { fontSize: 26, marginTop: 6, marginBottom: 6 },
   bigTitleLanguage: { fontSize: 27, letterSpacing: -0.3 },
   bigTitleNeutral: { color: C.title },
   bigTitleElectrician: { color: 'rgba(21,154,111,0.84)' },
   bigTitleDealer: { color: 'rgba(44,107,231,0.84)' },
-  subtext: { color: C.muted, fontSize: 13.5, lineHeight: 20, marginBottom: 16, maxWidth: '96%' },
+  subtext: { color: C.muted, fontSize: 13.5, lineHeight: 20, marginTop: 4, marginBottom: 20, maxWidth: '96%' },
+  subtextCompact: { fontSize: 12.5, lineHeight: 18, marginTop: 4, marginBottom: 16 },
   card: { backgroundColor: C.white, borderRadius: 28, padding: 18, borderWidth: 1, borderColor: C.line, shadowColor: '#0F172A', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.08, shadowRadius: 20, elevation: 6 },
-  languageCard: { marginTop: 2, paddingTop: 14, paddingBottom: 12, paddingHorizontal: 14 },
-  roleSetupCard: { marginTop: 6, flex: 1, justifyContent: 'space-between', paddingTop: 16, paddingBottom: 14 },
+  introCardCompact: { borderRadius: 24, paddingTop: 12, paddingBottom: 10, paddingHorizontal: 12 },
+  languageCard: { marginTop: 22, paddingTop: 14, paddingBottom: 12, paddingHorizontal: 14 },
+  roleSetupCard: { marginTop: 34, flex: 1, justifyContent: 'space-between', paddingTop: 16, paddingBottom: 14 },
+  roleSetupCardCompact: { marginTop: 28, flexGrow: 0, paddingTop: 12, paddingBottom: 12 },
   sectionEyebrow: { color: '#7D8AA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, marginBottom: 5 },
   sectionTitle: { color: C.title, fontSize: 13, fontWeight: '900', marginBottom: 6 },
   sectionText: { color: C.muted, fontSize: 12.5, lineHeight: 18 },
@@ -1324,18 +1351,23 @@ const s = StyleSheet.create({
   languageOptionNativeActive: { color: '#1D4ED8' },
   languageOptionDescription: { color: C.muted, fontSize: 11.5, lineHeight: 15, marginTop: 1 },
   roleGrid: { flexDirection: 'row', gap: 12, marginTop: 14, marginBottom: 14 },
+  roleGridCompact: { gap: 10, marginTop: 12, marginBottom: 12 },
   roleCard: { flex: 1, borderRadius: 22, padding: 12, borderWidth: 1.5, borderColor: '#243554' },
+  roleCardCompact: { borderRadius: 18, padding: 10 },
   roleCardElectrician: { backgroundColor: '#F1FBF7', borderColor: '#B9E7D4' },
   roleCardDealer: { backgroundColor: '#F2F7FF', borderColor: '#BED4F7' },
   roleCardElectricianActive: { borderColor: '#63D79C', backgroundColor: '#CFF3DE', shadowColor: '#63D79C', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 14, elevation: 4 },
   roleCardDealerActive: { borderColor: '#69B8FF', backgroundColor: '#D8EBFF', shadowColor: '#4D9FFF', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 14, elevation: 4 },
   roleFrame: { height: 112, borderRadius: 18, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.18)', backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: 10, overflow: 'hidden', padding: 6 },
+  roleFrameCompact: { height: 90, borderRadius: 15, marginBottom: 8, padding: 4 },
   roleImage: { width: '100%', height: '100%' },
   roleFrameText: { color: '#D3DFF5', fontSize: 12, fontWeight: '700' },
   roleTitle: { fontSize: 16, fontWeight: '800', marginBottom: 4 },
+  roleTitleCompact: { fontSize: 14, marginBottom: 2 },
   roleTitleDefault: { color: C.text },
   roleTitleActive: { color: C.text },
   roleSubtitle: { fontSize: 12, lineHeight: 18 },
+  roleSubtitleCompact: { fontSize: 11, lineHeight: 16 },
   roleSubtitleDefault: { color: C.muted2 },
   roleSubtitleActive: { color: C.muted2 },
   tabs: { flexDirection: 'row', backgroundColor: '#F1F6FD', borderRadius: 18, padding: 4, marginTop: 18, marginBottom: 18 },
@@ -1369,12 +1401,16 @@ const s = StyleSheet.create({
   shellError: { borderColor: C.error, backgroundColor: C.errorSoft },
   prefixWrap: { height: '100%', justifyContent: 'center', paddingHorizontal: 12, borderRightWidth: 1, borderRightColor: '#DFE7F1' },
   prefix: { color: C.text, fontSize: 14, fontWeight: '700' },
-  input: { flex: 1, height: '100%', paddingHorizontal: 14, color: C.text, fontSize: 15, fontWeight: '600' },
-  fieldAction: { alignSelf: 'center', marginRight: 8, paddingHorizontal: 10, minWidth: 74, height: 36, borderRadius: 12, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
-  fieldActionWide: { minWidth: 112 },
+  inputWrap: { flex: 1, minWidth: 0 },
+  inputWrapWithAction: { paddingRight: 2 },
+  input: { height: '100%', paddingHorizontal: 14, color: C.text, fontSize: 15, fontWeight: '600' },
+  inputWithAction: { flexShrink: 1, fontSize: 14 },
+  inputWithWideAction: { fontSize: 13, paddingHorizontal: 10 },
+  fieldAction: { alignSelf: 'center', marginRight: 6, paddingHorizontal: 8, minWidth: 62, height: 32, borderRadius: 11, backgroundColor: '#EEF4FF', alignItems: 'center', justifyContent: 'center' },
+  fieldActionWide: { minWidth: 102 },
   fieldActionIcon: { minWidth: 42, width: 42, paddingHorizontal: 0 },
   fieldActionDisabled: { backgroundColor: '#E3E9F2' },
-  fieldActionText: { color: C.accentA, fontSize: 12, fontWeight: '800' },
+  fieldActionText: { color: C.accentA, fontSize: 11, fontWeight: '800' },
   fieldActionTextDisabled: { color: '#97A6BE' },
   btnOuter: { marginTop: 2 },
   btn: { minHeight: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, shadowColor: '#F97316', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16, elevation: 4 },
