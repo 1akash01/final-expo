@@ -70,54 +70,62 @@ const historyItems = [
   { id: 'h3', title: 'Scheme bonus unlocked', time: '02 Apr 2026', points: '+80', accent: '#35538E' },
 ];
 
+const dealerHistoryItems = [
+  { id: 'dh1', title: 'Referral reward credited', time: 'Today, 10:42 AM', points: '+120', accent: '#1F9C5D' },
+  { id: 'dh2', title: 'Bank transfer processed', time: 'Yesterday, 06:20 PM', points: '-250', accent: '#B44A3A' },
+  { id: 'dh3', title: 'Scheme bonus unlocked', time: '02 Apr 2026', points: '+80', accent: '#35538E' },
+];
+
 export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenProps) {
   const { darkMode, tx } = usePreferenceContext();
   const isDealer = role === 'dealer';
-  const actions = isDealer
-    ? [
-        {
-          id: 'bank',
-          label: 'Bank Transfer',
-          detail: 'Fast withdrawal',
-          icon: TransferIcon,
-          tint: '#DDEAFE',
-          target: 'bank_details' as Screen,
-        },
-        {
-          id: 'bonus',
-          label: 'Dealer Bonus',
-          detail: '5% electrician bonus',
-          icon: SparkIcon,
-          tint: '#FFE0DA',
-          target: 'dealer_bonus' as Screen,
-        },
-      ]
-    : [
-        {
-          id: 'buy',
-          label: 'Buy Schemes',
-          detail: 'Premium offers',
-          icon: GiftIcon,
-          tint: '#FBE4CC',
-          target: 'rewards' as Screen,
-        },
-        {
-          id: 'bank',
-          label: 'Bank Transfer',
-          detail: 'Fast withdrawal',
-          icon: TransferIcon,
-          tint: '#DDEAFE',
-          target: 'bank_details' as Screen,
-        },
-        {
-          id: 'point',
-          label: 'Transfer Point',
-          detail: 'Send to dealer',
-          icon: SparkIcon,
-          tint: '#FFE0DA',
-          target: 'transfer_points' as Screen,
-        },
-      ];
+  const dealerActions = [
+    {
+      id: 'bank',
+      label: 'Bank Transfer',
+      detail: 'Fast withdrawal',
+      icon: TransferIcon,
+      tint: '#DDEAFE',
+      target: 'bank_details' as Screen,
+    },
+    {
+      id: 'bonus',
+      label: 'Dealer Bonus',
+      detail: '5% electrician bonus',
+      icon: SparkIcon,
+      tint: '#FFE0DA',
+      target: 'dealer_bonus' as Screen,
+    },
+  ];
+
+  const electricianActions = [
+    {
+      id: 'buy',
+      label: 'Buy Schemes',
+      detail: 'Premium offers',
+      icon: GiftIcon,
+      tint: '#FBE4CC',
+      target: 'rewards' as Screen,
+    },
+    {
+      id: 'bank',
+      label: 'Bank Transfer',
+      detail: 'Fast withdrawal',
+      icon: TransferIcon,
+      tint: '#DDEAFE',
+      target: 'bank_details' as Screen,
+    },
+    {
+      id: 'point',
+      label: 'Transfer Point',
+      detail: 'Send to dealer',
+      icon: SparkIcon,
+      tint: '#FFE0DA',
+      target: 'transfer_points' as Screen,
+    },
+  ];
+
+  const actions = isDealer ? dealerActions : electricianActions;
 
   return (
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -136,7 +144,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         </View>
 
         <Text style={styles.eyebrow}>{tx(isDealer ? 'SRV Dealer Wallet' : 'SRV Premium Wallet')}</Text>
-        <Text style={styles.heroTitle}>0 Points</Text>
+        <Text style={styles.heroTitle}>0 {tx('Total Points')}</Text>
         <Text style={styles.heroSub}>
           {tx(
             isDealer
@@ -192,7 +200,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         <View style={styles.sectionHeader}>
           <View>
             <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Redeem Point History')}</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>Elegant activity timeline</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Elegant activity timeline')}</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <HistoryGlyph />
@@ -200,7 +208,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         </View>
 
         <View style={styles.timeline}>
-          {historyItems.map((item) => (
+          {(isDealer ? dealerHistoryItems : historyItems).map((item) => (
             <View key={item.id} style={styles.timelineItem}>
               <View style={styles.timelineTrack}>
                 <View style={[styles.timelineDot, { backgroundColor: item.accent }]} />

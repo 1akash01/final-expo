@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
-import type { Screen } from '@/shared/types/navigation';
+import type { Screen, UserRole } from '@/shared/types/navigation';
 
 function BellIcon({ color = '#0F172A', size = 22 }: { color?: string; size?: number }) {
   return (
@@ -89,8 +89,45 @@ const notifications = [
   },
 ];
 
-export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
+const dealerNotifications = [
+  {
+    title: 'Price Update',
+    body: 'The price of 4 way DD has been updated to Rs.306.',
+    time: '2 hr ago',
+    type: 'Price Alert',
+    colors: ['#FFF4E8', '#FDE1B7'] as [string, string],
+    icon: OfferIcon,
+  },
+  {
+    title: 'Price Update',
+    body: 'The price of 6 Way DD has been updated to Rs.363.',
+    time: '3 hr ago',
+    type: 'Catalog',
+    colors: ['#EBF8FF', '#CBE7FF'] as [string, string],
+    icon: ScanIcon,
+  },
+  {
+    title: 'Scheme Notice',
+    body: 'Selected SRV reward schemes have updated slabs for this week.',
+    time: 'Today',
+    type: 'Rewards',
+    colors: ['#EEF7F0', '#D2F0DA'] as [string, string],
+    icon: WalletIcon,
+  },
+  {
+    title: 'Important SRV announcement',
+    body: 'Keep your profile and bank details updated for smooth redemptions and withdrawals.',
+    time: 'Today',
+    type: 'Alerts',
+    colors: ['#F2EEFF', '#DDD2FF'] as [string, string],
+    icon: BellIcon,
+  },
+];
+
+export function NotificationScreen({ onNavigate, role = 'electrician' }: { onNavigate: (screen: Screen) => void; role?: UserRole }) {
   const { darkMode, tx } = usePreferenceContext();
+  const isDealer = role === 'dealer';
+  const activeNotifications = isDealer ? dealerNotifications : notifications;
   return (
     <ScrollView style={[styles.screen, darkMode ? styles.screenDark : null]} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <LinearGradient colors={['#09111F', '#12284A', '#18396A']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
@@ -118,11 +155,11 @@ export function NotificationScreen({ onNavigate }: { onNavigate: (screen: Screen
       <View style={styles.headerRow}>
         <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Latest updates')}</Text>
         <View style={styles.unreadPill}>
-          <Text style={styles.unreadText}>{notifications.length} {tx('new')}</Text>
+          <Text style={styles.unreadText}>{activeNotifications.length} {tx('new')}</Text>
         </View>
       </View>
 
-      {notifications.map((item, index) => {
+      {activeNotifications.map((item, index) => {
         const Icon = item.icon;
         return (
           <LinearGradient key={`${item.title}-${item.time}-${index}`} colors={darkMode ? ['#182133', '#23324C'] as [string, string] : (item.colors as [string, string])} style={[styles.card, darkMode ? styles.cardDark : null]}>

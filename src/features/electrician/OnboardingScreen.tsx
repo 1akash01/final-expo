@@ -938,18 +938,16 @@ export function OnboardingScreen({
   };
 
   return (
-    <KeyboardAvoidingView
-      style={s.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
-    >
+    <View style={s.root}>
       <StatusBar hidden />
-      <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-        <LinearGradient colors={[C.heroA, C.heroB, C.heroC]} style={s.bg}>
-          <View style={s.glow1} />
-          <View style={s.glow2} />
-          <View style={s.glow3} />
-          <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 24 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
+      <LinearGradient colors={[C.heroA, C.heroB, C.heroC]} style={s.bg}>
+        <KeyboardAvoidingView
+          style={s.kav}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+          keyboardVerticalOffset={0}
+        >
+          <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
+            <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 24 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
             <Animated.View style={[reveal, phase !== 'auth' ? s.revealRole : null]}>
             <View style={[s.topRow, isCompactPhone ? s.topRowCompact : null]}>
               <View style={[s.brandRow, s.brandRowCentered]}>
@@ -1246,18 +1244,17 @@ export function OnboardingScreen({
             )}
             </Animated.View>
           </ScrollView>
-        </LinearGradient>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </LinearGradient>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.heroA },
-  bg: { flex: 1, overflow: 'hidden', backgroundColor: C.heroA },
-  glow1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(59,130,246,0.18)', top: -60, right: -35 },
-  glow2: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(236,72,153,0.14)', bottom: 120, left: -28 },
-  glow3: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(34,197,94,0.1)', top: 90, left: '34%' },
+  bg: { ...StyleSheet.absoluteFillObject },
+  kav: { flex: 1 },
   content: { flexGrow: 1, paddingHorizontal: 14, paddingTop: 34, paddingBottom: 24 },
   contentRole: { flexGrow: 1 },
   revealRole: { flex: 1 },

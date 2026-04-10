@@ -63,7 +63,8 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
       return Alert.alert(tx('Insufficient balance'), tx('Withdrawal amount cannot be more than your available dealer bonus.'));
     }
 
-    Alert.alert(tx('Request submitted'), tx(`Rs. ${amount.toFixed(0)} will be transferred to your bank account after approval.`));
+    const amountKey = amount === 250 ? 'Rs. 250 will be transferred to your bank account after approval.' : amount === 500 ? 'Rs. 500 will be transferred to your bank account after approval.' : amount === 1000 ? 'Rs. 1000 will be transferred to your bank account after approval.' : `Rs. ${amount.toFixed(0)} will be transferred to your bank account after approval.`;
+    Alert.alert(tx('Request submitted'), tx(amountKey));
     setWithdrawAmount('');
   };
 
