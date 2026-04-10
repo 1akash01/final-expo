@@ -972,7 +972,7 @@ export function OnboardingScreen({
                 </Pressable>
               ) : null}
             </View>
-            <View style={[s.welcomeRow, phase !== 'auth' ? s.welcomeRowCentered : null]}>
+            <View style={[s.welcomeRow, s.welcomeRowCentered]}>
               <View style={s.welcomeBadge}>
                 <LinearGradient colors={['rgba(14,165,233,0.12)', 'rgba(139,92,246,0.12)']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={s.welcomeBadgeFill}>
                   <Text style={s.eyebrow}>{tx('Welcome to SRV')}</Text>
