@@ -1125,7 +1125,7 @@ export function OnboardingScreen({
                         {loginStep !== 'phone' ? <Button label={tx('Verify OTP')} onPress={verifyLoginOtp} disabled={loginOtp.length !== 4} secondary /> : null}
                         {loginStep === 'password' ? <Info text={tx('OTP verification successful.')} kind="success" /> : null}
                         {loginStep === 'password' ? <Field label={tx('Password')} value={loginPass} onChangeText={setLoginPass} placeholder={tx('Enter password')} secureTextEntry={!showPassword} error={errors.loginPass} onFocus={scrollToForm} inputRef={loginPassRef} onSubmitEditing={dismissKeyboard} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {loginStep === 'password' ? <Button label={loading ? tx('Opening...') : tx('Continue')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
+                        {loginStep === 'password' ? <Button label={loading ? tx('Logging In...') : tx('Continue')} onPress={submitAuth} disabled={!canContinue || loading} secondary /> : null}
                       </>
                     )}
                   </View>

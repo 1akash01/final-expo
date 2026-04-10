@@ -17,6 +17,7 @@ import Svg, {
   Path, Rect, Circle, Ellipse, Line, G, Polygon,
 } from 'react-native-svg';
 import { usePreferenceContext } from '@/features/profile/ProfileShared';
+import type { AppLanguage } from '@/features/profile/ProfileShared';
 
 const Colors = {
   primary: '#E8453C',
@@ -265,6 +266,124 @@ const allProducts: Product[] = [
   { id: 'lv3', category: 'louver', name: 'LOUVER SHUTTER 4"', sub: 'Compact 4" Ventilation', img: `${CDN}Kitchen-Fan-Royal.png?v=1741846906&width=300`, points: 14, badge: null },
 ];
 
+const normalizeCatalogText = (text: string) =>
+  text
+    .replace(/â€”/g, '-')
+    .replace(/Ã—/g, 'x')
+    .replace(/âœ•/g, 'x')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const catalogPhraseMap: Record<Exclude<AppLanguage, 'English'>, Array<[string, string]>> = {
+  Hindi: [
+    ['FAN BOX', 'फैन बॉक्स'],
+    ['FAN REGULATOR', 'फैन रेगुलेटर'],
+    ['CONCEALED', 'कन्सील्ड'],
+    ['OCTAGONAL BOX', 'ऑक्टागोनल बॉक्स'],
+    ['MODULE', 'मॉड्यूल'],
+    ['PLATINUM', 'प्लैटिनम'],
+    ['GOLD', 'गोल्ड'],
+    ['SUPER', 'सुपर'],
+    ['ZINC', 'जिंक'],
+    ['PREMIUM', 'प्रीमियम'],
+    ['MCB BOX', 'एमसीबी बॉक्स'],
+    ['BUS BAR', 'बस बार'],
+    ['KITCHEN FAN ROYAL', 'किचन फैन रॉयल'],
+    ['VENTILATION', 'वेंटिलेशन'],
+    ['EXHAUST FAN', 'एग्जॉस्ट फैन'],
+    ['AXIAL FLOW FAN', 'एक्सियल फ्लो फैन'],
+    ['LED FLOOD', 'एलईडी फ्लड'],
+    ['LED STREET LIGHT', 'एलईडी स्ट्रीट लाइट'],
+    ['LED PANEL LIGHT', 'एलईडी पैनल लाइट'],
+    ['AUTO CHANGEOVER', 'ऑटो चेंजओवर'],
+    ['CHANGEOVER', 'चेंजओवर'],
+    ['DIGITAL PANEL', 'डिजिटल पैनल'],
+    ['MAIN SW', 'मेन स्विच'],
+    ['FUSE UNIT', 'फ्यूज यूनिट'],
+    ['DP MAIN SWITCH', 'डीपी मेन स्विच'],
+    ['VENTOGUARD', 'वेंटोगार्ड'],
+    ['LOUVER SHUTTER', 'लूवर शटर'],
+    ['Range', 'रेंज'],
+    ['Precision', 'प्रिसीजन'],
+    ['Standard', 'स्टैंडर्ड'],
+    ['Heavy', 'हेवी'],
+    ['Deluxe', 'डीलक्स'],
+    ['Series', 'सीरीज़'],
+    ['Single Door', 'सिंगल डोर'],
+    ['Double Door', 'डबल डोर'],
+    ['Draw Type', 'ड्रॉ टाइप'],
+    ['Pure Copper', 'प्योर कॉपर'],
+    ['Industrial Grade', 'इंडस्ट्रियल ग्रेड'],
+    ['Outdoor Waterproof', 'आउटडोर वॉटरप्रूफ'],
+    ['High Lumen Output', 'हाई लुमेन आउटपुट'],
+    ['Compact', 'कॉम्पैक्ट'],
+    ['Automatic', 'ऑटोमैटिक'],
+    ['With Built-in', 'बिल्ट-इन के साथ'],
+    ['Light Weight', 'लाइट वेट'],
+    ['Ventilation', 'वेंटिलेशन'],
+    ['Available', 'उपलब्ध'],
+  ],
+  Punjabi: [
+    ['FAN BOX', 'ਫੈਨ ਬਾਕਸ'],
+    ['FAN REGULATOR', 'ਫੈਨ ਰੈਗੂਲੇਟਰ'],
+    ['CONCEALED', 'ਕੰਸੀਲਡ'],
+    ['OCTAGONAL BOX', 'ਆਕਟਾਗੋਨਲ ਬਾਕਸ'],
+    ['MODULE', 'ਮੋਡੀਊਲ'],
+    ['PLATINUM', 'ਪਲੈਟਿਨਮ'],
+    ['GOLD', 'ਗੋਲਡ'],
+    ['SUPER', 'ਸੁਪਰ'],
+    ['ZINC', 'ਜ਼ਿੰਕ'],
+    ['PREMIUM', 'ਪ੍ਰੀਮੀਅਮ'],
+    ['MCB BOX', 'ਐਮਸੀਬੀ ਬਾਕਸ'],
+    ['BUS BAR', 'ਬਸ ਬਾਰ'],
+    ['KITCHEN FAN ROYAL', 'ਕਿਚਨ ਫੈਨ ਰੋਯਲ'],
+    ['VENTILATION', 'ਵੈਂਟੀਲੇਸ਼ਨ'],
+    ['EXHAUST FAN', 'ਐਗਜ਼ੌਸਟ ਫੈਨ'],
+    ['AXIAL FLOW FAN', 'ਐਕਸੀਅਲ ਫਲੋ ਫੈਨ'],
+    ['LED FLOOD', 'ਐਲਈਡੀ ਫਲੱਡ'],
+    ['LED STREET LIGHT', 'ਐਲਈਡੀ ਸਟ੍ਰੀਟ ਲਾਈਟ'],
+    ['LED PANEL LIGHT', 'ਐਲਈਡੀ ਪੈਨਲ ਲਾਈਟ'],
+    ['AUTO CHANGEOVER', 'ਆਟੋ ਚੇਂਜਓਵਰ'],
+    ['CHANGEOVER', 'ਚੇਂਜਓਵਰ'],
+    ['DIGITAL PANEL', 'ਡਿਜ਼ਿਟਲ ਪੈਨਲ'],
+    ['MAIN SW', 'ਮੇਨ ਸਵਿੱਚ'],
+    ['FUSE UNIT', 'ਫਿਊਜ਼ ਯੂਨਿਟ'],
+    ['DP MAIN SWITCH', 'ਡੀਪੀ ਮੇਨ ਸਵਿੱਚ'],
+    ['VENTOGUARD', 'ਵੈਂਟੋਗਾਰਡ'],
+    ['LOUVER SHUTTER', 'ਲੂਵਰ ਸ਼ਟਰ'],
+    ['Range', 'ਰੇਂਜ'],
+    ['Precision', 'ਪ੍ਰਿਸੀਜ਼ਨ'],
+    ['Standard', 'ਸਟੈਂਡਰਡ'],
+    ['Heavy', 'ਹੈਵੀ'],
+    ['Deluxe', 'ਡਿਲਕਸ'],
+    ['Series', 'ਸੀਰੀਜ਼'],
+    ['Single Door', 'ਸਿੰਗਲ ਡੋਰ'],
+    ['Double Door', 'ਡਬਲ ਡੋਰ'],
+    ['Draw Type', 'ਡਰਾਅ ਟਾਈਪ'],
+    ['Pure Copper', 'ਸ਼ੁੱਧ ਤਾਂਬਾ'],
+    ['Industrial Grade', 'ਇੰਡਸਟਰੀਅਲ ਗ੍ਰੇਡ'],
+    ['Outdoor Waterproof', 'ਆਉਟਡੋਰ ਵਾਟਰਪ੍ਰੂਫ'],
+    ['High Lumen Output', 'ਹਾਈ ਲੂਮਨ ਆਉਟਪੁੱਟ'],
+    ['Compact', 'ਕੌਂਪੈਕਟ'],
+    ['Automatic', 'ਆਟੋਮੈਟਿਕ'],
+    ['With Built-in', 'ਬਿਲਟ-ਇਨ ਨਾਲ'],
+    ['Light Weight', 'ਹਲਕਾ ਵਜ਼ਨ'],
+    ['Ventilation', 'ਵੈਂਟੀਲੇਸ਼ਨ'],
+    ['Available', 'ਉਪਲਬਧ'],
+  ],
+};
+
+function localizeCatalogText(text: string, language: AppLanguage) {
+  const normalized = normalizeCatalogText(text);
+  if (language === 'English') return normalized;
+
+  let localized = normalized;
+  for (const [source, target] of catalogPhraseMap[language]) {
+    localized = localized.replaceAll(source, target);
+  }
+  return localized;
+}
+
 type Screen = 'home' | 'scan' | 'rewards' | 'profile' | 'product' | 'wallet';
 
 // ── Animated Product Image (float only — NO glow circle) ──────────────
@@ -313,7 +432,7 @@ function ProductCard({
   onScan: () => void;
   showScanButton?: boolean;
 }) {
-  const { darkMode, tx } = usePreferenceContext();
+  const { darkMode, tx, language } = usePreferenceContext();
   const pressScale = useRef(new Animated.Value(1)).current;
   const tiltX = useRef(new Animated.Value(0)).current;
 
@@ -368,8 +487,8 @@ function ProductCard({
 
         {/* Info zone — fixed layout */}
         <View style={[styles.infoZone, darkMode ? styles.infoZoneDark : null, !showScanButton ? styles.infoZoneCompact : null]}>
-          <Text style={[styles.productName, darkMode ? styles.productNameDark : null]} numberOfLines={1}>{product.name}</Text>
-          <Text style={[styles.productSub, darkMode ? styles.productSubDark : null]} numberOfLines={2}>{product.sub}</Text>
+          <Text style={[styles.productName, darkMode ? styles.productNameDark : null]} numberOfLines={1}>{localizeCatalogText(product.name, language)}</Text>
+          <Text style={[styles.productSub, darkMode ? styles.productSubDark : null]} numberOfLines={2}>{localizeCatalogText(product.sub, language)}</Text>
           <View style={showScanButton ? styles.infoSpacer : styles.infoCompactSpacer} />
           {showScanButton ? (
             <TouchableOpacity
@@ -399,7 +518,7 @@ export function ProductScreen({
   showBottomBanner?: boolean;
   showScanButton?: boolean;
 }) {
-  const { darkMode, tx } = usePreferenceContext();
+  const { darkMode, tx, language } = usePreferenceContext();
   const { width } = useWindowDimensions();
   const [category, setCategory] = useState(initialCategory);
   const [search, setSearch] = useState('');
@@ -497,7 +616,7 @@ export function ProductScreen({
                     <CatIcon id={cat.id} size={22} color={active ? '#fff' : cc.scanText} />
                   </View>
                     <Text style={[styles.filterCardTitle, darkMode && !active ? styles.filterCardTitleDark : null, active && styles.filterCardTitleActive]} numberOfLines={1}>
-                    {cat.label}
+                    {localizeCatalogText(cat.label, language)}
                   </Text>
                     <Text style={[styles.filterCardMeta, darkMode && !active ? styles.filterCardMetaDark : null, active && styles.filterCardMetaActive]}>
                     {allProducts.filter((product) => product.category === cat.id).length} {tx('products')}
@@ -531,7 +650,7 @@ export function ProductScreen({
               <View style={[styles.tabIconWrap, { backgroundColor: active ? 'rgba(255,255,255,0.2)' : cc.iconBg }]}>
                 <CatIcon id={cat.id} size={18} color={active ? '#fff' : cc.scanText} />
               </View>
-              <Text style={[styles.categoryText, darkMode && !active ? styles.categoryTextDark : null, active && { color: '#fff' }]}>{cat.label}</Text>
+              <Text style={[styles.categoryText, darkMode && !active ? styles.categoryTextDark : null, active && { color: '#fff' }]}>{localizeCatalogText(cat.label, language)}</Text>
             </TouchableOpacity>
           );
         })}
@@ -556,13 +675,13 @@ export function ProductScreen({
               <CatIcon id={category} size={32} color="#fff" />
             </View>
             <View>
-              <Text style={styles.catBannerTitle}>{currentCat.label}</Text>
+              <Text style={styles.catBannerTitle}>{localizeCatalogText(currentCat.label, language)}</Text>
               <Text style={styles.catBannerSub}>{filtered.length} {tx('products')} {tx('available')}</Text>
             </View>
           </View>
           <TouchableOpacity onPress={() => onNavigate('scan')} style={styles.catScanBtn}>
             <ScanIcon size={20} color="#fff" />
-            <Text style={styles.catScanText}>Scan{'\n'}& Earn</Text>
+            <Text style={styles.catScanText}>{tx('Scan & Earn').replace(' ', '\n')}</Text>
           </TouchableOpacity>
         </LinearGradient>
       )}

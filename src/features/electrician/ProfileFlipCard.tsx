@@ -114,7 +114,7 @@ function DetailPill({
 }
 
 export default function ProfileFlipCard({ profile, role = 'electrician', photoUri }: Props) {
-  const { darkMode, tx } = usePreferenceContext();
+  const { darkMode, tx, t } = usePreferenceContext();
   const [flipped, setFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -175,12 +175,17 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
   };
 
   const dealerName = role === 'dealer' ? (profile?.name || 'Harshvardhan') : (profile?.dealer_name || 'Bansal Chauke');
+  const formatTranslatedLocation = (parts: Array<string | undefined>) =>
+    parts.filter(Boolean).map((part) => tx(part as string)).join(', ');
+
   const dealerLocation = role === 'dealer'
-    ? [profile?.town || 'Chauke', profile?.district || 'Mansa', profile?.state || 'Punjab'].filter(Boolean).join(', ')
-    : [profile?.dealer_town || 'Chauke', profile?.district || 'Mansa', profile?.state || 'Punjab'].filter(Boolean).join(', ');
+    ? formatTranslatedLocation([profile?.town || 'Chauke', profile?.district || 'Mansa', profile?.state || 'Punjab'])
+    : formatTranslatedLocation([profile?.dealer_town || 'Chauke', profile?.district || 'Mansa', profile?.state || 'Punjab']);
   const dealerPhone = '+91 ' + (role === 'dealer' ? (profile?.phone || '9162038214') : (profile?.dealer_phone || '9465258788'));
-  const dealerAddress = profile?.address || 'Green Valley Colony, Mansa, Punjab 151505, India';
-  const frontLocation = role === 'dealer' ? dealerLocation : (profile?.town || 'Chauke, Punjab');
+  const dealerAddress = profile?.address
+    ? profile.address.replace(/\bPunjab\b/g, tx('Punjab')).replace(/\bMansa\b/g, tx('Mansa')).replace(/\bIndia\b/g, tx('India'))
+    : `Green Valley Colony, ${tx('Mansa')}, ${tx('Punjab')} 151505, ${tx('India')}`;
+  const frontLocation = role === 'dealer' ? dealerLocation : formatTranslatedLocation([(profile?.town || 'Chauke'), profile?.state || 'Punjab']);
   const codeLabel = role === 'dealer' ? 'Dealer Code' : 'Electrician Code';
   const backThirdLabel = role === 'dealer' ? 'Address' : 'Phone Number';
   const backThirdValue = role === 'dealer' ? dealerAddress : dealerPhone;
@@ -198,8 +203,11 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
     const safeDealerLocation = escapeHtml(dealerLocation);
     const safeDealerPhone = escapeHtml(dealerPhone);
     const safeDealerAddress = escapeHtml(dealerAddress);
-    const heading = escapeHtml(role === 'dealer' ? 'Business Details' : 'Connected Dealer');
-    const partnerRole = escapeHtml(role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner');
+    const heading = escapeHtml(tx(role === 'dealer' ? 'Business Details' : 'Connected Dealer'));
+    const partnerRole = escapeHtml(tx(role === 'dealer' ? 'Dealer Partner' : 'Electrician Partner'));
+    const safeCodeLabel = escapeHtml(tx('Code'));
+    const safeLocationLabel = escapeHtml(tx('Location'));
+    const safeNameLabel = escapeHtml(tx('Name'));
     const safeBackThirdLabel = escapeHtml(backThirdLabel);
     const safeBackThirdValue = escapeHtml(backThirdValue);
 
@@ -235,7 +243,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
           </style>
         </head>
         <body>
-          <div class="title">SRV Profile Card</div>
+          <div class="title">${escapeHtml(tx('SRV Profile Card'))}</div>
           <div class="card front">
             <div class="row">
               <div class="identity">
@@ -250,11 +258,11 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
             </div>
             <div class="pill-row">
               <div class="pill">
-                <div class="pill-label">Code</div>
+                <div class="pill-label">${safeCodeLabel}</div>
                 <div class="pill-value">${safeCode}</div>
               </div>
               <div class="pill">
-                <div class="pill-label">Location</div>
+                <div class="pill-label">${safeLocationLabel}</div>
                 <div class="pill-value">${location}</div>
               </div>
             </div>
@@ -264,8 +272,8 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
               <div class="back-left">
                 <div class="eyebrow">${heading}</div>
                 <div class="stack">
-                  <div class="pill"><div class="pill-label">Name</div><div class="pill-value">${safeDealerName}</div></div>
-                  <div class="pill"><div class="pill-label">Location</div><div class="pill-value">${safeDealerLocation}</div></div>
+                  <div class="pill"><div class="pill-label">${safeNameLabel}</div><div class="pill-value">${safeDealerName}</div></div>
+                  <div class="pill"><div class="pill-label">${safeLocationLabel}</div><div class="pill-value">${safeDealerLocation}</div></div>
                   <div class="pill"><div class="pill-label">${safeBackThirdLabel}</div><div class="pill-value">${role === 'dealer' ? safeDealerAddress : safeDealerPhone}</div></div>
                 </div>
               </div>
@@ -334,7 +342,7 @@ export default function ProfileFlipCard({ profile, role = 'electrician', photoUr
                     {photoUri ? <Image source={{ uri: photoUri }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.roleText, darkMode ? styles.roleTextDark : null]}>{role === 'dealer' ? tx('Dealer Partner') : tx('Electrician Partner')}</Text>
+                    <Text style={[styles.roleText, darkMode ? styles.roleTextDark : null]}>{role === 'dealer' ? t('dealerPartner') : t('electricianPartner')}</Text>
                     <Text style={styles.nameText}>{profile?.name || 'Harshvardhan'}</Text>
                     <Text style={[styles.phoneText, darkMode ? styles.phoneTextDark : null]}>+91 {profile?.phone || '9162038214'}</Text>
                     <Animated.Text

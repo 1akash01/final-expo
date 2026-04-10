@@ -207,7 +207,7 @@ export function PartnerCommissionPage({ onBack }: { onBack: () => void }) {
               <View style={{ flex: 1 }}>
                 <Text style={[styles.activityTitle, { color: theme.textPrimary }]}>{item.electrician}</Text>
                 <Text style={[styles.activityMeta, { color: theme.textMuted }]}>
-                  {tx('Redeemed')} {item.redeemed} {tx('pts')} • {item.when}
+                  {tx('Redeemed')} {item.redeemed} {tx('pts')} • {tx(item.when)}
                 </Text>
               </View>
               <Text style={styles.activityBonus}>+Rs. {item.bonus}</Text>
