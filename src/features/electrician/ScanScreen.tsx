@@ -229,7 +229,10 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
   const handleOpenCamera = async () => {
     setPreviewImage(null);
-    await resetScanner();
+    scanLockedRef.current = false;
+    if (cameraGranted === true) {
+      setScanning(true);
+    }
   };
 
   const handlePickFromGallery = async () => {
@@ -252,7 +255,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
 
     const imageUri = result.assets[0].uri;
     setPreviewImage(imageUri);
-    setScanning(true);
+    setScanning(false);
     setScanned(false);
     scanLockedRef.current = false;
 
@@ -262,10 +265,8 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
         completeScan(matches[0]?.data);
         return;
       }
-      setScanning(false);
       Alert.alert(tx('Scan QR Code'), tx('Align QR code within the frame'));
     } catch {
-      setScanning(false);
       Alert.alert(tx('Scan QR Code'), tx('Align QR code within the frame'));
     }
   };
@@ -302,7 +303,7 @@ export function ScanScreen({ onNavigate }: { onNavigate: (screen: Screen) => voi
               { width: frameSize, height: frameSize, borderColor: frameBorderColor, borderWidth: 2 },
             ]}
           >
-            {cameraGranted ? (
+            {cameraGranted && !previewImage ? (
               <CameraView
                 style={StyleSheet.absoluteFillObject}
                 facing="back"

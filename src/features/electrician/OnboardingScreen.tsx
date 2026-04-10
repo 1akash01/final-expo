@@ -599,7 +599,8 @@ export function OnboardingScreen({
     return { ...current, [key]: value };
   });
 
-  const scrollToForm = () => setTimeout(() => scrollRef.current?.scrollTo({ y: 420, animated: true }), 120);
+  const scrollToForm = () => setTimeout(() => scrollRef.current?.scrollTo({ y: 180, animated: true }), 120);
+  const handleName = (setter: (value: string) => void) => (value: string) => setter(value.replace(/[^A-Za-z ]/g, ''));
   const dismissKeyboard = () => {
     Keyboard.dismiss();
     [
@@ -764,6 +765,7 @@ export function OnboardingScreen({
       const permission = await Location.requestForegroundPermissionsAsync();
       if (permission.status !== 'granted') {
         setError('signupAddress', 'Location permission is required to fetch the current address. You can still enter the details manually.');
+        setLocationLoading(false);
         return;
       }
 
@@ -778,6 +780,7 @@ export function OnboardingScreen({
 
       if (!currentAddress) {
         setError('signupAddress', 'We could not detect the current address. Please enter the address manually.');
+        setLocationLoading(false);
         return;
       }
 
@@ -795,6 +798,7 @@ export function OnboardingScreen({
 
       if (!resolvedAddress && !resolvedState && !resolvedCity && !resolvedPincode) {
         setError('signupAddress', 'We could not detect the current address. Please enter the address manually.');
+        setLocationLoading(false);
         return;
       }
 
@@ -946,11 +950,11 @@ export function OnboardingScreen({
         <View style={s.glow3} />
         <KeyboardAvoidingView
           style={s.kav}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-          keyboardVerticalOffset={0}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}
         >
           <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-            <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 24 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} automaticallyAdjustKeyboardInsets scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
+            <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 100 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
             <Animated.View style={[reveal, phase !== 'auth' ? s.revealRole : null]}>
             <View style={[s.topRow, isCompactPhone ? s.topRowCompact : null]}>
               <View style={[s.brandRow, s.brandRowCentered]}>
@@ -1146,9 +1150,9 @@ export function OnboardingScreen({
 
                         {signupStep === 'name' ? (
                           <>
-                            <Field label={tx('Full Name')} value={signupName} onChangeText={setSignupName} placeholder={tx('Enter owner or business name')} error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
+                            <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter owner or business name')} error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
                             <Field label={tx('Email Address')} value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
+                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
                             {locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
                           </>
@@ -1156,8 +1160,8 @@ export function OnboardingScreen({
 
                         {signupStep === 'location' ? (
                           <>
-                            <Field label={tx('State')} value={signupState} onChangeText={setSignupState} placeholder={tx('State')} error={errors.signupState} onFocus={scrollToForm} inputRef={signupStateRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupCityRef.current?.focus()} />
-                            <Field label={tx('City')} value={signupCity} onChangeText={setSignupCity} placeholder={tx('City')} error={errors.signupCity} onFocus={scrollToForm} inputRef={signupCityRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPincodeRef.current?.focus()} />
+                            <Field label={tx('State')} value={signupState} onChangeText={handleName(setSignupState)} placeholder={tx('State')} error={errors.signupState} onFocus={scrollToForm} inputRef={signupStateRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupCityRef.current?.focus()} />
+                            <Field label={tx('City')} value={signupCity} onChangeText={handleName(setSignupCity)} placeholder={tx('City')} error={errors.signupCity} onFocus={scrollToForm} inputRef={signupCityRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupPincodeRef.current?.focus()} />
                             <Field label={tx('Pincode')} value={signupPincode} onChangeText={(value) => setSignupPincode(value.replace(/\D/g, '').slice(0, 6))} placeholder={tx('Pincode')} keyboardType="numeric" error={errors.signupPincode} onFocus={scrollToForm} inputRef={signupPincodeRef} onSubmitEditing={continueSignup} />
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupState.trim().length < 2 || signupCity.trim().length < 2 || signupPincode.trim().length < 4} secondary />
                           </>
@@ -1166,7 +1170,7 @@ export function OnboardingScreen({
                         {signupStep === 'identity' ? (
                           <>
                             <Field label={tx('GST / PAN Number')} value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase()); setError('signupGstNumber'); }} placeholder={tx('Enter GST or PAN number')} error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
-                            <Field label={tx('GST / PAN Holder Name')} value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value); setError('signupGstHolderName'); }} placeholder={tx('Enter holder name')} error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
+                            <Field label={tx('GST / PAN Holder Name')} value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value.replace(/[^A-Za-z ]/g, '')); setError('signupGstHolderName'); }} placeholder={tx('Enter holder name')} error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={false} secondary />
                             <Pressable style={s.skipBtn} onPress={continueSignup}>
                               <Text style={s.skipBtnText}>{tx('Skip for Now')}</Text>
@@ -1195,7 +1199,7 @@ export function OnboardingScreen({
                       </>
                     ) : (
                       <>
-                        <Field label={tx('Full Name')} value={signupName} onChangeText={setSignupName} placeholder={tx('Enter your full name')} error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
+                        <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter your full name')} error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
                         {signupStep === 'name' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3} secondary /> : null}
 
                         {signupStep !== 'name' ? <Field label={tx('Dealer Verification Number')} value={signupDealerPhone} onChangeText={(value) => { handlePhone(setSignupDealerPhone)(value); setDealerVerified(false); setVerifiedDealerName(''); setError('signupDealerPhone'); }} placeholder={tx('Enter dealer mobile number')} keyboardType="phone-pad" error={errors.signupDealerPhone} onFocus={scrollToForm} inputRef={signupDealerRef} onSubmitEditing={verifyDealer} /> : null}
@@ -1203,7 +1207,7 @@ export function OnboardingScreen({
                         {dealerVerified ? <Info text={`${verifiedDealerName} ${tx('verification successfully done.')}`} kind="success" /> : null}
                         {dealerVerified && signupStep === 'dealer' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
 
-                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} /> : null}
+                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} /> : null}
                         {signupStep === 'address' && locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                         {['address', 'phone', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
                           <View style={s.locationSummaryCard}>
