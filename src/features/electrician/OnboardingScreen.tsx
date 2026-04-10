@@ -35,6 +35,10 @@ const dealerDirectory: Record<string, { dealerName: string; city: string }> = {
   '9123456789': { dealerName: 'Gupta Power House', city: 'Jaipur' },
 };
 
+const registeredDealerPhones = ['9876543210', '9988776655', '9123456789', '9162038214'];
+
+const isRegisteredDealer = (phone: string) => registeredDealerPhones.includes(phone);
+
 const C = {
   bg: '#EEF3F8',
   heroA: '#EAF3FF',
@@ -53,6 +57,8 @@ const C = {
   successSoft: '#EAF8EF',
   error: '#D64B4B',
   errorSoft: '#FFF3F3',
+  warning: '#B45309',
+  warningSoft: '#FEF3C7',
   warmA: '#F97316',
   warmB: '#EF4444',
   accentA: '#0EA5E9',
@@ -139,11 +145,11 @@ function useReveal() {
   return { opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] };
 }
 
-function Info({ text, kind }: { text: string; kind: 'error' | 'success' }) {
+function Info({ text, kind }: { text: string; kind: 'error' | 'success' | 'warning' }) {
   const { tx } = usePreferenceContext();
   return (
-    <View style={[s.info, kind === 'error' ? s.infoError : s.infoSuccess]}>
-      <Text style={[s.infoText, kind === 'error' ? s.infoErrorText : s.infoSuccessText]}>{tx(text)}</Text>
+    <View style={[s.info, kind === 'error' ? s.infoError : kind === 'warning' ? s.infoWarning : s.infoSuccess]}>
+      <Text style={[s.infoText, kind === 'error' ? s.infoErrorText : kind === 'warning' ? s.infoWarningText : s.infoSuccessText]}>{tx(text)}</Text>
     </View>
   );
 }
@@ -676,9 +682,27 @@ export function OnboardingScreen({
     setError('signupPhone');
     setError('signupOtp');
   };
+  const isValidPassword = (pass: string) => {
+    if (pass.length === 0) return true;
+    if (pass.length < 8) return false;
+    if (!/[A-Z]/.test(pass)) return false;
+    if (!/[0-9]/.test(pass)) return false;
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) return false;
+    return true;
+  };
+
+  const getPasswordError = (pass: string) => {
+    if (pass.length === 0) return '';
+    if (pass.length < 8) return 'Password must be at least 8 characters.';
+    if (!/[A-Z]/.test(pass)) return 'Password must contain at least one capital letter.';
+    if (!/[0-9]/.test(pass)) return 'Password must contain at least one number.';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass)) return 'Password must contain at least one special character.';
+    return '';
+  };
+
   const signupPasswordReady =
     (signupPass.length === 0 && signupConfirmPass.length === 0) ||
-    (signupPass.length >= 6 && signupConfirmPass === signupPass);
+    (isValidPassword(signupPass) && signupConfirmPass === signupPass);
 
   const canContinue = useMemo(() => {
     if (mode === 'login') {
@@ -756,7 +780,6 @@ export function OnboardingScreen({
   };
 
   const useCurrentLocation = async () => {
-    dismissKeyboard();
     if (locationLoading) return;
     setLocationLoading(true);
     setLocationMessage('');
@@ -861,6 +884,10 @@ export function OnboardingScreen({
   const sendSignupOtp = () => {
     dismissKeyboard();
     if (signupPhone.length !== 10) return setError('signupPhone', 'Please enter a valid 10-digit mobile number.');
+    if (role === 'electrician' && isRegisteredDealer(signupPhone)) {
+      setError('signupPhone', 'This number is already registered as a dealer. Please use a different number or login as dealer.');
+      return;
+    }
     setError('signupPhone');
     setError('signupOtp');
     setSignupOtp('');
@@ -1177,7 +1204,7 @@ export function OnboardingScreen({
 
                         {signupStep === 'identity' ? (
                           <>
-                            <Field label={tx('GST / PAN Number')} value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase()); setError('signupGstNumber'); }} placeholder={tx('Enter GST or PAN number')} error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
+                            <Field label={tx('GST / PAN Number')} value={signupGstNumber} onChangeText={(value) => { setSignupGstNumber(value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10)); setError('signupGstNumber'); }} placeholder={tx('Enter GST or PAN number')} error={errors.signupGstNumber} onFocus={scrollToForm} inputRef={signupGstNumberRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupGstHolderRef.current?.focus()} />
                             <Field label={tx('GST / PAN Holder Name')} value={signupGstHolderName} onChangeText={(value) => { setSignupGstHolderName(value.replace(/[^A-Za-z ]/g, '')); setError('signupGstHolderName'); }} placeholder={tx('Enter holder name')} error={errors.signupGstHolderName} onFocus={scrollToForm} inputRef={signupGstHolderRef} onSubmitEditing={continueSignup} />
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={false} secondary />
                             <Pressable style={s.skipBtn} onPress={continueSignup}>
@@ -1198,8 +1225,8 @@ export function OnboardingScreen({
                           <>
                             {signupOtpVerified ? <Info text={tx('Phone verification successful.')} kind="success" /> : null}
                             <Text style={s.helperText}>{tx('Password is optional. Leave both fields blank if you want to skip it.')}</Text>
-                            <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={setSignupPass} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
-                            <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
+                            <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={(value) => { setSignupPass(value); setError('signupPass', getPasswordError(value)); }} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={getPasswordError(signupPass)} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
+                            <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={(value) => { setSignupConfirmPass(value); if (signupPass.length > 0 && value !== signupPass) { setError('signupConfirmPass', 'Passwords do not match.'); } else { setError('signupConfirmPass'); } }} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} />
                             <Text style={s.helperText}>{tx('By creating an account, you agree to the Terms & Conditions and Privacy Policy.')}</Text>
                             <Button label={loading ? tx('Creating Account...') : dealerSignupContent?.buttonLabel ?? tx('Create Account')} onPress={submitAuth} disabled={!canContinue || loading} />
                           </>
@@ -1248,8 +1275,8 @@ export function OnboardingScreen({
                         {signupStep === 'otp' ? <Button label={tx('Verify OTP')} onPress={continueSignup} disabled={signupOtp.length !== 4} secondary /> : null}
                         {signupStep === 'password' ? <Info text={tx('OTP verification successful.')} kind="success" /> : null}
                         {signupStep === 'password' ? <Text style={s.helperText}>{tx('Password is optional. Leave both fields blank if you want to skip it.')}</Text> : null}
-                        {signupStep === 'password' ? <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={setSignupPass} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={errors.signupPass} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
-                        {signupStep === 'password' ? <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={setSignupConfirmPass} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                        {signupStep === 'password' ? <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={(value) => { setSignupPass(value); setError('signupPass', getPasswordError(value)); }} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={getPasswordError(signupPass)} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
+                        {signupStep === 'password' ? <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={(value) => { setSignupConfirmPass(value); if (signupPass.length > 0 && value !== signupPass) { setError('signupConfirmPass', 'Passwords do not match.'); } else { setError('signupConfirmPass'); } }} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
                         {signupStep === 'password' ? <Button label={loading ? tx('Logging In...') : tx('Continue')} onPress={submitAuth} disabled={!canContinue || loading} /> : null}
                       </>
                     )}
@@ -1437,9 +1464,11 @@ const s = StyleSheet.create({
   info: { borderRadius: 14, paddingHorizontal: 12, paddingVertical: 10 },
   infoError: { backgroundColor: C.errorSoft },
   infoSuccess: { backgroundColor: C.successSoft },
+  infoWarning: { backgroundColor: C.warningSoft },
   infoText: { fontSize: 12, lineHeight: 18, fontWeight: '700' },
   infoErrorText: { color: C.error },
   infoSuccessText: { color: C.success },
+  infoWarningText: { color: C.warning },
   checkboxCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, borderRadius: 18, borderWidth: 1, borderColor: '#DCE6F3', backgroundColor: '#F9FBFE', padding: 14 },
   checkboxCardTextWrap: { flex: 1, gap: 4 },
   checkboxCardTitle: { color: C.text, fontSize: 13, fontWeight: '800' },

@@ -38,7 +38,7 @@ export function TransferPointsPage({ onBack, onNavigate }: { onBack: () => void;
               placeholder={tx('Enter Mobile Number')}
               placeholderTextColor={theme.textMuted}
               value={mobile}
-              onChangeText={setMobile}
+              onChangeText={(value) => setMobile(value.replace(/\D/g, '').slice(0, 10))}
               keyboardType="phone-pad"
             />
             <TouchableOpacity style={styles.searchBtn} onPress={handleSearch} activeOpacity={0.85}>

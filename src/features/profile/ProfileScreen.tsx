@@ -763,10 +763,11 @@ export function ProfileScreen({
                         <Text style={[styles.fieldLabel, { color: theme.textMuted }]}>GST Number / PAN Number</Text>
                         <TextInput
                           value={draftTaxIdentity}
-                          onChangeText={(value) => setDraftTaxIdentity(value.toUpperCase().replace(/\s/g, ''))}
+                          onChangeText={(value) => setDraftTaxIdentity(value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))}
                           placeholder="Enter GST or PAN number"
                           placeholderTextColor={theme.textMuted}
                           autoCapitalize="characters"
+                          maxLength={10}
                           style={[styles.input, { borderColor: theme.border, backgroundColor: theme.soft, color: theme.textPrimary }]}
                         />
                       </View>

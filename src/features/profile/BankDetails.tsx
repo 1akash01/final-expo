@@ -127,9 +127,10 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
                 placeholder="Enter IFSC Code"
                 placeholderTextColor={theme.textMuted}
                 value={ifsc}
-                onChangeText={(value) => setIfsc(value.toUpperCase())}
+                onChangeText={(value) => setIfsc(value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                 autoCapitalize="characters"
                 onFocus={() => scrollToField('ifsc')}
+                maxLength={11}
               />
             </View>
           </View>

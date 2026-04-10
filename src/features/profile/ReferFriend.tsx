@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Image, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Linking, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AppIcon, C, IconName, PageHeader, usePreferenceContext } from './ProfileShared';
 
 const referImage = require('./assets/referfriend.png');
@@ -20,6 +20,17 @@ export function ReferFriendPage({ onBack }: { onBack: () => void }) {
 
   const shareCode = async () => {
     await Share.share({ message: shareMessage, url: referralLink });
+  };
+
+  const openWhatsApp = () => {
+    const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareMessage)}`;
+    Linking.canOpenURL(whatsappUrl).then((supported) => {
+      if (supported) {
+        Linking.openURL(whatsappUrl);
+      } else {
+        Linking.openURL(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`);
+      }
+    });
   };
 
   return (
@@ -56,7 +67,7 @@ export function ReferFriendPage({ onBack }: { onBack: () => void }) {
 
         <Text style={[styles.sendTitle, { color: theme.textPrimary }]}>Send Invite With</Text>
         <View style={styles.shareRow}>
-          {[['link', 'Share', shareCode], ['message', 'Message', shareCode], ['whatsapp', 'WhatsApp', shareCode]].map(([icon, label, fn]) => (
+          {[['link', 'Share', shareCode], ['message', 'Message', shareCode], ['whatsapp', 'WhatsApp', openWhatsApp]].map(([icon, label, fn]) => (
             <TouchableOpacity key={label as string} style={[styles.shareBtn, { backgroundColor: theme.soft, borderColor: theme.border }]} onPress={fn as () => void} activeOpacity={0.8}>
               <AppIcon name={icon as IconName} size={24} color={label === 'WhatsApp' ? '#16A34A' : C.primary} />
             </TouchableOpacity>
