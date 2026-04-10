@@ -281,8 +281,11 @@ function LanguageChooser() {
           </LinearGradient>
         </Pressable>
       </Animated.View>
+      {open && (
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => setOpen(false)} />
+      )}
       {open ? (
-        <Animated.View style={[s.languageMenu, dropdownStyle]}>
+        <Animated.View style={[s.languageMenu, dropdownStyle]} pointerEvents="box-none">
           {options.map((option) => {
             const active = language === option.value;
             return (
@@ -564,7 +567,7 @@ export function OnboardingScreen({
       ? tx('Pick your preferred language first, then continue to the onboarding screen.')
       : phase === 'role'
         ? tx('Choose your role to start the onboarding journey.')
-        : tx('Professional authentication flow aligned with the app design system.');
+        : '';
 
   useEffect(() => {
     if (loginStep === 'otp') {
@@ -764,40 +767,46 @@ export function OnboardingScreen({
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
       if (permission.status !== 'granted') {
-        setError('signupAddress', 'Location permission is required to fetch the current address. You can still enter the details manually.');
+        setError('signupAddress', 'Location permission is required to fetch the current address. Please enable it in settings.');
         setLocationLoading(false);
         return;
       }
 
       const currentPosition = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.High,
       });
+      
       const reverseLookup = await Location.reverseGeocodeAsync({
         latitude: currentPosition.coords.latitude,
         longitude: currentPosition.coords.longitude,
       });
+      
+      if (!reverseLookup || reverseLookup.length === 0) {
+        setError('signupAddress', 'Could not find address for your location. Please enter manually.');
+        setLocationLoading(false);
+        return;
+      }
+      
       const currentAddress = reverseLookup[0];
-
       if (!currentAddress) {
-        setError('signupAddress', 'We could not detect the current address. Please enter the address manually.');
+        setError('signupAddress', 'Address details not found. Please enter manually.');
         setLocationLoading(false);
         return;
       }
 
-      const addressParts = Array.from(new Set([
-        currentAddress.name,
-        currentAddress.streetNumber,
-        currentAddress.street,
-        currentAddress.district,
-        currentAddress.subregion,
-      ].map((part) => part?.trim()).filter(Boolean))) as string[];
+      const addressParts: string[] = [];
+      if (currentAddress.name) addressParts.push(currentAddress.name);
+      if (currentAddress.street) addressParts.push(currentAddress.street);
+      if (currentAddress.district) addressParts.push(currentAddress.district);
+      if (currentAddress.subregion) addressParts.push(currentAddress.subregion);
+      
       const resolvedAddress = addressParts.join(', ');
-      const resolvedState = currentAddress.region?.trim() ?? '';
-      const resolvedCity = currentAddress.city?.trim() || currentAddress.subregion?.trim() || currentAddress.district?.trim() || '';
-      const resolvedPincode = currentAddress.postalCode?.replace(/\D/g, '').slice(0, 6) ?? '';
+      const resolvedState = currentAddress.region || '';
+      const resolvedCity = currentAddress.city || currentAddress.district || currentAddress.subregion || '';
+      const resolvedPincode = currentAddress.postalCode || '';
 
       if (!resolvedAddress && !resolvedState && !resolvedCity && !resolvedPincode) {
-        setError('signupAddress', 'We could not detect the current address. Please enter the address manually.');
+        setError('signupAddress', 'Could not fetch address details. Please enter manually.');
         setLocationLoading(false);
         return;
       }
@@ -805,10 +814,10 @@ export function OnboardingScreen({
       if (resolvedAddress) setSignupAddress(resolvedAddress);
       if (resolvedState) setSignupState(resolvedState);
       if (resolvedCity) setSignupCity(resolvedCity);
-      if (resolvedPincode) setSignupPincode(resolvedPincode);
-      setLocationMessage('Current address details were fetched successfully. You can review and update them if needed.');
-    } catch {
-      setError('signupAddress', 'Current address could not be fetched right now. Please try again shortly or enter the details manually.');
+      if (resolvedPincode) setSignupPincode(resolvedPincode.replace(/\D/g, '').slice(0, 6));
+      setLocationMessage('Address fetched successfully. Please review and update if needed.');
+    } catch (err) {
+      setError('signupAddress', 'Could not fetch location. Please enter address manually.');
     } finally {
       setLocationLoading(false);
     }
@@ -950,11 +959,11 @@ export function OnboardingScreen({
         <View style={s.glow3} />
         <KeyboardAvoidingView
           style={s.kav}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
         >
           <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
-            <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 100 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
+            <ScrollView ref={scrollRef} contentContainerStyle={[s.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 40 }, phase !== 'auth' ? s.contentRole : null]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" scrollEnabled={phase === 'auth'} bounces={false} overScrollMode="never">
             <Animated.View style={[reveal, phase !== 'auth' ? s.revealRole : null]}>
             <View style={[s.topRow, isCompactPhone ? s.topRowCompact : null]}>
               <View style={[s.brandRow, s.brandRowCentered]}>
@@ -1059,7 +1068,6 @@ export function OnboardingScreen({
               <View style={s.card}>
                 <Text style={s.sectionEyebrow}>{tx('Authentication')}</Text>
                 <Text style={s.sectionTitle}>{mode === 'login' ? tx('Welcome back') : tx('Create your account')}</Text>
-                <Text style={s.sectionText}>{tx('Smooth inputs, full-screen layout, and no keyboard overlap while typing.')}</Text>
                 <Tabs
                   mode={mode}
                   role={role}
@@ -1152,7 +1160,7 @@ export function OnboardingScreen({
                           <>
                             <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter owner or business name')} error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
                             <Field label={tx('Email Address')} value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} />
+                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} />
                             {locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
                           </>
@@ -1207,7 +1215,7 @@ export function OnboardingScreen({
                         {dealerVerified ? <Info text={`${verifiedDealerName} ${tx('verification successfully done.')}`} kind="success" /> : null}
                         {dealerVerified && signupStep === 'dealer' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
 
-                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onPressIn={() => { if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => void useCurrentLocation()} actionDisabled={locationLoading} /> : null}
+                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={scrollToForm} inputRef={signupAddressRef} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} /> : null}
                         {signupStep === 'address' && locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                         {['address', 'phone', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
                           <View style={s.locationSummaryCard}>
@@ -1307,6 +1315,7 @@ const s = StyleSheet.create({
     position: 'absolute',
     top: 42,
     right: -6,
+    zIndex: 100,
     minWidth: 156,
     borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.98)',
