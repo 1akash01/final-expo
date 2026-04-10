@@ -53,19 +53,19 @@ export function TransferPointsPage({ onBack, onNavigate }: { onBack: () => void;
           ) : null}
         </View>
 
-        <View style={[styles.scannerCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={[styles.scannerTitle, { color: theme.textPrimary }]}>{tx('Scan QR')}</Text>
-          <Text style={[styles.scannerSub, { color: theme.textMuted }]}>{tx('Open the main scan page to scan the QR code from the middle bottom navigation.')}</Text>
-
-          <TouchableOpacity style={[styles.scanQrBtn, { backgroundColor: C.blueLight, borderColor: theme.border }]} onPress={() => onNavigate('scan')} activeOpacity={0.85}>
-            <View style={styles.scanQrIcon}>
-              <AppIcon name="scan" size={22} color={C.blue} />
+        <View style={[styles.scannerCard, { backgroundColor: C.blue, borderColor: C.blue }]}>
+          <View style={styles.scannerHeader}>
+            <View style={styles.scannerIconWrap}>
+              <AppIcon name="scan" size={28} color="#fff" />
             </View>
-            <View style={styles.scanQrContent}>
-              <Text style={styles.scanQrTitle}>{tx('Open Scan Page')}</Text>
-              <Text style={[styles.scanQrSub, { color: theme.textMuted }]}>{tx('Go to the center QR scanner page')}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.scannerTitleWhite}>{tx('Scan & Transfer')}</Text>
+              <Text style={styles.scannerSubWhite}>{tx('Scan any SRV product QR to transfer points to dealers instantly.')}</Text>
             </View>
-            <AppIcon name="chevronRight" size={18} color={C.blue} />
+          </View>
+          <TouchableOpacity style={styles.scanQrBtnWhite} onPress={() => onNavigate('scan')} activeOpacity={0.85}>
+            <Text style={styles.scanQrBtnText}>{tx('Open Scanner')}</Text>
+            <AppIcon name="chevronRight" size={20} color={C.blue} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -83,10 +83,14 @@ const styles = StyleSheet.create({
   searchBtn: { width: 52, height: 52, borderRadius: 16, backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' },
   resultBox: { borderRadius: 16, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 14 },
   resultText: { fontSize: 15, fontWeight: '700' },
-  scannerCard: { borderRadius: 24, borderWidth: 1, padding: 16, gap: 14 },
-  scannerTitle: { fontSize: 16, fontWeight: '800' },
-  scannerSub: { fontSize: 13, lineHeight: 20 },
+  scannerCard: { borderRadius: 24, padding: 20, gap: 16 },
+  scannerHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  scannerIconWrap: { width: 56, height: 56, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  scannerTitleWhite: { fontSize: 18, fontWeight: '900', color: '#fff' },
+  scannerSubWhite: { fontSize: 13, color: 'rgba(255,255,255,0.85)', marginTop: 4, lineHeight: 18 },
   scanQrBtn: { minHeight: 84, borderRadius: 20, borderWidth: 1, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  scanQrBtnWhite: { backgroundColor: '#fff', borderRadius: 18, paddingHorizontal: 20, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  scanQrBtnText: { color: C.blue, fontSize: 15, fontWeight: '800' },
   scanQrIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
   scanQrContent: { flex: 1 },
   scanQrTitle: { color: C.blue, fontSize: 15, fontWeight: '800' },

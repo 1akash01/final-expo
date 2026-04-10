@@ -9,7 +9,7 @@ const orders = [
 ];
 
 export function MyOrdersPage({ onBack }: { onBack: () => void }) {
-  const { t, theme } = usePreferenceContext();
+  const { t, tx, theme } = usePreferenceContext();
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
@@ -17,11 +17,11 @@ export function MyOrdersPage({ onBack }: { onBack: () => void }) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Active Orders</Text>
+            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{tx('Active Orders')}</Text>
             <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>03</Text>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Last Delivery</Text>
+            <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>{tx('Last Delivery')}</Text>
             <Text style={[styles.summaryValue, { color: C.teal }]}>02 Apr</Text>
           </View>
         </View>
