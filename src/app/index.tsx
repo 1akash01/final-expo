@@ -183,7 +183,7 @@ export default function Index() {
       case 'scan':
         return <ElectricianScanScreen onNavigate={handleNavigate} />;
       case 'rewards':
-        return <ElectricianRewardsScreen />;
+        return <ElectricianRewardsScreen onBack={() => setCurrentScreen('home')} />;
       case 'profile':
         return (
           <ElectricianProfileScreen

@@ -9,8 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
-import { usePreferenceContext } from '@/features/profile/ProfileShared';
+import { usePreferenceContext, AppIcon, shared } from '@/features/profile/ProfileShared';
 
 const Colors = {
   primary: '#E8453C',
@@ -41,14 +40,6 @@ const rewards = [
   { id: 'r6', category: 'Cashback', name: 'Flipkart Voucher', description: 'Rs 300 shopping voucher', points: 1500, progress: 50, color: Colors.blue, bg: Colors.blueLight, badge: 'FK' },
 ];
 
-function BackIcon({ size = 20, color = '#1C1E2E' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M15 6l-6 6 6 6M9 12h10" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
-
 export function RewardsScreen({ onBack }: { onBack?: () => void }) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>('All');
   const headerScale = useRef(new Animated.Value(1)).current;
@@ -72,15 +63,15 @@ export function RewardsScreen({ onBack }: { onBack?: () => void }) {
   return (
     <View style={{ flex: 1, backgroundColor: darkMode ? '#08111F' : Colors.background }}>
       {onBack ? (
-        <View style={[styles.pageHeader, { backgroundColor: darkMode ? '#111827' : Colors.surface, borderBottomColor: darkMode ? '#243043' : Colors.border }]}>
-          <TouchableOpacity onPress={onBack} style={[styles.backBtn, { backgroundColor: darkMode ? '#1F2937' : Colors.background }]} activeOpacity={0.75}>
-            <BackIcon color={darkMode ? '#F8FAFC' : Colors.textDark} />
+        <View style={[shared.header, { backgroundColor: theme.surface, borderBottomColor: theme.border, paddingTop: 12 }]}>
+          <TouchableOpacity onPress={onBack} style={[shared.backBtn, { backgroundColor: theme.soft }]} activeOpacity={0.75}>
+            <AppIcon name="arrowLeft" size={20} color={theme.textPrimary} />
           </TouchableOpacity>
-          <Text style={[styles.pageTitle, { color: darkMode ? '#F8FAFC' : Colors.textDark }]}>{tx('Gift Store')}</Text>
-          <View style={{ width: 44 }} />
+          <Text style={[shared.title, { color: theme.textPrimary }]}>{tx('Gift Store')}</Text>
+          <View style={{ width: 36 }} />
         </View>
       ) : null}
-      <ScrollView style={[styles.screen, darkMode && styles.screenDark]} contentContainerStyle={[styles.content, onBack && { paddingTop: 0 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.screen, darkMode && styles.screenDark]} contentContainerStyle={[styles.content, onBack && { paddingTop: 8 }]} showsVerticalScrollIndicator={false}>
       <Animated.View style={[styles.header, { transform: [{ scale: headerScale }] }]}>
         <Text style={[styles.headerTitle, darkMode && styles.headerTitleDark]}>{tx('Rewards Store')}</Text>
         <View style={[styles.pointsBadge, darkMode && styles.pointsBadgeDark]}>
@@ -93,7 +84,7 @@ export function RewardsScreen({ onBack }: { onBack?: () => void }) {
         {TABS.map((tab) => (
           <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}>
             <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive, darkMode && activeTab !== tab && styles.tabTextDark]}>{tx(tab)}</Text>
-            {activeTab === tab ? <View style={[styles.tabUnderline, darkMode && styles.tabUnderlineDark]} /> : null}
+            {activeTab === tab ? <View style={styles.tabUnderline} /> : null}
           </TouchableOpacity>
         ))}
       </View>
@@ -144,9 +135,6 @@ export function RewardsScreen({ onBack }: { onBack?: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  pageHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, borderBottomWidth: 1 },
-  backBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  pageTitle: { fontSize: 18, fontWeight: '800' },
   screen: { flex: 1, backgroundColor: Colors.background },
   screenDark: { backgroundColor: '#08111F' },
   content: { padding: 16, gap: 14 },

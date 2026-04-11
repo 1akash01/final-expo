@@ -1146,9 +1146,9 @@ export function EmptyState({ emoji, message }: { emoji: string; message: string 
   return <View style={shared.emptyWrap}><View style={shared.emptyCircle}><Text style={shared.emptyEmoji}>{emoji}</Text></View><Text style={shared.emptyText}>{message}</Text></View>;
 }
 
-const shared = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 10, borderBottomWidth: 1 },
-  backBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+export const shared = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10, borderBottomWidth: 1 },
+  backBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
   title: { fontSize: 18, fontWeight: '800' },
   primaryBtn: { backgroundColor: C.primary, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center' },
   primaryLabel: { color: '#fff', fontSize: 16, fontWeight: '800', letterSpacing: 0.3 },
