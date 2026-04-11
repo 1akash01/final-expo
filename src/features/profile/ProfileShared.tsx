@@ -262,6 +262,28 @@ const uiText: Record<AppLanguage, Record<string, string>> = {
     'Transfer Points': 'पॉइंट्स ट्रांसफर',
     'My Orders': 'मेरे ऑर्डर',
     'Bank Details': 'बैंक डिटेल्स',
+    'Secure payouts to your bank': 'अपने बैंक को सुरक्षित पेआउट',
+    'BANK TRANSFER': 'बैंक ट्रांसफर',
+    'Account Holder Name': 'खाताधारक का नाम',
+    'Enter Account Holder Name': 'खाताधारक का नाम दर्ज करें',
+    'Account Number': 'खाता संख्या',
+    'Enter Account Number': 'खाता संख्या दर्ज करें',
+    'IFSC Code': 'IFSC कोड',
+    'Enter IFSC Code': 'IFSC कोड दर्ज करें',
+    'Select Bank': 'बैंक चुनें',
+    'UPI ID': 'UPI ID',
+    'Enter UPI ID': 'UPI ID दर्ज करें',
+    'Please enter a valid UPI ID in the format name@bank.': 'कृपया name@bank फॉर्मेट में सही UPI ID दर्ज करें।',
+    'Add your bank account and UPI ID for smooth payouts': 'सहज पेआउट के लिए अपना बैंक खाता और UPI ID जोड़ें',
+    'Saved': 'सेव किया गया',
+    'Bank details saved successfully!': 'बैंक डिटेल्स सफलतापूर्वक सेव हो गए!',
+    'Required fields': 'आवश्यक फील्ड',
+    'Please fill all required fields.': 'कृपया सभी आवश्यक फील्ड भरें।',
+    'Invalid account holder name': 'अमान्य खाताधारक नाम',
+    'Account holder name should contain only letters and spaces.': 'खाताधारक नाम में केवल अक्षर और स्पेस होने चाहिए।',
+    'Invalid account number': 'अमान्य खाता संख्या',
+    'Account number should contain only numbers.': 'खाता संख्या में केवल अंक होने चाहिए।',
+    'Invalid UPI ID': 'अमान्य UPI ID',
     'Refer To A Friend': 'दोस्त को रेफर करें',
     'Need Help': 'मदद चाहिए',
     'Offers & Promotions': 'ऑफर्स और प्रमोशन्स',
@@ -701,6 +723,28 @@ const uiText: Record<AppLanguage, Record<string, string>> = {
     'Transfer Points': 'ਪੁਆਇੰਟ ਟ੍ਰਾਂਸਫਰ',
     'My Orders': 'ਮੇਰੇ ਆਰਡਰ',
     'Bank Details': 'ਬੈਂਕ ਵੇਰਵਾ',
+    'Secure payouts to your bank': 'ਆਪਣੇ ਬੈਂਕ ਨੂੰ ਸੁਰੱਖਿਅਤ ਪੇਆਊਟ',
+    'BANK TRANSFER': 'ਬੈਂਕ ਟ੍ਰਾਂਸਫਰ',
+    'Account Holder Name': 'ਖਾਤਾਧਾਰਕ ਦਾ ਨਾਂ',
+    'Enter Account Holder Name': 'ਖਾਤਾਧਾਰਕ ਦਾ ਨਾਂ ਦਰਜ ਕਰੋ',
+    'Account Number': 'ਖਾਤਾ ਨੰਬਰ',
+    'Enter Account Number': 'ਖਾਤਾ ਨੰਬਰ ਦਰਜ ਕਰੋ',
+    'IFSC Code': 'IFSC ਕੋਡ',
+    'Enter IFSC Code': 'IFSC ਕੋਡ ਦਰਜ ਕਰੋ',
+    'Select Bank': 'ਬੈਂਕ ਚੁਣੋ',
+    'UPI ID': 'UPI ID',
+    'Enter UPI ID': 'UPI ID ਦਰਜ ਕਰੋ',
+    'Please enter a valid UPI ID in the format name@bank.': 'ਕਿਰਪਾ ਕਰਕੇ name@bank ਫਾਰਮੈਟ ਵਿੱਚ ਸਹੀ UPI ID ਦਰਜ ਕਰੋ।',
+    'Add your bank account and UPI ID for smooth payouts': 'ਆਸਾਨ ਪੇਆਊਟ ਲਈ ਆਪਣਾ ਬੈਂਕ ਖਾਤਾ ਅਤੇ UPI ID ਜੋੜੋ',
+    'Saved': 'ਸੇਵ ਕੀਤਾ',
+    'Bank details saved successfully!': 'ਬੈਂਕ ਵੇਰਵਾ ਸਫਲਤਾਪੂਰਵਕ ਸੇਵ ਹੋ ਗਿਆ!',
+    'Required fields': 'ਲੋੜੀਂਦੇ ਖੇਤਰ',
+    'Please fill all required fields.': 'ਕਿਰਪਾ ਕਰਕੇ ਸਾਰੇ ਲੋੜੀਂਦੇ ਖੇਤਰ ਭਰੋ।',
+    'Invalid account holder name': 'ਗਲਤ ਖਾਤਾਧਾਰਕ ਨਾਂ',
+    'Account holder name should contain only letters and spaces.': 'ਖਾਤਾਧਾਰਕ ਨਾਂ ਵਿੱਚ ਸਿਰਫ ਅੱਖਰ ਅਤੇ ਖਾਲੀ ਥਾਂ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ।',
+    'Invalid account number': 'ਗਲਤ ਖਾਤਾ ਨੰਬਰ',
+    'Account number should contain only numbers.': 'ਖਾਤਾ ਨੰਬਰ ਵਿੱਚ ਸਿਰਫ ਅੰਕ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।',
+    'Invalid UPI ID': 'ਗਲਤ UPI ID',
     'Refer To A Friend': 'ਦੋਸਤ ਨੂੰ ਰੈਫਰ ਕਰੋ',
     'Need Help': 'ਮਦਦ ਚਾਹੀਦੀ ਹੈ',
     'Offers & Promotions': 'ਆਫਰ ਅਤੇ ਪ੍ਰਮੋਸ਼ਨ',
@@ -1117,7 +1161,7 @@ export function AppIcon({ name, size = 18, color = '#0F1120', strokeWidth = 1.8 
 export function PageHeader({ title, onBack }: { title: string; onBack: () => void }) {
   const { theme } = usePreferenceContext();
   return (
-    <View style={[shared.header, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+    <View style={[shared.header, { backgroundColor: theme.surface, borderBottomColor: theme.border, paddingTop: 0 }]}>
       <TouchableOpacity onPress={onBack} style={[shared.backBtn, { backgroundColor: theme.soft }]} activeOpacity={0.75}>
         <AppIcon name="arrowLeft" size={20} color={theme.textPrimary} />
       </TouchableOpacity>
@@ -1136,7 +1180,7 @@ export function EmptyState({ emoji, message }: { emoji: string; message: string 
 }
 
 const shared = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'ios' ? 56 : 20, paddingBottom: 14, borderBottomWidth: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10, borderBottomWidth: 1 },
   backBtn: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '800' },
   primaryBtn: { backgroundColor: C.primary, borderRadius: 16, height: 56, alignItems: 'center', justifyContent: 'center' },

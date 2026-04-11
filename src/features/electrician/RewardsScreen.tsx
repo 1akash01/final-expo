@@ -72,7 +72,7 @@ export function RewardsScreen({ onBack }: { onBack?: () => void }) {
   return (
     <View style={{ flex: 1, backgroundColor: darkMode ? '#08111F' : Colors.background }}>
       {onBack ? (
-        <View style={[styles.pageHeader, { backgroundColor: darkMode ? '#111827' : Colors.surface, borderBottomColor: darkMode ? '#243043' : Colors.border, paddingTop: insets.top }]}>
+        <View style={[styles.pageHeader, { backgroundColor: darkMode ? '#111827' : Colors.surface, borderBottomColor: darkMode ? '#243043' : Colors.border }]}>
           <TouchableOpacity onPress={onBack} style={[styles.backBtn, { backgroundColor: darkMode ? '#1F2937' : Colors.background }]} activeOpacity={0.75}>
             <BackIcon color={darkMode ? '#F8FAFC' : Colors.textDark} />
           </TouchableOpacity>
@@ -144,7 +144,7 @@ export function RewardsScreen({ onBack }: { onBack?: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  pageHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 14, borderBottomWidth: 1 },
+  pageHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10, borderBottomWidth: 1 },
   backBtn: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   pageTitle: { fontSize: 18, fontWeight: '800' },
   screen: { flex: 1, backgroundColor: Colors.background },

@@ -1,7 +1,7 @@
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav as DealerBottomNav } from '@/features/dealer/BottomNav';
 import { CallElectricianScreen as DealerCallElectricianScreen } from '@/features/dealer/CallElectricianScreen';
 import { ElectriciansScreen as DealerElectriciansScreen } from '@/features/dealer/ElectriciansScreen';
@@ -264,7 +264,7 @@ export default function Index() {
 
   return (
     <PreferenceContext.Provider value={preferenceValue}>
-      <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: appTheme.bg }]}>
+      <SafeAreaView style={[styles.root, { backgroundColor: appTheme.bg }]} edges={['top', 'left', 'right']}>
         <ExpoStatusBar style={statusBarStyle} />
         <View style={styles.content} key={`${currentRole}-${currentScreen}-${screenResetKey}`}>{activeScreen}</View>
         {isDealer ? (
@@ -272,7 +272,7 @@ export default function Index() {
         ) : (
           <ElectricianBottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
         )}
-      </View>
+      </SafeAreaView>
     </PreferenceContext.Provider>
   );
 }

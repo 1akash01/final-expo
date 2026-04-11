@@ -5,7 +5,7 @@ import { AppIcon, C, PageHeader, PrimaryBtn, usePreferenceContext } from './Prof
 const bankOptions = ['State Bank of India', 'Punjab National Bank', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Bank of Baroda', 'Canara Bank', 'Union Bank of India', 'Kotak Mahindra Bank', 'IDFC FIRST Bank'];
 
 export function BankDetailsPage({ onBack }: { onBack: () => void }) {
-  const { t, theme } = usePreferenceContext();
+  const { t, tx, theme } = usePreferenceContext();
   const [accountHolderName, setAccountHolderName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
@@ -31,20 +31,20 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
 
   const handleSave = () => {
     if (!accountHolderName.trim() || !accountNumber.trim() || !ifsc.trim() || !selectedBank.trim() || !upi.trim()) {
-      return Alert.alert('Required fields', 'Please fill all required fields.');
+      return Alert.alert(tx('Required fields'), tx('Please fill all required fields.'));
     }
     if (!/^[A-Za-z ]+$/.test(accountHolderName.trim())) {
-      return Alert.alert('Invalid account holder name', 'Account holder name should contain only letters and spaces.');
+      return Alert.alert(tx('Invalid account holder name'), tx('Account holder name should contain only letters and spaces.'));
     }
     if (!/^\d+$/.test(accountNumber.trim())) {
-      return Alert.alert('Invalid account number', 'Account number should contain only numbers.');
+      return Alert.alert(tx('Invalid account number'), tx('Account number should contain only numbers.'));
     }
     if (!isValidUpi(upi.trim())) {
-      setUpiError('Please enter a valid UPI ID in the format name@bank.');
-      return Alert.alert('Invalid UPI ID', 'Please enter a valid UPI ID in the format name@bank.');
+      setUpiError(tx('Please enter a valid UPI ID in the format name@bank.'));
+      return Alert.alert(tx('Invalid UPI ID'), tx('Please enter a valid UPI ID in the format name@bank.'));
     }
     setUpiError('');
-    Alert.alert('Saved', 'Bank details saved successfully!');
+    Alert.alert(tx('Saved'), tx('Bank details saved successfully!'));
   };
 
   return (
@@ -64,8 +64,8 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
                 <AppIcon name="bank" size={22} color={C.gold} />
               </View>
               <View>
-                <Text style={styles.posterEyebrow}>BANK TRANSFER</Text>
-                <Text style={styles.posterHeading}>Secure payouts to your bank</Text>
+                <Text style={styles.posterEyebrow}>{tx('BANK TRANSFER')}</Text>
+                <Text style={styles.posterHeading}>{tx('Secure payouts to your bank')}</Text>
               </View>
             </View>
             <View style={styles.posterBankWrap}>
@@ -84,18 +84,18 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
               <AppIcon name="bank" size={24} color={C.gold} />
             </View>
             <View style={styles.headerCopy}>
-              <Text style={[styles.title, { color: theme.textPrimary }]}>Bank Details</Text>
-              <Text style={[styles.sub, { color: theme.textMuted }]}>Add your bank account and UPI ID for smooth payouts</Text>
+              <Text style={[styles.title, { color: theme.textPrimary }]}>{t('bankDetails')}</Text>
+              <Text style={[styles.sub, { color: theme.textMuted }]}>{tx('Add your bank account and UPI ID for smooth payouts')}</Text>
             </View>
           </View>
 
           <View onLayout={({ nativeEvent }) => saveFieldPosition('accountHolderName', nativeEvent.layout.y)}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>Account Holder Name *</Text>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{tx('Account Holder Name')} *</Text>
             <View style={[styles.inputWrap, { backgroundColor: theme.soft, borderColor: theme.border }]}>
               <AppIcon name="bank" size={18} color={C.gold} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
-                placeholder="Enter Account Holder Name"
+                placeholder={tx('Enter Account Holder Name')}
                 placeholderTextColor={theme.textMuted}
                 value={accountHolderName}
                 onChangeText={(value) => setAccountHolderName(value.replace(/[^A-Za-z ]/g, ''))}
@@ -104,12 +104,12 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
             </View>
           </View>
           <View onLayout={({ nativeEvent }) => saveFieldPosition('accountNumber', nativeEvent.layout.y)}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>Account Number *</Text>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{tx('Account Number')} *</Text>
             <View style={[styles.inputWrap, { backgroundColor: theme.soft, borderColor: theme.border }]}>
               <AppIcon name="bank" size={18} color={C.gold} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
-                placeholder="Enter Account Number"
+                placeholder={tx('Enter Account Number')}
                 placeholderTextColor={theme.textMuted}
                 value={accountNumber}
                 onChangeText={(value) => setAccountNumber(value.replace(/\D/g, ''))}
@@ -119,12 +119,12 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
             </View>
           </View>
           <View onLayout={({ nativeEvent }) => saveFieldPosition('ifsc', nativeEvent.layout.y)}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>IFSC Code *</Text>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{tx('IFSC Code')} *</Text>
             <View style={[styles.inputWrap, { backgroundColor: theme.soft, borderColor: theme.border }]}>
               <AppIcon name="bank" size={18} color={C.gold} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
-                placeholder="Enter IFSC Code"
+                placeholder={tx('Enter IFSC Code')}
                 placeholderTextColor={theme.textMuted}
                 value={ifsc}
                 onChangeText={(value) => setIfsc(value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
@@ -135,7 +135,7 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
             </View>
           </View>
           <View onLayout={({ nativeEvent }) => saveFieldPosition('selectBank', nativeEvent.layout.y)}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>Select Bank *</Text>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{tx('Select Bank')} *</Text>
             <TouchableOpacity
               style={[styles.inputWrap, { backgroundColor: theme.soft, borderColor: theme.border }]}
               activeOpacity={0.85}
@@ -145,7 +145,7 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
               }}
             >
               <AppIcon name="bank" size={18} color={C.gold} />
-              <Text style={[styles.input, { color: selectedBank ? theme.textPrimary : theme.textMuted }]}>{selectedBank || 'Select Bank'}</Text>
+              <Text style={[styles.input, { color: selectedBank ? theme.textPrimary : theme.textMuted }]}>{selectedBank || tx('Select Bank')}</Text>
             </TouchableOpacity>
             {showBankOptions ? (
               <View style={[styles.bankOptionsWrap, { borderColor: theme.border }]}>
@@ -166,7 +166,7 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
             ) : null}
           </View>
           <View onLayout={({ nativeEvent }) => saveFieldPosition('upi', nativeEvent.layout.y)}>
-            <Text style={[styles.label, { color: theme.textMuted }]}>UPI ID *</Text>
+            <Text style={[styles.label, { color: theme.textMuted }]}>{tx('UPI ID')} *</Text>
             <View
               style={[
                 styles.inputWrap,
@@ -177,14 +177,14 @@ export function BankDetailsPage({ onBack }: { onBack: () => void }) {
               <AppIcon name="link" size={18} color={C.gold} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
-                placeholder="Enter UPI ID"
+                placeholder={tx('Enter UPI ID')}
                 placeholderTextColor={theme.textMuted}
                 value={upi}
                 onChangeText={(value) => {
                   const nextValue = value.replace(/\s/g, '');
                   setUpi(nextValue);
                   if (upiError) {
-                    setUpiError(nextValue && !isValidUpi(nextValue) ? 'Please enter a valid UPI ID in the format name@bank.' : '');
+                    setUpiError(nextValue && !isValidUpi(nextValue) ? tx('Please enter a valid UPI ID in the format name@bank.') : '');
                   }
                 }}
                 autoCapitalize="none"
