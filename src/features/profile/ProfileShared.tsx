@@ -846,6 +846,8 @@ const uiText: Record<AppLanguage, Record<string, string>> = {
     'Redeemable Points': 'ਰੀਡੀਮ ਕੀਤੇ ਜਾ ਸਕਣ ਵਾਲੇ ਪੁਆਇੰਟ',
     Filter: 'ਫਿਲਟਰ',
     'Buy Schemes': 'ਸਕੀਮਾਂ ਖਰੀਦੋ',
+    'Premium offers': 'ਪ੍ਰੀਮੀਅਮ ਆਫਰ',
+    'Send to dealer': 'ਡੀਲਰ ਨੂੰ ਭੇਜੋ',
     'Transfer Point': 'ਪੁਆਇੰਟ ਟ੍ਰਾਂਸਫਰ',
     'This Month': 'ਇਸ ਮਹੀਨੇ',
     'Last 30 Days': 'ਪਿਛਲੇ 30 ਦਿਨ',

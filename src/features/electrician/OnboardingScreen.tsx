@@ -1163,7 +1163,7 @@ export function OnboardingScreen({
                     }
                     setPhase('language');
                   }}
-                  style={s.back}
+                  style={s.backRight}
                 >
                   <BackArrowIcon />
                 </Pressable>
@@ -1480,7 +1480,8 @@ const s = StyleSheet.create({
   logoWrap: { width: 156, height: 88, alignItems: 'center', justifyContent: 'center' },
   logoWrapCompact: { width: 134, height: 76 },
   logo: { width: '100%', height: '100%' },
-  back: { position: 'absolute', right: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
+  back: { position: 'absolute', left: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
+  backRight: { position: 'absolute', right: 0, top: 30, width: 42, height: 42, borderRadius: 21, backgroundColor: 'rgba(255,255,255,0.96)', borderWidth: 1, borderColor: 'rgba(148,163,184,0.2)', alignItems: 'center', justifyContent: 'center' },
   welcomeRow: { flexDirection: 'row', alignItems: 'center', width: '100%', marginTop: 10, marginBottom: 14, minHeight: 22 },
   welcomeRowCentered: { justifyContent: 'center' },
   welcomeLanguageWrap: { marginLeft: 'auto', alignItems: 'flex-end' },
@@ -1597,7 +1598,7 @@ const s = StyleSheet.create({
   loginChoiceTextActive: { color: C.accentA },
   form: { gap: 12 },
   formIntroCard: { borderRadius: 20, padding: 14, backgroundColor: '#F7FAFF', borderWidth: 1, borderColor: '#D8E7FB', gap: 6 },
-  formStepBackRow: { alignItems: 'flex-start' },
+  formStepBackRow: { alignItems: 'flex-end' },
   formIntroHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   formStepChip: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#E3EEFF' },
   formStepChipText: { color: '#2C6BE7', fontSize: 11, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase' },
