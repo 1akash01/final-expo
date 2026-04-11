@@ -149,7 +149,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
           {tx(
             isDealer
               ? 'Dealer wallet for schemes, bank payouts, and dealer bonus tracking.'
-              : 'Luxury rewards dashboard for redemptions, transfers, and loyalty growth.'
+              : 'Premium rewards dashboard for redemptions, transfers, and loyalty growth.'
           )}
         </Text>
 
@@ -200,7 +200,7 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
         <View style={styles.sectionHeader}>
           <View>
             <Text style={[styles.sectionEyebrow, darkMode ? styles.sectionEyebrowDark : null]}>{tx('Redeem Point History')}</Text>
-            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Elegant activity timeline')}</Text>
+            <Text style={[styles.sectionTitle, darkMode ? styles.sectionTitleDark : null]}>{tx('Activity Timeline')}</Text>
           </View>
           <View style={styles.sectionIconWrap}>
             <HistoryGlyph />
@@ -232,8 +232,8 @@ export function WalletScreen({ role = 'electrician', onNavigate }: WalletScreenP
           <Text style={[styles.emptySub, darkMode ? styles.emptySubDark : null]}>
             {tx(
               isDealer
-                ? 'Jaise hi bank payout ya dealer bonus activity hogi, yahan full wallet history dikh jayegi.'
-                : 'Jaise hi redemption ya transfer hoga, yahan premium style me full wallet history dikh jayegi.'
+                ? 'Your complete wallet history will appear here once bank payouts or dealer bonus activity starts.'
+                : 'Your complete wallet history will appear here once redemption or transfer activity starts.'
             )}
           </Text>
         </View>
