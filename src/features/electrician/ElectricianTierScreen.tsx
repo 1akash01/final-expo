@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#EEF3F8' },
   screenDark: { backgroundColor: '#08111F' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 18, paddingBottom: 12 },
-  backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#94A3B8', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 4 },
+  backBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#94A3B8', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.12, shadowRadius: 14, elevation: 4 },
   headerTitle: { fontSize: 18, fontWeight: '900', color: '#17324D' },
   backBtnDark: { backgroundColor: '#111827', shadowColor: '#020617' },
   headerTitleDark: { color: '#F8FAFC' },

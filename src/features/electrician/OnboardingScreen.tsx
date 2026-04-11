@@ -5,6 +5,7 @@ import {
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -522,6 +523,10 @@ export function OnboardingScreen({
   const signupPanHolderRef = useRef<TextInput | null>(null);
   const signupPassRef = useRef<TextInput | null>(null);
   const signupConfirmPassRef = useRef<TextInput | null>(null);
+  const dealerAutoAddressRequestedRef = useRef(false);
+  const electricianAddressAutoRequestedRef = useRef(false);
+  const electricianPhoneAutoRequestedRef = useRef(false);
+  const electricianDealerAutoAdvanceRef = useRef(false);
 
   const [phase, setPhase] = useState<IntroStep>('language');
   const [mode, setMode] = useState<AuthMode>('login');
@@ -598,6 +603,74 @@ export function OnboardingScreen({
     }
   }, [loginOtpVerified, signupOtpVerified]);
 
+  useEffect(() => {
+    if (
+      mode !== 'signup' ||
+      role !== 'dealer' ||
+      signupStep !== 'name' ||
+      !signupEmail.trim() ||
+      !isValidEmail(signupEmail) ||
+      signupAddress.trim() ||
+      locationLoading ||
+      dealerAutoAddressRequestedRef.current
+    ) {
+      return;
+    }
+
+    dealerAutoAddressRequestedRef.current = true;
+    void useCurrentLocation();
+  }, [locationLoading, mode, role, signupAddress, signupEmail, signupStep]);
+
+  useEffect(() => {
+    if (
+      mode !== 'signup' ||
+      role !== 'electrician' ||
+      signupStep !== 'address' ||
+      signupAddress.trim() ||
+      locationLoading ||
+      electricianAddressAutoRequestedRef.current
+    ) {
+      return;
+    }
+
+    electricianAddressAutoRequestedRef.current = true;
+    void useCurrentLocation();
+  }, [locationLoading, mode, role, signupAddress, signupStep]);
+
+  useEffect(() => {
+    if (
+      mode !== 'signup' ||
+      role !== 'electrician' ||
+      signupStep !== 'phone' ||
+      electricianPhoneAutoRequestedRef.current
+    ) {
+      return;
+    }
+    if (signupPhone.length !== 10) {
+      electricianPhoneAutoRequestedRef.current = false;
+      return;
+    }
+
+    electricianPhoneAutoRequestedRef.current = true;
+  }, [mode, role, signupPhone, signupStep]);
+
+  useEffect(() => {
+    if (
+      mode !== 'signup' ||
+      role !== 'electrician' ||
+      signupStep !== 'address' ||
+      !locationMessage ||
+      signupAddress.trim().length < 5 ||
+      electricianDealerAutoAdvanceRef.current
+    ) {
+      return;
+    }
+
+    electricianDealerAutoAdvanceRef.current = true;
+    const timer = setTimeout(() => setSignupStep('dealer'), 250);
+    return () => clearTimeout(timer);
+  }, [locationMessage, mode, role, signupAddress, signupStep]);
+
   const matchedDealer = signupDealerPhone.length === 10 ? dealerDirectory[signupDealerPhone] : undefined;
   const setError = (key: string, value?: string) => setErrors((current) => {
     if (!value) {
@@ -633,6 +706,10 @@ export function OnboardingScreen({
   };
 
   const resetForm = () => {
+    dealerAutoAddressRequestedRef.current = false;
+    electricianAddressAutoRequestedRef.current = false;
+    electricianPhoneAutoRequestedRef.current = false;
+    electricianDealerAutoAdvanceRef.current = false;
     setErrors({});
     setLoading(false);
     setShowPassword(false);
@@ -681,6 +758,37 @@ export function OnboardingScreen({
     setSignupOtpVerified(false);
     setError('signupPhone');
     setError('signupOtp');
+  };
+  const previousDealerSignupStep = (step: SignupStep): SignupStep | null => {
+    switch (step) {
+      case 'location': return 'name';
+      case 'identity': return 'location';
+      case 'holders': return 'identity';
+      case 'password': return 'holders';
+      default: return null;
+    }
+  };
+  const goToPreviousDealerSignupStep = () => {
+    const previousStep = previousDealerSignupStep(signupStep);
+    if (!previousStep) return;
+    dismissKeyboard();
+    setSignupStep(previousStep);
+  };
+  const previousElectricianSignupStep = (step: SignupStep): SignupStep | null => {
+    switch (step) {
+      case 'phone': return 'name';
+      case 'otp': return 'phone';
+      case 'address': return 'otp';
+      case 'dealer': return 'address';
+      case 'password': return 'dealer';
+      default: return null;
+    }
+  };
+  const goToPreviousElectricianSignupStep = () => {
+    const previousStep = previousElectricianSignupStep(signupStep);
+    if (!previousStep) return;
+    dismissKeyboard();
+    setSignupStep(previousStep);
   };
   const isValidPassword = (pass: string) => {
     if (pass.length === 0) return true;
@@ -788,16 +896,53 @@ export function OnboardingScreen({
     setError('signupCity');
     setError('signupPincode');
     try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== 'granted') {
-        setError('signupAddress', 'Location permission is required to fetch the current address. Please enable it in settings.');
-        setLocationLoading(false);
+      let permission = await Location.getForegroundPermissionsAsync();
+
+      if (!permission.granted) {
+        permission = await Location.requestForegroundPermissionsAsync();
+      }
+
+      const hasLocationPermission =
+        permission.granted ||
+        permission.status === 'granted' ||
+        (Platform.OS === 'android' && permission.android?.accuracy !== 'none');
+
+      if (!hasLocationPermission) {
+        if (permission.canAskAgain) {
+          setError('signupAddress', 'Please allow location permission to fetch your current address automatically.');
+        } else {
+          setError('signupAddress', 'Location permission is blocked. Opening app settings so you can allow it.');
+          await Linking.openSettings();
+        }
         return;
       }
 
-      const currentPosition = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        if (Platform.OS === 'android') {
+          try {
+            await Location.enableNetworkProviderAsync();
+          } catch {
+            setError('signupAddress', 'Please turn on device location to fetch the current address automatically.');
+            return;
+          }
+        } else {
+          setError('signupAddress', 'Please turn on device location to fetch the current address automatically.');
+          return;
+        }
+      }
+
+      let currentPosition = await Location.getLastKnownPositionAsync({
+        maxAge: 1000 * 60 * 10,
+        requiredAccuracy: 500,
       });
+
+      if (!currentPosition) {
+        currentPosition = await Location.getCurrentPositionAsync({
+          accuracy: Platform.OS === 'android' ? Location.Accuracy.Balanced : Location.Accuracy.High,
+          mayShowUserSettingsDialog: true,
+        });
+      }
       
       const reverseLookup = await Location.reverseGeocodeAsync({
         latitude: currentPosition.coords.latitude,
@@ -818,12 +963,20 @@ export function OnboardingScreen({
       }
 
       const addressParts: string[] = [];
+      if (currentAddress.formattedAddress) addressParts.push(currentAddress.formattedAddress);
       if (currentAddress.name) addressParts.push(currentAddress.name);
+      if (currentAddress.streetNumber) addressParts.push(currentAddress.streetNumber);
       if (currentAddress.street) addressParts.push(currentAddress.street);
       if (currentAddress.district) addressParts.push(currentAddress.district);
+      if (currentAddress.city) addressParts.push(currentAddress.city);
       if (currentAddress.subregion) addressParts.push(currentAddress.subregion);
+      if (currentAddress.region) addressParts.push(currentAddress.region);
       
-      const resolvedAddress = addressParts.join(', ');
+      const resolvedAddress = addressParts
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .filter((part, index, parts) => parts.indexOf(part) === index)
+        .join(', ');
       const resolvedState = currentAddress.region || '';
       const resolvedCity = currentAddress.city || currentAddress.district || currentAddress.subregion || '';
       const resolvedPincode = currentAddress.postalCode || '';
@@ -902,7 +1055,7 @@ export function OnboardingScreen({
     if (signupOtp.length !== 4) return setError('signupOtp', 'Enter the 4-digit OTP to verify your number.');
     setError('signupOtp');
     setSignupOtpVerified(true);
-    setSignupStep('password');
+    setSignupStep(role === 'electrician' ? 'address' : 'password');
   };
 
   const continueSignup = () => {
@@ -954,22 +1107,25 @@ export function OnboardingScreen({
     if (signupStep === 'name') {
       if (signupName.trim().length < 3) return setError('signupName', 'Please fill the name field.');
       setError('signupName');
-      setSignupStep('dealer');
+      setSignupStep('phone');
       return;
     }
-    if (signupStep === 'dealer') {
-      if (!dealerVerified) return setError('signupDealerPhone', 'Please verify the dealer number before continuing.');
-      setSignupStep('address');
+    if (signupStep === 'phone') {
+      if (signupPhone.length !== 10) return setError('signupPhone', 'Please enter a valid 10-digit mobile number.');
+      setError('signupPhone');
+      sendSignupOtp();
       return;
     }
     if (signupStep === 'address') {
       if (signupAddress.trim().length < 5) return setError('signupAddress', 'Please fill the address field.');
       setError('signupAddress');
-      setSignupStep('phone');
+      setSignupStep('dealer');
       return;
     }
-    if (signupStep === 'phone') {
-      sendSignupOtp();
+    if (signupStep === 'dealer') {
+      if (!dealerVerified) return setError('signupDealerPhone', 'Please verify the dealer number before continuing.');
+      setError('signupDealerPhone');
+      setSignupStep('password');
       return;
     }
     if (signupStep === 'otp') {
@@ -1175,8 +1331,15 @@ export function OnboardingScreen({
                       <>
                         {dealerSignupContent ? (
                           <View style={s.formIntroCard}>
-                            <View style={s.formStepChip}>
-                              <Text style={s.formStepChipText}>{dealerSignupContent.stepLabel}</Text>
+                            <View style={s.formIntroHeader}>
+                              <View style={s.formStepChip}>
+                                <Text style={s.formStepChipText}>{dealerSignupContent.stepLabel}</Text>
+                              </View>
+                              {previousDealerSignupStep(signupStep) ? (
+                                <Pressable onPress={goToPreviousDealerSignupStep} style={s.stepBackBtn}>
+                                  <BackArrowIcon />
+                                </Pressable>
+                              ) : null}
                             </View>
                             <Text style={s.formStepTitle}>{dealerSignupContent.title}</Text>
                             <Text style={s.formStepText}>{dealerSignupContent.description}</Text>
@@ -1234,17 +1397,22 @@ export function OnboardingScreen({
                       </>
                     ) : (
                       <>
-                        <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter your full name')} error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} />
+                        {previousElectricianSignupStep(signupStep) ? (
+                          <View style={s.formStepBackRow}>
+                            <Pressable onPress={goToPreviousElectricianSignupStep} style={s.stepBackBtn}>
+                              <BackArrowIcon />
+                            </Pressable>
+                          </View>
+                        ) : null}
+                        {signupStep === 'name' ? <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter your full name')} error={errors.signupName} onFocus={scrollToForm} onSubmitEditing={continueSignup} /> : null}
                         {signupStep === 'name' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3} secondary /> : null}
 
-                        {signupStep !== 'name' ? <Field label={tx('Dealer Verification Number')} value={signupDealerPhone} onChangeText={(value) => { handlePhone(setSignupDealerPhone)(value); setDealerVerified(false); setVerifiedDealerName(''); setError('signupDealerPhone'); }} placeholder={tx('Enter dealer mobile number')} keyboardType="phone-pad" error={errors.signupDealerPhone} onFocus={scrollToForm} inputRef={signupDealerRef} onSubmitEditing={verifyDealer} /> : null}
-                        {signupStep === 'dealer' ? <Button label={tx('Verify')} onPress={verifyDealer} disabled={signupDealerPhone.length !== 10} secondary /> : null}
-                        {dealerVerified ? <Info text={`${verifiedDealerName} ${tx('verification successfully done.')}`} kind="success" /> : null}
-                        {dealerVerified && signupStep === 'dealer' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
+                        {signupStep === 'phone' ? <Field label={tx('Your Phone Number')} value={signupPhone} onChangeText={handleSignupPhone} placeholder={tx('Enter your phone number')} keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={continueSignup} /> : null}
+                        {signupStep === 'phone' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupPhone.length !== 10} secondary /> : null}
 
-                        {['address', 'phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onSubmitEditing={signupStep === 'address' ? continueSignup : undefined} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} /> : null}
+                        {signupStep === 'address' ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} /> : null}
                         {signupStep === 'address' && locationMessage ? <Info text={locationMessage} kind="success" /> : null}
-                        {['address', 'phone', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
+                        {['address', 'dealer', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
                           <View style={s.locationSummaryCard}>
                             <Text style={s.locationSummaryTitle}>{tx('Detected Location Details')}</Text>
                             {signupState ? (
@@ -1269,11 +1437,13 @@ export function OnboardingScreen({
                         ) : null}
                         {signupStep === 'address' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupAddress.trim().length < 5 || locationLoading} secondary /> : null}
 
-                        {['phone', 'otp', 'password'].includes(signupStep) ? <Field label={tx('Your Phone Number')} value={signupPhone} onChangeText={handleSignupPhone} placeholder={tx('Enter your phone number')} keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={sendSignupOtp} actionLabel={signupPhone.length > 0 && !signupOtpVerified ? (signupOtpSent ? tx('Resend') : tx('Verify')) : undefined} onActionPress={sendSignupOtp} actionDisabled={signupPhone.length !== 10} /> : null}
-                        {signupOtpSent && !signupOtpVerified ? <Info text={`${tx('OTP sent to')} +91 ${signupPhone}.`} kind="success" /> : null}
-                        {['otp', 'password'].includes(signupStep) ? <Field label={tx('OTP')} value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} /> : null}
+                        {signupStep === 'dealer' ? <Field label={tx('Dealer Verification Number')} value={signupDealerPhone} onChangeText={(value) => { handlePhone(setSignupDealerPhone)(value); setDealerVerified(false); setVerifiedDealerName(''); setError('signupDealerPhone'); }} placeholder={tx('Enter dealer mobile number')} keyboardType="phone-pad" error={errors.signupDealerPhone} onFocus={scrollToForm} inputRef={signupDealerRef} onSubmitEditing={verifyDealer} /> : null}
+                        {signupStep === 'dealer' ? <Button label={tx('Verify')} onPress={verifyDealer} disabled={signupDealerPhone.length !== 10} secondary /> : null}
+                        {signupStep === 'dealer' && dealerVerified ? <Info text={`${verifiedDealerName} ${tx('verification successfully done.')}`} kind="success" /> : null}
+                        {dealerVerified && signupStep === 'dealer' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={!dealerVerified} secondary /> : null}
+                        {signupStep === 'otp' && signupOtpSent && !signupOtpVerified ? <Info text={`${tx('OTP sent to')} +91 ${signupPhone}.`} kind="success" /> : null}
+                        {signupStep === 'otp' ? <Field label={tx('OTP')} value={signupOtp} onChangeText={handleOtp(setSignupOtp)} placeholder={tx('Enter 4 digit OTP')} keyboardType="numeric" error={errors.signupOtp} onFocus={scrollToForm} inputRef={signupOtpRef} onSubmitEditing={verifySignupOtp} /> : null}
                         {signupStep === 'otp' ? <Button label={tx('Verify OTP')} onPress={continueSignup} disabled={signupOtp.length !== 4} secondary /> : null}
-                        {signupStep === 'password' ? <Info text={tx('OTP verification successful.')} kind="success" /> : null}
                         {signupStep === 'password' ? <Text style={s.helperText}>{tx('Password is optional. Leave both fields blank if you want to skip it.')}</Text> : null}
                         {signupStep === 'password' ? <Field label={tx('Password (Optional)')} value={signupPass} onChangeText={(value) => { setSignupPass(value); setError('signupPass', getPasswordError(value)); }} placeholder={tx('Create password if you want')} secureTextEntry={!showPassword} error={getPasswordError(signupPass)} onFocus={scrollToForm} inputRef={signupPassRef} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => signupConfirmPassRef.current?.focus()} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
                         {signupStep === 'password' ? <Field label={tx('Confirm Password (Optional)')} value={signupConfirmPass} onChangeText={(value) => { setSignupConfirmPass(value); if (signupPass.length > 0 && value !== signupPass) { setError('signupConfirmPass', 'Passwords do not match.'); } else { setError('signupConfirmPass'); } }} placeholder={tx('Re-enter password')} secureTextEntry={!showPassword} error={errors.signupConfirmPass} onFocus={scrollToForm} inputRef={signupConfirmPassRef} actionContent={<EyeIcon open={showPassword} />} onActionPress={() => setShowPassword((current) => !current)} /> : null}
@@ -1427,8 +1597,11 @@ const s = StyleSheet.create({
   loginChoiceTextActive: { color: C.accentA },
   form: { gap: 12 },
   formIntroCard: { borderRadius: 20, padding: 14, backgroundColor: '#F7FAFF', borderWidth: 1, borderColor: '#D8E7FB', gap: 6 },
+  formStepBackRow: { alignItems: 'flex-start' },
+  formIntroHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   formStepChip: { alignSelf: 'flex-start', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#E3EEFF' },
   formStepChipText: { color: '#2C6BE7', fontSize: 11, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase' },
+  stepBackBtn: { width: 34, height: 34, borderRadius: 12, borderWidth: 1, borderColor: '#D8E7FB', backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
   formStepTitle: { color: C.title, fontSize: 16, fontWeight: '900' },
   formStepText: { color: C.muted, fontSize: 12.5, lineHeight: 18 },
   group: { gap: 6 },

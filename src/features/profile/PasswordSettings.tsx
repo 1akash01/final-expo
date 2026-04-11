@@ -316,7 +316,7 @@ export function PasswordSettingsPage({
               {mode === 'set'
                 ? hasPasswordConfigured
                   ? 'A password is already active for this account. Use Change Password to update it.'
-                  : 'Use at least 6 characters so your account stays secure.'
+                  : 'Use at least 8 characters so your account stays secure.'
                 : hasPasswordConfigured
                   ? 'Enter your current password and then create a new one.'
                   : 'You can change a password after you create one from the Set Password option.'}
@@ -335,7 +335,7 @@ export function PasswordSettingsPage({
                   secureTextEntry={!showSetPassword}
                   onToggle={() => setShowSetPassword((current) => !current)}
                   error={errors.setPassword}
-                  placeholder="Enter at least 6 characters"
+                  placeholder="Enter at least 8 characters"
                   inputRef={setPasswordRef}
                   returnKeyType="next"
                   onSubmitEditing={() => confirmSetPasswordRef.current?.focus()}
