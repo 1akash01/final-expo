@@ -565,6 +565,7 @@ export function OnboardingScreen({
   const [verifiedDealerName, setVerifiedDealerName] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationMessage, setLocationMessage] = useState('');
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const isCompactPhone = width <= 360 || height <= 760;
 
   const screenTitle =
@@ -1350,7 +1351,7 @@ export function OnboardingScreen({
                           <>
                             <Field label={tx('Full Name')} value={signupName} onChangeText={handleName(setSignupName)} placeholder={tx('Enter owner or business name')} error={errors.signupName} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
                             <Field label={tx('Email Address')} value={signupEmail} onChangeText={handleSignupEmail} placeholder="name@business.com" error={errors.signupEmail} onFocus={scrollToForm} returnKeyType="next" blurOnSubmit={false} onSubmitEditing={() => scrollToForm()} />
-                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} />
+                            <Field label={tx('Business Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter complete business address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); setShowAddressModal(true); }} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} />
                             {locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                             <Button label={dealerSignupContent?.buttonLabel ?? tx('Continue')} onPress={continueSignup} disabled={signupName.trim().length < 3 || !isValidEmail(signupEmail) || signupAddress.trim().length < 5} secondary />
                           </>
@@ -1410,7 +1411,7 @@ export function OnboardingScreen({
                         {signupStep === 'phone' ? <Field label={tx('Your Phone Number')} value={signupPhone} onChangeText={handleSignupPhone} placeholder={tx('Enter your phone number')} keyboardType="phone-pad" prefix="+91" error={errors.signupPhone} onFocus={scrollToForm} inputRef={signupPhoneRef} onSubmitEditing={continueSignup} /> : null}
                         {signupStep === 'phone' ? <Button label={tx('Continue')} onPress={continueSignup} disabled={signupPhone.length !== 10} secondary /> : null}
 
-                        {signupStep === 'address' ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); if (!locationLoading && !signupAddress.trim()) { void useCurrentLocation(); } }} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} /> : null}
+                        {signupStep === 'address' ? <Field label={tx('Address')} value={signupAddress} onChangeText={(value) => { setSignupAddress(value); setLocationMessage(''); setError('signupAddress'); }} placeholder={locationLoading ? tx('Fetching current address...') : tx('Enter your complete address')} error={errors.signupAddress} onFocus={() => { scrollToForm(); setShowAddressModal(true); }} inputRef={signupAddressRef} onSubmitEditing={continueSignup} actionLabel={locationLoading ? tx('Locating') : tx('Current Address')} onActionPress={() => { void useCurrentLocation(); }} actionDisabled={locationLoading} /> : null}
                         {signupStep === 'address' && locationMessage ? <Info text={locationMessage} kind="success" /> : null}
                         {['address', 'dealer', 'otp', 'password'].includes(signupStep) && (signupState || signupCity || signupPincode) ? (
                           <View style={s.locationSummaryCard}>
@@ -1459,6 +1460,53 @@ export function OnboardingScreen({
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </LinearGradient>
+
+      {showAddressModal ? (
+        <View style={s.modalOverlay}>
+          <View style={s.modalCard}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{tx('Enter Address Manually')}</Text>
+              <Pressable onPress={() => setShowAddressModal(false)} style={s.modalClose}>
+                <Text style={s.modalCloseText}>X</Text>
+              </Pressable>
+            </View>
+            <View style={s.modalField}>
+              <Text style={s.modalLabel}>{tx('City')}</Text>
+              <TextInput
+                style={s.modalInput}
+                value={signupCity}
+                onChangeText={(v) => { const t = v.replace(/[^A-Za-z ]/g, ''); setSignupCity(t); setSignupAddress(`${signupCity}, ${signupState}, ${signupPincode}`); }}
+                placeholder={tx('Enter city')}
+                placeholderTextColor="#90A0BB"
+              />
+            </View>
+            <View style={s.modalField}>
+              <Text style={s.modalLabel}>{tx('State')}</Text>
+              <TextInput
+                style={s.modalInput}
+                value={signupState}
+                onChangeText={(v) => { const t = v.replace(/[^A-Za-z ]/g, ''); setSignupState(t); setSignupAddress(`${signupCity}, ${signupState}, ${signupPincode}`); }}
+                placeholder={tx('Enter state')}
+                placeholderTextColor="#90A0BB"
+              />
+            </View>
+            <View style={s.modalField}>
+              <Text style={s.modalLabel}>{tx('Pincode')}</Text>
+              <TextInput
+                style={s.modalInput}
+                value={signupPincode}
+                onChangeText={(v) => { const t = v.replace(/\D/g, '').slice(0, 6); setSignupPincode(t); setSignupAddress(`${signupCity}, ${signupState}, ${signupPincode}`); }}
+                placeholder={tx('Enter 6-digit pincode')}
+                keyboardType="numeric"
+                placeholderTextColor="#90A0BB"
+              />
+            </View>
+            <Pressable style={s.modalBtn} onPress={() => setShowAddressModal(false)}>
+              <Text style={s.modalBtnText}>{tx('Done')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -1651,4 +1699,15 @@ const s = StyleSheet.create({
   checkboxOn: { backgroundColor: C.primary, borderColor: C.primary },
   check: { color: '#FFFFFF', fontSize: 13, fontWeight: '900' },
   checkboxText: { flex: 1, color: C.text, fontSize: 12, lineHeight: 19, fontWeight: '500' },
+  modalOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 100 },
+  modalCard: { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 20, width: '88%', maxWidth: 340 },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
+  modalTitle: { fontSize: 17, fontWeight: '900', color: C.title },
+  modalClose: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F6FD', alignItems: 'center', justifyContent: 'center' },
+  modalCloseText: { fontSize: 14, fontWeight: '800', color: C.muted },
+  modalField: { marginBottom: 14 },
+  modalLabel: { fontSize: 11, fontWeight: '800', color: C.muted2, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 },
+  modalInput: { height: 46, borderRadius: 14, borderWidth: 1, borderColor: '#D8E7FB', paddingHorizontal: 14, fontSize: 15, fontWeight: '600', color: C.text, backgroundColor: '#F9FBFE' },
+  modalBtn: { height: 48, borderRadius: 16, backgroundColor: C.accentA, alignItems: 'center', justifyContent: 'center', marginTop: 10 },
+  modalBtnText: { color: '#FFFFFF', fontSize: 15, fontWeight: '900' },
 });
